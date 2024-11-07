@@ -1,0 +1,201 @@
+/* Main container */
+.asosiasi-member-list {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin: 2rem auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.asosiasi-member-list h2 {
+    font-size: 1.75rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Search filter */
+.asosiasi-member-filter {
+    margin-bottom: 2rem;
+}
+
+.asosiasi-search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.asosiasi-search-input:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* List layout */
+.asosiasi-member-list-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.asosiasi-member-item {
+    background: #fff;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.asosiasi-member-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.member-company {
+    display: block;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.asosiasi-member-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.member-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #666;
+    min-width: 80px;
+}
+
+.info-value {
+    color: #333;
+}
+
+.info-value a {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.info-value a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Service tags */
+.service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.service-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #e1f0fa;
+    color: #2980b9;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    cursor: help;
+    transition: background-color 0.2s ease;
+}
+
+.service-tag:hover {
+    background: #d0e9f7;
+}
+
+/* Grid layout */
+.asosiasi-member-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.asosiasi-member-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.asosiasi-member-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.asosiasi-member-header {
+    background: #3498db;
+    padding: 1rem;
+    color: #fff;
+}
+
+.asosiasi-member-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.asosiasi-member-content {
+    padding: 1.5rem;
+}
+
+.asosiasi-member-info {
+    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.asosiasi-member-services {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+/* No members message */
+.asosiasi-no-members {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .asosiasi-member-list {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .asosiasi-member-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .member-info {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        min-width: auto;
+    }
+
+    .service-tags {
+        justify-content: flex-start;
+    }
+}

@@ -1,0 +1,67 @@
+/* Styles for admin member form */
+.services-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    margin: 5px 0;
+}
+
+.service-checkbox {
+    display: block;
+    margin-bottom: 8px;
+    padding: 3px 0;
+}
+
+.service-full-name {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+.required {
+    color: #dc3232;
+}
+
+/* Styles for member list */
+.wp-list-table .column-services {
+    width: 20%;
+}
+
+.service-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 2px;
+    background: #e7e7e7;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* Dashboard styles */
+.welcome-panel-column-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.welcome-panel-column {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Settings page styles */
+.form-table th {
+    width: 200px;
+}
+
+/* Responsive fixes */
+@media screen and (max-width: 782px) {
+    .form-table th {
+        width: auto;
+    }
+    
+    .welcome-panel-column {
+        flex: 100%;
+    }
+}
