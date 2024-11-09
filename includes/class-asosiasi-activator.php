@@ -103,5 +103,8 @@ class Asosiasi_Activator {
         // Schedule SKP status check
         Asosiasi_SKP_Cron::schedule_events();
 
+        // Flush rewrite rules untuk endpoint baru
+        flush_rewrite_rules();
     }
+
 }

@@ -3,7 +3,12 @@
  * Kelas untuk menangani operasi CRUD SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.0.0
+ * @version 1.1.0
+ * Path: includes/class-asosiasi-skp-perusahaan.php
+ * 
+ * Changelog:
+ * 1.1.0 - Added secure file handling methods
+ * 1.0.0 - Initial version
  */
 
 class Asosiasi_SKP_Perusahaan {
@@ -12,6 +17,7 @@ class Asosiasi_SKP_Perusahaan {
      */
     private $table_name;
     private $upload_dir;
+    private $upload_url;
 
     /**
      * Initialize the class and set its properties.
@@ -20,9 +26,10 @@ class Asosiasi_SKP_Perusahaan {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'asosiasi_skp_perusahaan';
         
-        // Set upload directory
-        $upload_dir = wp_upload_dir();
-        $this->upload_dir = $upload_dir['basedir'] . '/asosiasi-skp/perusahaan';
+        // Set upload paths
+        $upload = wp_upload_dir();
+        $this->upload_dir = $upload['basedir'] . '/asosiasi-skp/perusahaan';
+        $this->upload_url = $upload['baseurl'] . '/asosiasi-skp/perusahaan';
         
         // Create upload directory if it doesn't exist
         if (!file_exists($this->upload_dir)) {
@@ -33,31 +40,17 @@ class Asosiasi_SKP_Perusahaan {
     }
 
     /**
-     * Create tables on plugin activation
+     * Get absolute file path
      */
-    public static function create_table() {
-        global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
-        
-        $table_name = $wpdb->prefix . 'asosiasi_skp_perusahaan';
-        
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            member_id mediumint(9) NOT NULL,
-            nomor_skp varchar(100) NOT NULL,
-            penanggung_jawab varchar(255) NOT NULL,
-            tanggal_terbit date NOT NULL,
-            masa_berlaku date NOT NULL,
-            file_path varchar(255) NOT NULL,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY  (id),
-            KEY member_id (member_id),
-            FOREIGN KEY (member_id) REFERENCES {$wpdb->prefix}asosiasi_members(id) ON DELETE CASCADE
-        ) $charset_collate;";
+    public function get_file_path($filename) {
+        return trailingslashit($this->upload_dir) . basename($filename);
+    }
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
+    /**
+     * Get file URL (for admin use only)
+     */
+    public function get_file_url($filename) {
+        return trailingslashit($this->upload_url) . basename($filename);
     }
 
     /**
@@ -71,6 +64,10 @@ class Asosiasi_SKP_Perusahaan {
         $htaccess_content .= "</FilesMatch>\n";
         
         @file_put_contents($this->upload_dir . '/.htaccess', $htaccess_content);
+
+        // Also add index.php for extra security
+        $index_content = "<?php\n// Silence is golden.";
+        @file_put_contents($this->upload_dir . '/index.php', $index_content);
     }
 
     /**
@@ -90,23 +87,27 @@ class Asosiasi_SKP_Perusahaan {
             return $file_path;
         }
 
+        // Sanitize input
+        $data = $this->sanitize_skp_data($data);
+
         // Insert SKP data
         $result = $wpdb->insert(
             $this->table_name,
             array(
-                'member_id' => intval($data['member_id']),
-                'nomor_skp' => sanitize_text_field($data['nomor_skp']),
-                'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
+                'member_id' => $data['member_id'],
+                'nomor_skp' => $data['nomor_skp'],
+                'penanggung_jawab' => $data['penanggung_jawab'],
                 'tanggal_terbit' => $data['tanggal_terbit'],
                 'masa_berlaku' => $data['masa_berlaku'],
-                'file_path' => $file_path
+                'file_path' => $file_path,
+                'status' => 'active'
             ),
-            array('%d', '%s', '%s', '%s', '%s', '%s')
+            array('%d', '%s', '%s', '%s', '%s', '%s', '%s')
         );
 
         if ($result === false) {
             // Delete uploaded file if database insert fails
-            @unlink($this->upload_dir . '/' . basename($file_path));
+            @unlink($this->get_file_path($file_path));
             return new WP_Error('db_insert_error', __('Failed to save SKP data.', 'asosiasi'));
         }
 
@@ -148,9 +149,11 @@ class Asosiasi_SKP_Perusahaan {
     public function update_skp($id, $data, $file = null) {
         global $wpdb;
 
+        // Sanitize input
+        $data = $this->sanitize_skp_data($data);
         $update_data = array(
-            'nomor_skp' => sanitize_text_field($data['nomor_skp']),
-            'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
+            'nomor_skp' => $data['nomor_skp'],
+            'penanggung_jawab' => $data['penanggung_jawab'],
             'tanggal_terbit' => $data['tanggal_terbit'],
             'masa_berlaku' => $data['masa_berlaku']
         );
@@ -186,14 +189,14 @@ class Asosiasi_SKP_Perusahaan {
         if ($result === false) {
             // Delete newly uploaded file if update fails
             if (isset($file_path)) {
-                @unlink($this->upload_dir . '/' . basename($file_path));
+                @unlink($this->get_file_path($file_path));
             }
             return new WP_Error('db_update_error', __('Failed to update SKP data.', 'asosiasi'));
         }
 
         // Delete old file if new file was uploaded
         if (isset($old_file)) {
-            @unlink($this->upload_dir . '/' . basename($old_file));
+            @unlink($this->get_file_path($old_file));
         }
 
         return true;
@@ -219,7 +222,7 @@ class Asosiasi_SKP_Perusahaan {
 
         if ($result) {
             // Delete file after successful record deletion
-            @unlink($this->upload_dir . '/' . basename($skp['file_path']));
+            @unlink($this->get_file_path($skp['file_path']));
             return true;
         }
 
@@ -240,7 +243,7 @@ class Asosiasi_SKP_Perusahaan {
     private function handle_file_upload($file) {
         // Generate unique filename
         $filename = uniqid('skp_perusahaan_') . '.pdf';
-        $filepath = $this->upload_dir . '/' . $filename;
+        $filepath = $this->get_file_path($filename);
 
         // Move uploaded file
         if (!move_uploaded_file($file['tmp_name'], $filepath)) {
@@ -251,26 +254,40 @@ class Asosiasi_SKP_Perusahaan {
     }
 
     /**
+     * Sanitize SKP data
+     */
+    private function sanitize_skp_data($data) {
+        return array(
+            'member_id' => absint($data['member_id']),
+            'nomor_skp' => sanitize_text_field($data['nomor_skp']),
+            'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
+            'tanggal_terbit' => sanitize_text_field($data['tanggal_terbit']),
+            'masa_berlaku' => sanitize_text_field($data['masa_berlaku'])
+        );
+    }
+
+    /**
      * Clean up expired SKPs
      */
     public function cleanup_expired_skp() {
         global $wpdb;
         
         $expired_skps = $wpdb->get_results(
-            "SELECT * FROM {$this->table_name} WHERE masa_berlaku < CURDATE()",
+            "SELECT * FROM {$this->table_name} WHERE masa_berlaku < CURDATE() AND status = 'active'",
             ARRAY_A
         );
 
         foreach ($expired_skps as $skp) {
-            $this->delete_skp($skp['id']);
+            $wpdb->update(
+                $this->table_name,
+                array(
+                    'status' => 'expired',
+                    'status_changed_at' => current_time('mysql')
+                ),
+                array('id' => $skp['id']),
+                array('%s', '%s'),
+                array('%d')
+            );
         }
-    }
-
-    /**
-     * Get file URL
-     */
-    public function get_file_url($filename) {
-        $upload_dir = wp_upload_dir();
-        return $upload_dir['baseurl'] . '/asosiasi-skp/perusahaan/' . $filename;
     }
 }
