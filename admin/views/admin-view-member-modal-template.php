@@ -3,7 +3,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$member_id = isset($_GET['amp;id']) ? intval($_GET['amp;id']) : 0;
+$member_id = 0;
+if (isset($_GET['amp;id'])) {
+    $member_id = intval($_GET['amp;id']); 
+} else if (isset($_GET['id'])) {
+    $member_id = intval($_GET['id']); 
+}
+
 $crud = new Asosiasi_CRUD();
 $services = new Asosiasi_Services();
 $member = $crud->get_member($member_id);
