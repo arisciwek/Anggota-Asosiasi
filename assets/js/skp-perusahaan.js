@@ -96,7 +96,7 @@
             const rows = list.map((skp, index) => this.createSKPRow(skp, index + 1));
             this.$companyList.html(rows.join(''));
         },
-        
+
         createSKPRow(skp, index) {
             return `
                 <tr>

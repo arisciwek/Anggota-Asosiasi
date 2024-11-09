@@ -38,23 +38,7 @@ class Asosiasi {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
         }
-        /*
-        // Enqueue scripts and styles khusus untuk dashboard
-        wp_enqueue_style('asosiasi-admin-dashboard', plugin_dir_url(dirname(__FILE__)) . 'admin/css/dashboard-style.css', array(), $this->version);
-        wp_enqueue_script('asosiasi-admin-dashboard', plugin_dir_url(dirname(__FILE__)) . 'admin/js/dashboard-script.js', array('jquery'), $this->version, true);
-        
-        // Localize script
-        wp_localize_script('asosiasi-admin-dashboard', 'asosiasiAdmin', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('asosiasi_admin_nonce'),
-            'strings' => array(
-                'confirmDelete' => __('Yakin ingin menghapus?', 'asosiasi'),
-                'deletingMember' => __('Menghapus anggota...', 'asosiasi'),
-                'memberDeleted' => __('Anggota berhasil dihapus', 'asosiasi'),
-                'error' => __('Terjadi kesalahan', 'asosiasi')
-            )
-        ));
-        */
+
         require_once ASOSIASI_DIR . 'admin/views/admin-menu-page.php';
     }
 }
