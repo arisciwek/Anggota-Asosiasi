@@ -2,18 +2,15 @@
  * SKP Perusahaan Handler
  * 
  * @package Asosiasi
- * @version 1.3.0
+ * @version 1.4.0
  * Path: assets/js/skp-perusahaan.js
  * 
  * Changelog:
- * 1.3.0 - 2024-03-13
- * - Fixed AJAX request parameters for edit operation
- * - Updated variable references from asosiasiAdmin to asosiasiSKPPerusahaan
- * - Added proper error handling for AJAX responses
- * - Fixed nonce parameter name
- * 
- * 1.2.0 - Fixed modal handling and form submission
- * 1.1.0 - Initial enhancement version
+ * 1.4.0 - 2024-03-13
+ * - Complete rewrite with direct DOM manipulation
+ * - Enhanced error handling and logging
+ * - Improved form field population
+ * - Added visual feedback
  */
 
 (function($) {
@@ -36,43 +33,38 @@
             this.$closeBtn = this.$modal.find('.skp-modal-close, .skp-modal-cancel');
             this.memberId = this.$container.find('[data-member-id]').first().data('member-id');
         },
-        
+
         bindEvents() {
-            // Add SKP button
             this.$container.on('click', '.add-skp-btn', (e) => {
                 const type = $(e.currentTarget).data('type');
                 this.openModal('add', type);
             });
 
-            // Modal close handlers
             this.$closeBtn.on('click', () => this.closeModal());
+            
             $(window).on('click', (e) => {
                 if ($(e.target).is(this.$modal)) {
                     this.closeModal();
                 }
             });
 
-            // Form submission
             this.$form.on('submit', (e) => {
                 e.preventDefault();
                 this.submitForm();
             });
 
-            // Edit button
             this.$container.on('click', '.edit-skp', (e) => {
                 e.preventDefault();
                 const id = $(e.currentTarget).data('id');
                 this.editSKP(id);
             });
 
-            // Delete button
             this.$container.on('click', '.delete-skp', (e) => {
                 e.preventDefault();
                 const id = $(e.currentTarget).data('id');
                 this.confirmDelete(id);
             });
 
-            // ESC key handler
             $(document).on('keydown', (e) => {
                 if (e.key === 'Escape' && this.$modal.is(':visible')) {
                     this.closeModal();
@@ -81,6 +73,13 @@
         },
 
         editSKP(id) {
+            if (!id) {
+                console.error('Invalid SKP ID');
+                return;
+            }
+
+            this.setLoading(true);
+
             $.ajax({
                 url: asosiasiSKPPerusahaan.ajaxurl,
                 type: 'GET',
@@ -88,15 +87,24 @@
                     action: 'get_skp_perusahaan',
                     id: id,
                     nonce: asosiasiSKPPerusahaan.skpPerusahaanNonce
-                },
-                beforeSend: () => this.setLoading(true)
+                }
             })
             .done((response) => {
-                if (response.success) {
-                    this.populateForm(response.data.skp);
+                console.log('Raw response:', response);
+
+                if (response.success && response.data.skp) {
+                    const skpData = response.data.skp;
+                    console.log('SKP Data to populate:', skpData);
+                    
+                    // Open modal first
                     this.openModal('edit');
+                    
+                    // Then populate after a short delay
+                    setTimeout(() => {
+                        this.populateForm(skpData);
+                    }, 100);
                 } else {
-                    this.showError(response.data.message);
+                    this.showError('Failed to load SKP data');
                 }
             })
             .fail(() => {
@@ -108,38 +116,94 @@
         },
 
         populateForm(data) {
+            console.log('Starting form population with data:', data);
+            
             this.resetForm();
-            
-            this.$form.find('#skp_id').val(data.id);
-            this.$form.find('#nomor_skp').val(data.nomor_skp);
-            this.$form.find('#penanggung_jawab').val(data.penanggung_jawab);
-            this.$form.find('#tanggal_terbit').val(data.tanggal_terbit);
-            this.$form.find('#masa_berlaku').val(data.masa_berlaku);
-            
-            if (data.file_path) {
-                const $currentFile = this.$form.find('#current-file');
-                $currentFile.html(`File saat ini: ${data.file_name}`);
-                this.$form.find('#pdf_file').prop('required', false);
+
+            try {
+                // Force set values using direct DOM manipulation
+                this.setFieldValueDirect('skp_id', data.id);
+                this.setFieldValueDirect('nomor_skp', data.nomor_skp);
+                this.setFieldValueDirect('penanggung_jawab', data.penanggung_jawab);
+                this.setFieldValueDirect('tanggal_terbit', data.tanggal_terbit);
+                this.setFieldValueDirect('masa_berlaku', data.masa_berlaku);
+
+                // Handle file information
+                if (data.file_path) {
+                    const $currentFile = $('#current-file');
+                    const fileInfo = `
+                        <div class="current-file-info">
+                            <p>File saat ini: ${this.sanitizeText(data.file_name || data.file_path)}</p>
+                            <a href="${data.file_url}" target="_blank" class="button button-small">
+                                <span class="dashicons dashicons-pdf"></span> Lihat PDF
+                            </a>
+                        </div>
+                    `;
+                    $currentFile.html(fileInfo);
+                    $('#pdf_file').prop('required', false);
+                }
+
+                // Verify values were set
+                this.verifyFormValues();
+
+            } catch (error) {
+                console.error('Error in populateForm:', error);
+                this.showError('Error populating form data');
             }
         },
 
+        setFieldValueDirect(fieldId, value) {
+            // Get element using vanilla JS
+            const element = document.getElementById(fieldId);
+            if (element) {
+                // Set value multiple ways
+                element.value = value;
+                element.setAttribute('value', value);
+                
+                // Force update for React-like frameworks
+                const event = new Event('input', { bubbles: true });
+                element.dispatchEvent(event);
+                element.dispatchEvent(new Event('change'));
+
+                // Add visual feedback
+                element.style.backgroundColor = '#f0f7ff';
+                element.style.borderColor = '#2271b1';
+
+                console.log(`Field ${fieldId} set to:`, value);
+            } else {
+                console.warn(`Field ${fieldId} not found`);
+            }
+        },
+
+        verifyFormValues() {
+            console.log('Verifying form values:');
+            this.$form.find('input').each(function() {
+                console.log(`${this.id}: "${this.value}"`);
+            });
+        },
+
         openModal(mode = 'add', type = 'company') {
+            // Reset and prepare
             this.resetForm();
             
-            const title = mode === 'add' ? 
+            // Set modal properties
+            this.$formTitle.text(mode === 'add' ? 
                 asosiasiSKPPerusahaan.strings.addTitle : 
-                asosiasiSKPPerusahaan.strings.editTitle;
-                
-            this.$formTitle.text(title);
+                asosiasiSKPPerusahaan.strings.editTitle
+            );
+            
             this.$submitBtn.text(mode === 'add' ? 
                 asosiasiSKPPerusahaan.strings.save : 
-                asosiasiSKPPerusahaan.strings.update);
-            
+                asosiasiSKPPerusahaan.strings.update
+            );
+
+            // Show modal
             this.$modal
                 .attr('aria-hidden', 'false')
                 .show()
                 .find('input:visible:first').focus();
-                
+
+            // Add modal overlay class to body
             $('body').addClass('modal-open');
         },
 
@@ -152,10 +216,81 @@
             $('body').removeClass('modal-open');
         },
 
+        resetForm() {
+            this.$form[0].reset();
+            this.$form.find('input[type="hidden"]').val('');
+            this.$form.find('.error-message').remove();
+            this.$form.find('#current-file').empty();
+            this.$form.find('#pdf_file').prop('required', true);
+            
+            // Remove visual feedback
+            this.$form.find('input').css({
+                'backgroundColor': '',
+                'borderColor': ''
+            });
+        },
+
         submitForm() {
             const formData = new FormData(this.$form[0]);
             const isEdit = !!formData.get('id');
             
+            // Validate form data
+            const requiredFields = ['nomor_skp', 'penanggung_jawab', 'tanggal_terbit', 'masa_berlaku'];
+            let hasError = false;
+
+            // Clear previous errors
+            this.$form.find('.error-message').remove();
+
+            // Check required fields
+            requiredFields.forEach(field => {
+                const $field = this.$form.find(`#${field}`);
+                if (!$field.val()) {
+                    this.addFieldError($field, asosiasiSKPPerusahaan.strings.fieldRequired || 'Field ini wajib diisi');
+                    hasError = true;
+                }
+            });
+
+            // Validate dates
+            const tanggalTerbit = new Date(formData.get('tanggal_terbit'));
+            const masaBerlaku = new Date(formData.get('masa_berlaku'));
+            
+            if (masaBerlaku <= tanggalTerbit) {
+                const $field = this.$form.find('#masa_berlaku');
+                this.addFieldError($field, asosiasiSKPPerusahaan.strings.invalidDate || 'Masa berlaku harus lebih besar dari tanggal terbit');
+                hasError = true;
+            }
+
+            // Validate PDF only if:
+            // 1. This is a new submission (not edit) OR
+            // 2. This is an edit but user is uploading a new file
+            const pdfFile = formData.get('pdf_file');
+            const needsPDFValidation = !isEdit || (isEdit && pdfFile.size > 0);
+            
+            if (needsPDFValidation) {
+                if (!pdfFile || pdfFile.size === 0) {
+                    const $field = this.$form.find('#pdf_file');
+                    this.addFieldError($field, asosiasiSKPPerusahaan.strings.pdfRequired || 'File PDF wajib diupload');
+                    hasError = true;
+                } else if (pdfFile.type !== 'application/pdf') {
+                    const $field = this.$form.find('#pdf_file');
+                    this.addFieldError($field, asosiasiSKPPerusahaan.strings.invalidFileType || 'File harus berformat PDF');
+                    hasError = true;
+                } else if (pdfFile.size > 5 * 1024 * 1024) { // 5MB limit
+                    const $field = this.$form.find('#pdf_file');
+                    this.addFieldError($field, asosiasiSKPPerusahaan.strings.fileTooLarge || 'Ukuran file maksimal 5MB');
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
+                return false;
+            }
+
+            // If editing and no new file selected, remove the file field from FormData
+            if (isEdit && (!pdfFile || pdfFile.size === 0)) {
+                formData.delete('pdf_file');
+            }
+
             formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
             formData.append('nonce', asosiasiSKPPerusahaan.skpPerusahaanNonce);
             formData.append('member_id', this.memberId);
@@ -186,37 +321,14 @@
             });
         },
 
-        confirmDelete(id) {
-            if (confirm(asosiasiSKPPerusahaan.strings.confirmDelete)) {
-                this.deleteSKP(id);
-            }
+        addFieldError($field, message) {
+            $field.after(`<span class="error-message" style="color: #dc3232; display: block; margin-top: 5px;">${message}</span>`);
+            $field.css('border-color', '#dc3232');
         },
-
-        deleteSKP(id) {
-            $.ajax({
-                url: asosiasiSKPPerusahaan.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'delete_skp_perusahaan',
-                    id: id,
-                    member_id: this.memberId,
-                    nonce: asosiasiSKPPerusahaan.skpPerusahaanNonce
-                }
-            })
-            .done((response) => {
-                if (response.success) {
-                    this.showSuccess(response.data.message);
-                    this.loadSKPList();
-                } else {
-                    this.showError(response.data.message);
-                }
-            })
-            .fail(() => {
-                this.showError(asosiasiSKPPerusahaan.strings.deleteError);
-            });
-        },
-
+        
         loadSKPList() {
+            this.setLoading(true);
+
             $.ajax({
                 url: asosiasiSKPPerusahaan.ajaxurl,
                 type: 'GET',
@@ -224,8 +336,7 @@
                     action: 'get_skp_perusahaan_list',
                     member_id: this.memberId,
                     nonce: asosiasiSKPPerusahaan.skpPerusahaanNonce
-                },
-                beforeSend: () => this.setLoading(true)
+                }
             })
             .done((response) => {
                 if (response.success) {
@@ -242,82 +353,6 @@
             });
         },
 
-        renderSKPList(list) {
-            if (!list || !list.length) {
-                this.renderEmptyState();
-                return;
-            }
-
-            const rows = list.map((skp, index) => this.createSKPRow(skp, index + 1));
-            this.$companyList.html(rows.join(''));
-        },
-
-        createSKPRow(skp, index) {
-            return `
-                <tr>
-                    <td>${index}</td>
-                    <td>${this.escapeHtml(skp.nomor_skp)}</td>
-                    <td>${this.escapeHtml(skp.penanggung_jawab)}</td>
-                    <td>${skp.tanggal_terbit}</td>
-                    <td>${skp.masa_berlaku}</td>
-                    <td>
-                        <span class="skp-status skp-status-${skp.status}">
-                            ${this.escapeHtml(skp.status_label)}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="${skp.file_url}" 
-                           class="skp-pdf-link" 
-                           target="_blank"
-                           title="${asosiasiSKPPerusahaan.strings.view}">
-                            <span class="dashicons dashicons-pdf"></span>
-                        </a>
-                    </td>
-                    <td>
-                        <div class="skp-actions-group">
-                            ${this.createActionButtons(skp)}
-                        </div>
-                    </td>
-                </tr>
-            `;
-        },
-
-        createActionButtons(skp) {
-            const buttons = [];
-
-            if (skp.can_edit) {
-                buttons.push(`
-                    <button type="button" 
-                            class="button edit-skp" 
-                            data-id="${skp.id}"
-                            title="${asosiasiSKPPerusahaan.strings.edit}">
-                        ${asosiasiSKPPerusahaan.strings.edit}
-                    </button>
-                `);
-            }
-
-            buttons.push(`
-                <button type="button" 
-                        class="button delete-skp" 
-                        data-id="${skp.id}"
-                        title="${asosiasiSKPPerusahaan.strings.delete}">
-                    ${asosiasiSKPPerusahaan.strings.delete}
-                </button>
-            `);
-
-            return buttons.join('');
-        },
-
-        renderEmptyState() {
-            this.$companyList.html(`
-                <tr>
-                    <td colspan="8" class="skp-empty">
-                        ${asosiasiSKPPerusahaan.strings.noSKP}
-                    </td>
-                </tr>
-            `);
-        },
-
         setLoading(isLoading) {
             if (isLoading) {
                 this.$companyList.html(`
@@ -331,19 +366,75 @@
             }
         },
 
+        renderSKPList(list) {
+            console.log('Rendering SKP list:', list);
+            
+            if (!list || !list.length) {
+                this.renderEmptyState();
+                return;
+            }
+
+            const rows = list.map((skp, index) => this.createSKPRow(skp, index + 1));
+            this.$companyList.html(rows.join(''));
+        },
+
+        createSKPRow(skp, index) {
+            return `
+                <tr>
+                    <td>${index}</td>
+                    <td>${this.sanitizeText(skp.nomor_skp)}</td>
+                    <td>${this.sanitizeText(skp.penanggung_jawab)}</td>
+                    <td>${skp.tanggal_terbit}</td>
+                    <td>${skp.masa_berlaku}</td>
+                    <td>
+                        <span class="skp-status skp-status-${skp.status}">
+                            ${this.sanitizeText(skp.status_label)}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="${skp.file_url}" 
+                           class="skp-pdf-link" 
+                           target="_blank"
+                           title="${asosiasiSKPPerusahaan.strings.view}">
+                            <span class="dashicons dashicons-pdf"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <div class="skp-actions-group">
+                            <button type="button" 
+                                    class="button edit-skp" 
+                                    data-id="${skp.id}"
+                                    title="${asosiasiSKPPerusahaan.strings.edit}">
+                                ${asosiasiSKPPerusahaan.strings.edit}
+                            </button>
+                            <button type="button" 
+                                    class="button delete-skp" 
+                                    data-id="${skp.id}"
+                                    title="${asosiasiSKPPerusahaan.strings.delete}">
+                                ${asosiasiSKPPerusahaan.strings.delete}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        },
+
+        renderEmptyState() {
+            this.$companyList.html(`
+                <tr>
+                    <td colspan="8" class="skp-empty">
+                        ${asosiasiSKPPerusahaan.strings.noSKP}
+                    </td>
+                </tr>
+            `);
+        },
+
         setSubmitting(isSubmitting) {
             this.$submitBtn.prop('disabled', isSubmitting)
                 .text(isSubmitting ? 
                     asosiasiSKPPerusahaan.strings.saving : 
-                    asosiasiSKPPerusahaan.strings.save);
-        },
-
-        resetForm() {
-            this.$form[0].reset();
-            this.$form.find('[type="hidden"]').val('');
-            this.$form.find('.error-message').remove();
-            this.$form.find('#current-file').empty();
-            this.$form.find('#pdf_file').prop('required', true);
+                    asosiasiSKPPerusahaan.strings.save
+                );
         },
 
         showSuccess(message) {
@@ -359,9 +450,7 @@
                 <div class="notice notice-${type} is-dismissible">
                     <p>${message}</p>
                     <button type="button" class="notice-dismiss">
-                        <span class="screen-reader-text">
-                            ${asosiasiSKPPerusahaan.strings.dismiss}
-                        </span>
+                        <span class="screen-reader-text">Dismiss notice</span>
                     </button>
                 </div>
             `);
@@ -373,21 +462,11 @@
                     $(this).remove();
                 });
             }, 5000);
-
-            $notice.find('.notice-dismiss').on('click', function() {
-                $(this).closest('.notice').fadeOut('fast', function() {
-                    $(this).remove();
-                });
-            });
         },
 
-        escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        sanitizeText(text) {
+            if (!text) return '';
+            return text.replace(/[<>]/g, '');
         }
     };
 

@@ -422,3 +422,58 @@
 body.modal-open {
     overflow: hidden;
 }
+
+
+
+/* Ensure modal is above other elements */
+.skp-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 159999; /* Higher than WP admin bar */
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.skp-modal-content {
+    background: #fff;
+    padding: 20px;
+    max-width: 600px;
+    margin: 40px auto;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.skp-form-row {
+    margin-bottom: 20px;
+}
+
+.skp-form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.skp-form-field input[type="text"],
+.skp-form-field input[type="date"] {
+    width: 100%;
+}
+
+.skp-current-file {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 4px;
+}
+
+.skp-form-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.skp-form-footer .button {
+    margin-left: 10px;
+}
