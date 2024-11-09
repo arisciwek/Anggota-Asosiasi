@@ -3,11 +3,12 @@
  * Handle AJAX operations untuk SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.1.0
+ * @version 1.2.0
  * Path: includes/class-asosiasi-ajax-perusahaan.php
  * 
  * Changelog:
- * 1.1.0 - Added secure PDF URL handling
+ * 1.2.0 - Fixed get_skp_perusahaan endpoint
+ * 1.1.0 - Added secure PDF handling
  * 1.0.0 - Initial version
  */
 
@@ -20,15 +21,51 @@ class Asosiasi_Ajax_Perusahaan {
     }
 
     private function init_hooks() {
+        // Existing hooks
         add_action('wp_ajax_add_skp_perusahaan', array($this, 'add_skp_perusahaan'));
         add_action('wp_ajax_update_skp_perusahaan', array($this, 'update_skp_perusahaan'));
         add_action('wp_ajax_delete_skp_perusahaan', array($this, 'delete_skp_perusahaan'));
         add_action('wp_ajax_get_skp_perusahaan_list', array($this, 'get_skp_perusahaan_list'));
-        
-        // Add secure PDF download handler
         add_action('wp_ajax_get_skp_pdf', array($this, 'get_skp_pdf'));
+
+        // Add hook for get single SKP
+        add_action('wp_ajax_get_skp_perusahaan', array($this, 'get_skp_perusahaan'));
     }
 
+    /**
+     * Get single SKP for editing
+     */
+    public function get_skp_perusahaan() {
+        check_ajax_referer('asosiasi_skp_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized access', 'asosiasi')));
+        }
+
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if (!$id) {
+            wp_send_json_error(array('message' => __('Invalid SKP ID', 'asosiasi')));
+        }
+
+        $skp = new Asosiasi_SKP_Perusahaan();
+        $data = $skp->get_skp($id);
+
+        if (!$data) {
+            wp_send_json_error(array('message' => __('SKP not found', 'asosiasi')));
+        }
+
+        // Format dates for form
+        $data['tanggal_terbit'] = date('Y-m-d', strtotime($data['tanggal_terbit']));
+        $data['masa_berlaku'] = date('Y-m-d', strtotime($data['masa_berlaku']));
+
+        // Add file URL if needed
+        if (!empty($data['file_path'])) {
+            $data['file_url'] = $this->get_secure_pdf_url($id, $data['file_path']);
+        }
+
+        wp_send_json_success(array('skp' => $data));
+    }
+    
     public function add_skp_perusahaan() {
         check_ajax_referer('asosiasi_skp_nonce', 'nonce');
 

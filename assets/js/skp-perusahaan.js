@@ -19,10 +19,11 @@
 
         cacheDom() {
             this.$container = $('.skp-container');
-            this.$companyList = $('#company-skp-list');
-            this.$expertList = $('#expert-skp-list');
             this.$modal = $('#skp-modal');
             this.$form = $('#skp-form');
+            this.$formTitle = this.$modal.find('.modal-title');
+            this.$companyList = $('#company-skp-list');
+            this.$submitBtn = this.$form.find('[type="submit"]');
             this.memberId = this.$container.find('[data-member-id]').first().data('member-id');
         },
 
@@ -30,7 +31,7 @@
             // Add SKP button
             this.$container.on('click', '.add-skp-btn', (e) => {
                 const type = $(e.currentTarget).data('type');
-                this.openModal(type);
+                this.openModal('add', type);
             });
 
             // Modal close handlers
@@ -47,16 +48,158 @@
                 this.submitForm();
             });
 
-            // Delete SKP
+            // Edit button
+            this.$container.on('click', '.edit-skp', (e) => {
+                const id = $(e.currentTarget).data('id');
+                this.editSKP(id);
+            });
+
+            // Delete button
             this.$container.on('click', '.delete-skp', (e) => {
                 const id = $(e.currentTarget).data('id');
                 this.confirmDelete(id);
             });
 
-            // Edit SKP
-            this.$container.on('click', '.edit-skp', (e) => {
-                const id = $(e.currentTarget).data('id');
-                this.editSKP(id);
+            // ESC key to close modal
+            $(document).on('keydown', (e) => {
+                if (e.key === 'Escape' && this.$modal.is(':visible')) {
+                    this.closeModal();
+                }
+            });
+        },
+
+        editSKP(id) {
+            this.setLoading(true);
+            
+            $.ajax({
+                url: asosiasiAdmin.ajaxurl,
+                type: 'GET',
+                data: {
+                    action: 'get_skp_perusahaan',
+                    id: id,
+                    nonce: asosiasiAdmin.skpNonce
+                }
+            })
+            .done((response) => {
+                if (response.success) {
+                    this.populateForm(response.data.skp);
+                } else {
+                    this.showError(response.data.message);
+                }
+            })
+            .fail(() => {
+                this.showError(asosiasiAdmin.strings.loadError);
+            })
+            .always(() => {
+                this.setLoading(false);
+            });
+        },
+
+        populateForm(skp) {
+            // Reset and prepare form
+            this.resetForm();
+            
+            // Populate form fields
+            this.$form.find('#skp_id').val(skp.id);
+            this.$form.find('#nomor_skp').val(skp.nomor_skp);
+            this.$form.find('#penanggung_jawab').val(skp.penanggung_jawab);
+            this.$form.find('#tanggal_terbit').val(skp.tanggal_terbit);
+            this.$form.find('#masa_berlaku').val(skp.masa_berlaku);
+            
+            // Open modal in edit mode
+            this.openModal('edit', skp.type || 'company');
+        },
+
+        openModal(mode = 'add', type = 'company') {
+            this.resetForm();
+            
+            // Set modal properties based on mode
+            if (mode === 'add') {
+                this.$formTitle.text('Add SKP');
+                this.$submitBtn.text('Save SKP');
+                this.$form.find('#pdf_file').prop('required', true);
+            } else {
+                this.$formTitle.text('Edit SKP');
+                this.$submitBtn.text('Update SKP');
+                this.$form.find('#pdf_file').prop('required', false);
+            }
+            
+            // Show modal
+            this.$modal
+                .attr('aria-hidden', 'false')
+                .show()
+                .find('input:visible:first').focus();
+        },
+
+        closeModal() {
+            this.$modal
+                .attr('aria-hidden', 'true')
+                .hide();
+            
+            this.resetForm();
+        },
+
+        submitForm() {
+            const formData = new FormData(this.$form[0]);
+            const isEdit = !!formData.get('id');
+            
+            formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
+            formData.append('nonce', asosiasiAdmin.skpNonce);
+            formData.append('member_id', this.memberId);
+
+            this.setSubmitting(true);
+
+            $.ajax({
+                url: asosiasiAdmin.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false
+            })
+            .done((response) => {
+                if (response.success) {
+                    this.showSuccess(response.data.message);
+                    this.loadSKPList();
+                    this.closeModal();
+                } else {
+                    this.showError(response.data.message);
+                }
+            })
+            .fail(() => {
+                this.showError('Failed to save SKP');
+            })
+            .always(() => {
+                this.setSubmitting(false);
+            });
+        },
+
+        confirmDelete(id) {
+            if (confirm(asosiasiAdmin.strings.confirmDelete)) {
+                this.deleteSKP(id);
+            }
+        },
+
+        deleteSKP(id) {
+            $.ajax({
+                url: asosiasiAdmin.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'delete_skp_perusahaan',
+                    id: id,
+                    member_id: this.memberId,
+                    nonce: asosiasiAdmin.skpNonce
+                }
+            })
+            .done((response) => {
+                if (response.success) {
+                    this.showSuccess(response.data.message);
+                    this.loadSKPList();
+                } else {
+                    this.showError(response.data.message);
+                }
+            })
+            .fail(() => {
+                this.showError('Failed to delete SKP');
             });
         },
 
@@ -80,7 +223,7 @@
                 }
             })
             .fail(() => {
-                this.showError(asosiasiAdmin.strings.loadError);
+                this.showError('Failed to load SKP list');
             })
             .always(() => {
                 this.setLoading(false);
@@ -114,7 +257,7 @@
                         <a href="${skp.file_url}" 
                            class="skp-pdf-link" 
                            target="_blank"
-                           title="${asosiasiAdmin.strings.viewPdf}">
+                           title="View PDF">
                             <span class="dashicons dashicons-pdf"></span>
                         </a>
                     </td>
@@ -135,7 +278,7 @@
                     <button type="button" 
                             class="button edit-skp" 
                             data-id="${skp.id}">
-                        ${asosiasiAdmin.strings.edit}
+                        Edit
                     </button>
                 `);
             }
@@ -144,173 +287,30 @@
                 <button type="button" 
                         class="button delete-skp" 
                         data-id="${skp.id}">
-                    ${asosiasiAdmin.strings.delete}
+                    Delete
                 </button>
-                <a href="${skp.file_url}" 
-                   class="button" 
-                   target="_blank">
-                    ${asosiasiAdmin.strings.view}
-                </a>
             `);
 
             return buttons.join('');
         },
 
         renderEmptyState() {
-            const message = asosiasiAdmin.strings.noSKP || 'No SKP found.';
             this.$companyList.html(`
                 <tr>
-                    <td colspan="7" class="skp-empty">${message}</td>
+                    <td colspan="8" class="skp-empty">
+                        No SKP found
+                    </td>
                 </tr>
             `);
-        },
-
-        submitForm() {
-            const formData = new FormData(this.$form[0]);
-            const isEdit = !!formData.get('id');
-            
-            formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
-            formData.append('nonce', asosiasiAdmin.skpNonce);
-            formData.append('member_id', this.memberId);
-
-            $.ajax({
-                url: asosiasiAdmin.ajaxurl,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: () => this.setSubmitting(true)
-            })
-            .done((response) => {
-                if (response.success) {
-                    this.showSuccess(response.data.message);
-                    this.loadSKPList();
-                    this.closeModal();
-                } else {
-                    this.showError(response.data.message);
-                }
-            })
-            .fail(() => {
-                this.showError(asosiasiAdmin.strings.saveError);
-            })
-            .always(() => {
-                this.setSubmitting(false);
-            });
-        },
-
-        confirmDelete(id) {
-            if (confirm(asosiasiAdmin.strings.confirmDelete)) {
-                this.deleteSKP(id);
-            }
-        },
-
-        deleteSKP(id) {
-            $.ajax({
-                url: asosiasiAdmin.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'delete_skp_perusahaan',
-                    id: id,
-                    member_id: this.memberId,
-                    nonce: asosiasiAdmin.skpNonce
-                }
-            })
-            .done((response) => {
-                if (response.success) {
-                    this.showSuccess(response.data.message);
-                    this.loadSKPList();
-                } else {
-                    this.showError(response.data.message);
-                }
-            })
-            .fail(() => {
-                this.showError(asosiasiAdmin.strings.deleteError);
-            });
-        },
-
-        editSKP(id) {
-            // Implementation for edit functionality
-            // Will be added in future version
-        },
-
-        openModal(type) {
-            this.resetForm();
-            
-            // Set modal title based on type
-            const title = type === 'company' 
-                ? asosiasiAdmin.strings.addCompanySKP 
-                : asosiasiAdmin.strings.addExpertSKP;
-            this.$modal.find('.skp-modal-title').text(title);
-            
-            // Set form type
-            this.$modal.find('#skp_type').val(type);
-            
-            // Show modal with accessibility
-            this.$modal
-                .attr('aria-hidden', 'false')
-                .show()
-                .find('input:first').focus();
-                
-            // Trap focus in modal
-            this.trapFocus();
-            
-            // Disable page scroll
-            $('body').addClass('modal-open');
-        },
-
-        closeModal() {
-            this.$modal
-                .attr('aria-hidden', 'true')
-                .hide();
-            
-            this.resetForm();
-            
-            // Enable page scroll
-            $('body').removeClass('modal-open');
-        },
-
-        trapFocus() {
-            const $modal = this.$modal;
-            const $focusableElements = $modal.find(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-            );
-            
-            const $firstFocusable = $focusableElements.first();
-            const $lastFocusable = $focusableElements.last();
-            
-            $modal.on('keydown', function(e) {
-                if (e.key === 'Tab' || e.keyCode === 9) {
-                    if (e.shiftKey) {
-                        if (document.activeElement === $firstFocusable[0]) {
-                            e.preventDefault();
-                            $lastFocusable.focus();
-                        }
-                    } else {
-                        if (document.activeElement === $lastFocusable[0]) {
-                            e.preventDefault();
-                            $firstFocusable.focus();
-                        }
-                    }
-                }
-                
-                if (e.key === 'Escape' || e.keyCode === 27) {
-                    this.closeModal();
-                }
-            }.bind(this));
-        },
-
-        resetForm() {
-            this.$form[0].reset();
-            this.$form.find('[type="hidden"]').val('');
-            this.$form.find('.error-message').remove();
         },
 
         setLoading(isLoading) {
             if (isLoading) {
                 this.$companyList.html(`
                     <tr>
-                        <td colspan="7" class="skp-loading">
-                            ${asosiasiAdmin.strings.loading}
+                        <td colspan="8" class="skp-loading">
+                            <span class="spinner is-active"></span>
+                            Loading SKP data...
                         </td>
                     </tr>
                 `);
@@ -318,9 +318,14 @@
         },
 
         setSubmitting(isSubmitting) {
-            const $submit = this.$form.find('[type="submit"]');
-            $submit.prop('disabled', isSubmitting);
-            $submit.text(isSubmitting ? asosiasiAdmin.strings.saving : asosiasiAdmin.strings.save);
+            this.$submitBtn.prop('disabled', isSubmitting)
+                .text(isSubmitting ? 'Saving...' : 'Save SKP');
+        },
+
+        resetForm() {
+            this.$form[0].reset();
+            this.$form.find('[type="hidden"]').val('');
+            this.$form.find('.error-message').remove();
         },
 
         showSuccess(message) {
@@ -341,14 +346,21 @@
                 </div>
             `);
 
-            $('.wp-header-end').after($notice);
+            $('.wrap .wp-header-end').after($notice);
 
-            // Auto dismiss after 5 seconds
+            // Auto dismiss
             setTimeout(() => {
                 $notice.fadeOut('slow', function() {
                     $(this).remove();
                 });
             }, 5000);
+
+            // Handle dismiss button
+            $notice.find('.notice-dismiss').on('click', function() {
+                $(this).closest('.notice').fadeOut('fast', function() {
+                    $(this).remove();
+                });
+            });
         },
 
         escapeHtml(unsafe) {
