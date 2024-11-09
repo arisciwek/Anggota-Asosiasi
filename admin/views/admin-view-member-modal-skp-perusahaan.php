@@ -13,7 +13,6 @@ if (!defined('ABSPATH')) {
 
 $member_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 ?>
-
 <div id="skp-modal" class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="skp-modal-content">
         <div class="skp-modal-header">
@@ -24,7 +23,7 @@ $member_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         </div>
 
         <form id="skp-form" method="post" enctype="multipart/form-data" class="skp-form">
-            <?php wp_nonce_field('asosiasi_skp_action', 'skp_nonce'); ?>
+            <?php wp_nonce_field('asosiasi_skp_perusahaan_nonce', 'skp_nonce'); ?>
             <input type="hidden" name="member_id" value="<?php echo esc_attr($member_id); ?>">
             <input type="hidden" name="id" id="skp_id" value="">
             <input type="hidden" name="skp_type" id="skp_type" value="">
