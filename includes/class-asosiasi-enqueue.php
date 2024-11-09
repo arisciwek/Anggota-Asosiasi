@@ -180,4 +180,46 @@ class Asosiasi_Enqueue {
                isset($_GET['page']) && 
                $_GET['page'] === 'asosiasi-view-member';
     }
+    // Add this to your asosiasi.php
+	function asosiasi_enqueue_skp_assets() {
+	    // Only load on member view page
+	    $screen = get_current_screen();
+	    if ($screen && $screen->base === 'admin_page_asosiasi-view-member') {
+	        
+	        wp_enqueue_style(
+	            'asosiasi-skp-perusahaan',
+	            ASOSIASI_URL . 'assets/css/skp-perusahaan.css',
+	            array(),
+	            ASOSIASI_VERSION
+	        );
+
+	        wp_enqueue_script(
+	            'asosiasi-skp-perusahaan',
+	            ASOSIASI_URL . 'assets/js/skp-perusahaan.js',
+	            array('jquery'),
+	            ASOSIASI_VERSION,
+	            true
+	        );
+
+	        // Localize script with proper nonce
+	        wp_localize_script(
+	            'asosiasi-skp-perusahaan',
+	            'asosiasiAdmin',
+	            array(
+	                'ajaxurl' => admin_url('admin-ajax.php'),
+	                'skpNonce' => wp_create_nonce('asosiasi_skp_nonce'),
+	                'strings' => array(
+	                    'loading' => __('Loading SKP data...', 'asosiasi'),
+	                    'noSKP' => __('No SKP found', 'asosiasi'),
+	                    'confirmDelete' => __('Are you sure you want to delete this SKP?', 'asosiasi'),
+	                    'saveError' => __('Failed to save SKP', 'asosiasi'),
+	                    'deleteError' => __('Failed to delete SKP', 'asosiasi'),
+	                    'loadError' => __('Failed to load SKP list', 'asosiasi'),
+	                )
+	            )
+	        );
+	    }
+	add_action('admin_enqueue_scripts', 'asosiasi_enqueue_skp_assets');
+	}
+	
 }

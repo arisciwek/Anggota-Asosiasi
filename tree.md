@@ -30,7 +30,7 @@ asosiasi/
 │   ├── class-asosiasi-services.php (v1.0.0)
 │   ├── class-asosiasi-skp-perusahaan.php (v1.0.0)
 │   ├── class-asosiasi-skp-cron.php (v1.0.0)
-│   ├── class-asosiasi-ajax-perusahaan.php (v1.0.0)
+│   ├── class-asosiasi-ajax-skp-perusahaan.php (v1.0.0)
 │   └── asosiasi-functions.php (v1.0.0)
 ├── admin/
 │   ├── css/

@@ -359,3 +359,39 @@
     float: none;
     margin: 0 10px 0 0;
 }
+
+/* PDF Icon Styles */
+.skp-pdf-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url('../images/pdf-icon.svg') no-repeat center;
+    background-size: contain;
+    vertical-align: middle;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.skp-pdf-icon:hover {
+    opacity: 1;
+}
+
+.skp-pdf-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.skp-pdf-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Table Column Widths */
+.skp-column-pdf {
+    width: 60px;
+    text-align: center;
+}

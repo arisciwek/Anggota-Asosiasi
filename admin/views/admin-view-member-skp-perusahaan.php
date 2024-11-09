@@ -3,7 +3,7 @@
  * Template for SKP Perusahaan section in member view
  *
  * @package Asosiasi
- * @version 1.2.0
+ * @version 1.2.1
  * Path: admin/views/admin-view-member-skp-perusahaan.php
  * 
  * Changelog:
@@ -46,7 +46,7 @@ if ($member) {
                                 <th scope="col" class="skp-column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-status"><?php _e('Status', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-pdf"><?php _e('PDF', 'asosiasi'); ?></th>
+                                <th scope="col" class="skp-column-pdf"><?php _e('PDF', 'asosiasi'); ?></th> 
                                 <th scope="col" class="skp-column-actions"><?php _e('Actions', 'asosiasi'); ?></th>
                             </tr>
                         </thead>

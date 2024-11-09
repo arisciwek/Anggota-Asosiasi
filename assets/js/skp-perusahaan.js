@@ -96,7 +96,7 @@
             const rows = list.map((skp, index) => this.createSKPRow(skp, index + 1));
             this.$companyList.html(rows.join(''));
         },
-
+        
         createSKPRow(skp, index) {
             return `
                 <tr>
@@ -109,6 +109,14 @@
                         <span class="skp-status skp-status-${skp.status}">
                             ${this.escapeHtml(skp.status_label)}
                         </span>
+                    </td>
+                    <td>
+                        <a href="${skp.file_url}" 
+                           class="skp-pdf-link" 
+                           target="_blank"
+                           title="${asosiasiAdmin.strings.viewPdf}">
+                            <span class="dashicons dashicons-pdf"></span>
+                        </a>
                     </td>
                     <td>
                         <div class="skp-actions-group">
