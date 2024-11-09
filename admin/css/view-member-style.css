@@ -1,0 +1,100 @@
+/* admin/css/view-member-style.css */
+.member-info-card,
+.member-services-card,
+.member-actions-card {
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.form-table th {
+    width: 200px;
+}
+
+.service-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.service-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    font-size: 13px;
+    position: relative;
+    cursor: help;
+}
+
+.service-tag:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+.service-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background: #1d2327;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-bottom: 8px;
+    z-index: 100;
+}
+
+.service-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1d2327 transparent transparent transparent;
+}
+
+.service-tag:hover .service-tooltip,
+.service-tag:focus .service-tooltip {
+    display: block;
+}
+
+.member-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.button-link-delete {
+    color: #b32d2e;
+}
+
+.button-link-delete:hover,
+.button-link-delete:focus {
+    color: #8b2424;
+}
+
+.delete-member-form {
+    display: inline;
+}
+
+@media screen and (max-width: 782px) {
+    .form-table th {
+        width: auto;
+    }
+    
+    .member-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .delete-member-form {
+        display: block;
+    }
+}

@@ -1,13 +1,87 @@
 <?php
 /**
- * Tampilan halaman tambah/edit anggota
+ * Tampilan halaman tambah/edit anggota dengan enhanced logging
  *
  * @package Asosiasi
- * @version 1.3.0
+ * @version 2.6.0
+ * Changelog:
+ * 2.6.0 - Menambahkan detailed logging untuk debug redirect
+ * 2.5.0 - Integrasi dengan Asosiasi_Logger
  */
 
 if (!defined('ABSPATH')) {
     die;
+}
+
+/**
+ * Handles safe redirects in WordPress admin with fallbacks
+ * 
+ * @param string $url The URL to redirect to
+ * @param int $member_id The member ID for the success message
+ * @param string $action The action performed ('update' or 'create')
+ */
+function try_redirect($url, $member_id, $action = 'update') {
+    // Validate parameters
+    $url = esc_url_raw($url);
+    $member_id = absint($member_id);
+    $action = sanitize_key($action);
+
+    // Set appropriate success message
+    $message = $action === 'update' 
+        ? __('Member successfully updated.', 'asosiasi')
+        : __('Member successfully created.', 'asosiasi');
+
+    // Store message in transient for display after redirect
+    set_transient('asosiasi_message', array(
+        'type' => 'success',
+        'message' => $message,
+        'member_id' => $member_id
+    ), MINUTE_IN_SECONDS);
+
+    // Try PHP redirect if headers aren't sent
+    if (!headers_sent()) {
+        wp_safe_redirect($url);
+        exit;
+    }
+
+    // Fallback to meta refresh and JavaScript
+    ?>
+    <script type="text/javascript">
+        console.log('Redirecting to: <?php echo esc_js($url); ?>');
+        window.location.href = '<?php echo esc_js($url); ?>';
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0;url=<?php echo esc_attr($url); ?>">
+    </noscript>
+    <div class="notice notice-info">
+        <p>
+            <?php 
+            printf(
+                /* translators: %s: URL */
+                __('If you are not redirected automatically, please <a href="%s">click here</a>.', 'asosiasi'),
+                esc_url($url)
+            ); 
+            ?>
+        </p>
+    </div>
+    <?php
+    exit;
+}
+
+/**
+ * Display stored message on the target page
+ * Should be called at the top of the page after headers
+ */
+function display_redirect_message() {
+    $message = get_transient('asosiasi_message');
+    if ($message) {
+        delete_transient('asosiasi_message');
+        ?>
+        <div class="notice notice-<?php echo esc_attr($message['type']); ?> is-dismissible">
+            <p><?php echo esc_html($message['message']); ?></p>
+        </div>
+        <?php
+    }
 }
 
 $crud = new Asosiasi_CRUD();
@@ -18,29 +92,36 @@ $member_services = array();
 
 // Enable error reporting for debugging
 if (WP_DEBUG) {
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+    error_log("\n=== STARTING MEMBER FORM PROCESSING ===");
+    error_log("Time: " . current_time('mysql'));
+    error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        error_log("POST data: " . print_r($_POST, true));
+    }
 }
 
-// Handle edit
 if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
     $member_id = intval($_GET['id']);
     $member = $crud->get_member($member_id);
     $member_services = $services->get_member_services($member_id);
     $is_edit = true;
+    if (WP_DEBUG) {
+        error_log("Edit mode - Member ID: $member_id");
+        error_log("Member data: " . print_r($member, true));
+        error_log("Member services: " . print_r($member_services, true));
+    }
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
-    // Verify nonce
-    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_member')) {
-        wp_die(__('Invalid nonce specified', 'asosiasi'), __('Error', 'asosiasi'), array(
-            'response' => 403,
-            'back_link' => true,
-        ));
+    if (WP_DEBUG) {
+        error_log("Processing form submission");
     }
 
-    // Sanitize and validate input data
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_member')) {
+        error_log("Nonce verification failed");
+        wp_die(__('Invalid nonce specified', 'asosiasi'));
+    }
+
     $data = array(
         'company_name' => sanitize_text_field($_POST['company_name']),
         'contact_person' => sanitize_text_field($_POST['contact_person']),
@@ -48,7 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         'phone' => sanitize_text_field($_POST['phone'])
     );
 
-    // Validate required fields
+    if (WP_DEBUG) {
+        error_log("Sanitized data: " . print_r($data, true));
+    }
+
     $required_fields = array('company_name', 'contact_person', 'email');
     $errors = array();
     
@@ -58,57 +142,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         }
     }
 
-    // Validate email
     if (!is_email($data['email'])) {
         $errors[] = __('Invalid email address.', 'asosiasi');
     }
 
-    // Array untuk menyimpan ID layanan yang dipilih
     $selected_services = isset($_POST['member_services']) ? array_map('intval', $_POST['member_services']) : array();
 
-    // Log data for debugging
     if (WP_DEBUG) {
-        error_log('Member Update Data: ' . print_r($data, true));
-        error_log('Selected Services: ' . print_r($selected_services, true));
-        error_log('Is Edit: ' . ($is_edit ? 'true' : 'false'));
-        if ($is_edit) {
-            error_log('Member ID: ' . $member_id);
-        }
+        error_log("Validation errors: " . print_r($errors, true));
+        error_log("Selected services: " . print_r($selected_services, true));
     }
 
     if (empty($errors)) {
         if ($is_edit) {
-            // Update existing member
-            $update_result = $crud->update_member($member_id, $data);
-            
-            if (WP_DEBUG) {
-                error_log('Update Result: ' . ($update_result ? 'success' : 'failed'));
-            }
-
-            if ($update_result !== false) {
-                // Update member services
-                $services_result = $services->add_member_services($member_id, $selected_services);
-                
-                if (WP_DEBUG) {
-                    error_log('Services Update Result: ' . ($services_result ? 'success' : 'failed'));
-                }
-
-                $message = __('Anggota berhasil diperbarui.', 'asosiasi');
-                $member = $crud->get_member($member_id); // Refresh data
-                $member_services = $services->get_member_services($member_id);
+            error_log("Attempting to update member $member_id");
+            if ($crud->update_member($member_id, $data)) {
+                error_log("Member update successful");
+                $services->add_member_services($member_id, $selected_services);
+                try_redirect(
+                    admin_url("admin.php?page=asosiasi-view-member&id={$member_id}"),
+                    $member_id,
+                    'update'
+                );
             } else {
+                error_log("Member update failed");
                 $error = __('Gagal memperbarui data anggota.', 'asosiasi');
             }
         } else {
-            // Create new member
+            error_log("Attempting to create new member");
             $new_member_id = $crud->create_member($data);
             if ($new_member_id) {
-                // Add services for new member
+                error_log("New member created with ID: $new_member_id");
                 $services->add_member_services($new_member_id, $selected_services);
-                $message = __('Anggota baru berhasil ditambahkan.', 'asosiasi');
-                wp_redirect(admin_url('admin.php?page=asosiasi-list-members'));
-                exit;
+                try_redirect(
+                    admin_url("admin.php?page=asosiasi-view-member&id={$new_member_id}"),
+                    $new_member_id,
+                    'create'
+                );
             } else {
+                error_log("Member creation failed");
                 $error = __('Gagal menambahkan anggota baru.', 'asosiasi');
             }
         }
@@ -124,11 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
     </h1>
     <hr class="wp-header-end">
 
-    <?php if (isset($message)): ?>
-        <div class="notice notice-success is-dismissible">
-            <p><?php echo esc_html($message); ?></p>
-        </div>
-    <?php endif; ?>
+    <?php settings_errors('asosiasi_messages'); ?>
 
     <?php if (isset($error)): ?>
         <div class="notice notice-error is-dismissible">
@@ -228,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
                    id="submit_member" 
                    class="button button-primary" 
                    value="<?php echo $is_edit ? __('Update Anggota', 'asosiasi') : __('Tambah Anggota', 'asosiasi'); ?>">
-            <a href="<?php echo admin_url('admin.php?page=asosiasi-list-members'); ?>" class="button">
+            <a href="<?php echo admin_url('admin.php?page=asosiasi'); ?>" class="button">
                 <?php _e('Batal', 'asosiasi'); ?>
             </a>
         </p>

@@ -65,3 +65,114 @@
         flex: 100%;
     }
 }
+
+/* Global admin styles */
+.wrap {
+    margin: 20px 20px 0 0;
+}
+
+/* Form styles */
+.form-table .required {
+    color: #dc3232;
+}
+
+.services-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+    margin: 5px 0;
+}
+
+.service-checkbox {
+    display: block;
+    margin-bottom: 8px;
+    padding: 3px 0;
+}
+
+.service-checkbox input[type="checkbox"] {
+    margin: 0 8px 0 0;
+}
+
+.service-full-name {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+.form-invalid {
+    border-color: #dc3232 !important;
+}
+
+.error-message {
+    color: #dc3232;
+    display: block;
+    margin: 5px 0;
+}
+
+/* List table styles */
+.wp-list-table .column-services {
+    width: 20%;
+}
+
+.service-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 2px;
+    background: #e7e7e7;
+    border-radius: 3px;
+    font-size: 0.9em;
+    position: relative;
+}
+
+/* Search box */
+.search-box {
+    margin: 1em 0;
+}
+
+/* Responsive fixes */
+@media screen and (max-width: 782px) {
+    .form-table td input[type="text"],
+    .form-table td input[type="email"],
+    .form-table td input[type="tel"] {
+        width: 100%;
+    }
+    
+    .services-checkbox-list {
+        max-height: 150px;
+    }
+}
+
+
+.services-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.service-checkbox {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.service-full-name {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.required {
+    color: #dc3232;
+}
+
+.form-table td {
+    position: relative;
+}
+
+.error-message {
+    color: #dc3232;
+    display: block;
+    margin-top: 5px;
+}

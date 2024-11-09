@@ -35,6 +35,7 @@ require_once ASOSIASI_DIR . 'includes/class-asosiasi-services.php'; // Tambahkan
 require_once ASOSIASI_DIR . 'includes/class-asosiasi.php';
 require_once ASOSIASI_DIR . 'admin/class-asosiasi-admin.php';
 require_once ASOSIASI_DIR . 'public/class-asosiasi-public.php';
+require_once ASOSIASI_DIR . 'includes/class-asosiasi-logger.php';
 
 // Fungsi untuk memuat assets
 function asosiasi_enqueue_scripts() {
