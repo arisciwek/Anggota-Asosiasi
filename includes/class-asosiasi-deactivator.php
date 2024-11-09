@@ -20,6 +20,9 @@ class Asosiasi_Deactivator {
         // Clear any transients we've set
         delete_transient('asosiasi_members_count');
         
+        // Unschedule SKP status check
+        Asosiasi_SKP_Cron::unschedule_events();
+        
         // Clear permalinks
         flush_rewrite_rules();
     }

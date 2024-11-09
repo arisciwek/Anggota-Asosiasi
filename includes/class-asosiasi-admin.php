@@ -18,7 +18,6 @@ class Asosiasi_Admin {
         add_action('init', array($this, 'init_plugin'));
         add_action('admin_menu', array($this, 'add_plugin_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
     }
 
     /**
@@ -87,10 +86,6 @@ class Asosiasi_Admin {
             wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
         }
         
-        // Enqueue scripts and styles
-        wp_enqueue_style('asosiasi-admin-dashboard', ASOSIASI_URL . 'admin/css/dashboard-style.css', array(), $this->version);
-        wp_enqueue_script('asosiasi-admin-dashboard', ASOSIASI_URL . 'admin/js/dashboard-script.js', array('jquery'), $this->version, true);
-        
         require_once ASOSIASI_DIR . 'admin/views/admin-menu-page.php';
     }
 
@@ -98,9 +93,6 @@ class Asosiasi_Admin {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
         }
-        
-        wp_enqueue_style('asosiasi-admin-form', ASOSIASI_URL . 'admin/css/form-style.css', array(), $this->version);
-        wp_enqueue_script('asosiasi-admin-form', ASOSIASI_URL . 'admin/js/form-script.js', array('jquery'), $this->version, true);
         
         require_once ASOSIASI_DIR . 'admin/views/admin-add-member-page.php';
     }
@@ -117,9 +109,6 @@ class Asosiasi_Admin {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
         }
-        
-        wp_enqueue_style('asosiasi-admin-settings', ASOSIASI_URL . 'admin/css/settings-style.css', array(), $this->version);
-        wp_enqueue_script('asosiasi-admin-settings', ASOSIASI_URL . 'admin/js/settings-script.js', array('jquery'), $this->version, true);
         
         require_once ASOSIASI_DIR . 'admin/views/admin-settings-page.php';
     }
@@ -142,54 +131,6 @@ class Asosiasi_Admin {
                 'type' => 'string',
                 'sanitize_callback' => 'sanitize_email',
                 'default' => ''
-            )
-        );
-    }
-
-    /**
-     * Enqueue admin scripts and styles
-     */
-    public function enqueue_admin_assets() {
-
-        // Enqueue form styles only on add/edit member page
-        if (isset($_GET['page']) && 
-            ($_GET['page'] === 'asosiasi-add-member' || 
-             ($_GET['page'] === 'asosiasi' && isset($_GET['action']) && $_GET['action'] === 'edit'))) {
-            wp_enqueue_style(
-                'asosiasi-form-style',
-                ASOSIASI_URL . 'admin/css/form-style.css',
-                array(),
-                $this->version
-            );
-        }
-
-        wp_enqueue_style(
-            'asosiasi-admin-global',
-            ASOSIASI_URL . 'admin/css/admin-global.css',
-            array(),
-            $this->version
-        );
-
-        wp_enqueue_script(
-            'asosiasi-admin-global',
-            ASOSIASI_URL . 'admin/js/admin-global.js',
-            array('jquery'),
-            $this->version,
-            true
-        );
-
-        wp_localize_script(
-            'asosiasi-admin-global',
-            'asosiasiAdmin',
-            array(
-                'ajaxurl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('asosiasi_admin_nonce'),
-                'strings' => array(
-                    'confirmDelete' => __('Yakin ingin menghapus?', 'asosiasi'),
-                    'deletingMember' => __('Menghapus anggota...', 'asosiasi'),
-                    'memberDeleted' => __('Anggota berhasil dihapus', 'asosiasi'),
-                    'error' => __('Terjadi kesalahan', 'asosiasi')
-                )
             )
         );
     }

@@ -23,17 +23,22 @@ class Asosiasi {
         add_action('admin_menu', array($plugin_admin, 'add_plugin_admin_menu'));
         add_action('admin_init', array($plugin_admin, 'register_settings'));
     }
+    /*
+    private function define_public_hooks() {
+        $plugin_public = new Asosiasi_Public($this->version);
+        add_shortcode('asosiasi_member_list', array($plugin_public, 'display_member_list'));
+    }
+    */
 
     private function define_public_hooks() {
         $plugin_public = new Asosiasi_Public($this->version);
         add_shortcode('asosiasi_member_list', array($plugin_public, 'display_member_list'));
     }
-    
     public function display_admin_dashboard() {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
         }
-        
+        /*
         // Enqueue scripts and styles khusus untuk dashboard
         wp_enqueue_style('asosiasi-admin-dashboard', plugin_dir_url(dirname(__FILE__)) . 'admin/css/dashboard-style.css', array(), $this->version);
         wp_enqueue_script('asosiasi-admin-dashboard', plugin_dir_url(dirname(__FILE__)) . 'admin/js/dashboard-script.js', array('jquery'), $this->version, true);
@@ -49,7 +54,7 @@ class Asosiasi {
                 'error' => __('Terjadi kesalahan', 'asosiasi')
             )
         ));
-        
+        */
         require_once ASOSIASI_DIR . 'admin/views/admin-menu-page.php';
     }
 }
