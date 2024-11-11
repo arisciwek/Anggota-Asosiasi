@@ -3,7 +3,7 @@
  * Plugin Name: Asosiasi
  * Plugin URI: http://example.com
  * Description: Plugin CRUD untuk anggota asosiasi yang berupa perusahaan.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Nama Penulis
@@ -16,6 +16,11 @@
  * @package Asosiasi
  * 
  * Changelog:
+ * 2.1.0 - 2024-03-13
+ * - Added member images feature
+ * - Added image management system
+ * - Enhanced member profile view
+ * 
  * 2.0.0 - 2024-03-09
  * - Added SKP Perusahaan feature
  * - Added SKP management interface
@@ -25,18 +30,6 @@
  * 1.2.1 - 2024-03-08
  * - Fixed member listing display
  * - Added service filtering
- * 
- * 1.2.0 - 2024-03-07
- * - Added member services functionality
- * - Improved admin interface
- * 
- * 1.1.0 - 2024-03-06
- * - Added internationalization support
- * - Added settings page
- * 
- * 1.0.0 - 2024-03-05
- * - Initial release
- * - Basic CRUD functionality
  */
 
 // Prevent direct file access
@@ -45,7 +38,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin version
-define('ASOSIASI_VERSION', '2.0.0');
+define('ASOSIASI_VERSION', '2.1.0');
 
 // Plugin constants
 define('ASOSIASI_FILE', __FILE__);
@@ -111,6 +104,7 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-admin.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-public.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-member-images.php'; // Add this line
 
     // SKP related classes
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-perusahaan.php';
@@ -155,7 +149,9 @@ if (empty(asosiasi_check_requirements())) {
         // Load SKP functionality if needed
         if (is_admin()) {
             // Initialize SKP features
-            Asosiasi_SKP_Cron::schedule_events();
+            if (class_exists('Asosiasi_SKP_Cron')) {
+                Asosiasi_SKP_Cron::schedule_events();
+            }
         }
     }
 

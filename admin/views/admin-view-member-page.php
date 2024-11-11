@@ -1,10 +1,23 @@
 <?php
 /**
- * Tampilan detail member dengan SKP Perusahaan
+ * Tampilan detail member dengan foto preview
  *
  * @package Asosiasi
- * @version 2.0.0
+ * @version 2.2.0
  * Path: admin/views/admin-view-member-page.php
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-03-14
+ * - Removed image upload/delete forms
+ * - Added Edit Photos button
+ * - Enlarged image previews
+ * - Improved layout for image preview only
+ * - Simplified image display section
+ * 2.1.0 - 2024-03-13
+ * - Added member images support
+ * - Added image upload and preview interface
+ * - Added mandatory and optional image handling
+ * 2.0.0 - Initial version with SKP support
  */
 
 if (!defined('ABSPATH')) {
@@ -19,58 +32,17 @@ if (isset($_GET['amp;id'])) {
     $member_id = intval($_GET['id']); 
 }
 
-// Inisialisasi database handler
+// Inisialisasi handlers
 $crud = new Asosiasi_CRUD();
 $services = new Asosiasi_Services();
+$images = new Asosiasi_Member_Images();
 
 // Get member data
 $member = $crud->get_member($member_id);
 
-// Enqueue SKP assets
-/*
-wp_enqueue_style(
-    'asosiasi-skp-perusahaan',
-    ASOSIASI_URL . 'assets/css/skp-perusahaan.css',
-    array(),
-    ASOSIASI_VERSION
-);
-
-wp_enqueue_script(
-    'asosiasi-skp-perusahaan',
-    ASOSIASI_URL . 'assets/js/skp-perusahaan.js',
-    array('jquery'),
-    ASOSIASI_VERSION,
-    true
-);
-
-// Localize script
-wp_localize_script(
-    'asosiasi-skp-perusahaan',
-    'asosiasiAdmin',
-    array(
-        'ajaxurl' => admin_url('admin-ajax.php'),
-        'skpNonce' => wp_create_nonce('asosiasi_skp_nonce'),
-        'strings' => array(
-            'loading' => __('Loading SKP data...', 'asosiasi'),
-            'noSKP' => __('No SKP found', 'asosiasi'),
-            'addCompanySKP' => __('Add Company SKP', 'asosiasi'),
-            'addExpertSKP' => __('Add Expert SKP', 'asosiasi'),
-            'edit' => __('Edit', 'asosiasi'),
-            'delete' => __('Delete', 'asosiasi'),
-            'view' => __('View PDF', 'asosiasi'),
-            'confirmDelete' => __('Are you sure you want to delete this SKP?', 'asosiasi'),
-            'saveError' => __('Failed to save SKP', 'asosiasi'),
-            'deleteError' => __('Failed to delete SKP', 'asosiasi'),
-            'loadError' => __('Failed to load SKP list', 'asosiasi'),
-            'saving' => __('Saving...', 'asosiasi'),
-            'save' => __('Save SKP', 'asosiasi')
-        )
-    )
-);
-*/
-
 if ($member) {
     $member_services = $services->get_member_services($member_id);
+    $member_images = $images->get_member_images($member_id);
     ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">
@@ -183,28 +155,69 @@ if ($member) {
                     </div>
                 </div>
 
-                <!-- Right Column - Template SKP -->
+                <!-- Right Column - Member Images -->
                 <div style="flex: 0 0 55%;">
-                    <?php 
-                    $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-perusahaan.php';
-                    if (file_exists($skp_template)) {
-                        include $skp_template;
-                    }
-                    ?>
-                    <hr />
-                    <?php 
-                    $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-tenaga-ahli.php';
-                    if (file_exists($skp_template)) {
-                        include $skp_template;
-                    }
-                    ?>
+                    <div class="card" style="margin-top: 20px;">
+                        <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                            <?php _e('Member Images', 'asosiasi'); ?>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-edit-photos&id=' . $member_id)); ?>" 
+                               class="button">
+                                <?php _e('Edit Photos', 'asosiasi'); ?>
+                            </a>
+                        </h2>
+                        <div class="inside" style="padding: 20px;">
+                            <!-- Main Image Preview -->
+                            <div class="main-image-preview" style="margin-bottom: 30px;">
+                                <h3><?php _e('Main Image', 'asosiasi'); ?></h3>
+                                <?php if (isset($member_images['mandatory'])): ?>
+                                    <img src="<?php echo esc_url($member_images['mandatory']['url']); ?>" 
+                                         alt="<?php echo esc_attr($member['company_name']); ?>"
+                                         style="width: 100%; max-height: 272px; object-fit: contain; display: block; margin: 10px 0;">
+                                <?php else: ?>
+                                    <div style="width: 100%; height: 120px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; border: 1px dashed #ddd;">
+                                        <p><?php _e('No main image available', 'asosiasi'); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Additional Images Preview -->
+                            <?php if (!empty($member_images['optional'])): ?>
+                                <div class="additional-images">
+                                    <h3><?php _e('Additional Images', 'asosiasi'); ?></h3>
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                                        <?php foreach ($member_images['optional'] as $order => $image): ?>
+                                            <div style="aspect-ratio: 4/3; overflow: hidden;">
+                                                <img src="<?php echo esc_url($image['url']); ?>" 
+                                                     alt="<?php printf(esc_attr__('Additional image %d', 'asosiasi'), $order); ?>"
+                                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="wrap">
+        <?php 
+        $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-perusahaan.php';
+        if (file_exists($skp_template)) {
+            include $skp_template;
+        }
+        ?>
+        <hr />
+        <?php 
+        $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-tenaga-ahli.php';
+        if (file_exists($skp_template)) {
+            include $skp_template;
+        }
+        ?>
+    </div>
     <?php
-    // Include Modal template
-    require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
 } else {
     ?>
     <div class="wrap">

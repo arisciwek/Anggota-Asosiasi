@@ -3,7 +3,14 @@
  * Kelas untuk menangani fungsionalitas admin
  *
  * @package Asosiasi
- * @version 2.0.0
+ * @version 2.1.0
+ * Path: includes/class-asosiasi-admin.php
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-03-14
+ * - Added edit photos page registration
+ * - Added hidden submenu for editing member photos
+ * 2.0.0 - Initial version
  */
 
 class Asosiasi_Admin {
@@ -69,6 +76,16 @@ class Asosiasi_Admin {
             array($this, 'display_view_member_page')
         );
 
+        // Submenu Edit Photos (hidden) - New
+        add_submenu_page(
+            null,
+            __('Edit Member Photos', 'asosiasi'),
+            __('Edit Member Photos', 'asosiasi'),
+            'manage_options',
+            'asosiasi-edit-photos',
+            array($this, 'display_edit_photos_page')
+        );
+
         // Submenu Pengaturan
         add_submenu_page(
             'asosiasi',
@@ -103,6 +120,14 @@ class Asosiasi_Admin {
         }
         
         require_once ASOSIASI_DIR . 'admin/views/admin-view-member-page.php';
+    }
+
+    public function display_edit_photos_page() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'asosiasi'));
+        }
+        
+        require_once ASOSIASI_DIR . 'admin/views/admin-edit-member-images.php';
     }
 
     public function display_settings_page() {
