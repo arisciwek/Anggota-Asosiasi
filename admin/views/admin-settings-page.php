@@ -3,9 +3,13 @@
  * Tampilan halaman pengaturan utama
  * 
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.1.1
  * 
  * Changelog:
+ * 2.1.1 - 2024-03-13
+ * - Added roles management tab
+ * - Updated tab paths configuration
+ * 
  * 2.1.0 - 2024-03-13
  * - Restructured settings into modular tab system
  * - Separated services management into its own file
@@ -23,13 +27,15 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'genera
 // Define tabs - tambahkan tab baru di sini
 $tabs = array(
     'general' => __('Pengaturan Umum', 'asosiasi'),
-    'services' => __('Kelola Layanan', 'asosiasi')
+    'services' => __('Kelola Layanan', 'asosiasi'),
+    'roles' => __('Pengaturan Role', 'asosiasi')
 );
 
 // Define file paths for tab content
 $tab_paths = array(
     'general' => '', // General settings rendered below
-    'services' => ASOSIASI_DIR . 'admin/views/tabs/tab-services.php'
+    'services' => ASOSIASI_DIR . 'admin/views/tabs/tab-services.php',
+    'roles' => ASOSIASI_DIR . 'admin/views/tabs/tab-roles.php'
 );
 ?>
 
