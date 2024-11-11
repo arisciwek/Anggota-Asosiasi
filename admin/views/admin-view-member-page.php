@@ -63,16 +63,16 @@ if ($member) {
                     <!-- Company Information Card -->
                     <div class="card" style="max-width: 800px; margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd;">
-                            <?php _e('Company Information', 'asosiasi'); ?>
+                            <?php _e('Informasi Perusahaan', 'asosiasi'); ?>
                         </h2>
                         <div class="inside" style="padding: 20px;">
                             <table class="form-table" style="margin: 0;">
                                 <tr>
-                                    <th scope="row" style="padding: 10px 0;"><?php _e('Company Name', 'asosiasi'); ?></th>
+                                    <th scope="row" style="padding: 10px 0;"><?php _e('Nama Perusahaan', 'asosiasi'); ?></th>
                                     <td style="padding: 10px 0;"><?php echo esc_html($member['company_name']); ?></td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" style="padding: 10px 0;"><?php _e('Contact Person', 'asosiasi'); ?></th>
+                                    <th scope="row" style="padding: 10px 0;"><?php _e('Nama Kontak', 'asosiasi'); ?></th>
                                     <td style="padding: 10px 0;"><?php echo esc_html($member['contact_person']); ?></td>
                                 </tr>
                                 <tr>
@@ -84,7 +84,7 @@ if ($member) {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" style="padding: 10px 0;"><?php _e('Phone', 'asosiasi'); ?></th>
+                                    <th scope="row" style="padding: 10px 0;"><?php _e('No. Telpon', 'asosiasi'); ?></th>
                                     <td style="padding: 10px 0;">
                                         <?php if (!empty($member['phone'])): ?>
                                             <a href="tel:<?php echo esc_attr($member['phone']); ?>" style="color: #0073aa; text-decoration: none;">
@@ -126,7 +126,7 @@ if ($member) {
                     <!-- Actions Card -->
                     <div class="card" style="max-width: 800px; margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd;">
-                            <?php _e('Actions', 'asosiasi'); ?>
+                            <?php _e('Aksi', 'asosiasi'); ?>
                         </h2>
                         <div class="inside" style="padding: 20px;">
                             <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-add-member&action=edit&id=' . $member_id)); ?>" 
