@@ -159,7 +159,7 @@ if ($member) {
                 <div style="flex: 0 0 55%;">
                     <div class="card" style="margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                            <?php _e('Member Images', 'asosiasi'); ?>
+                            <?php _e('Foto Anggota', 'asosiasi'); ?>
                             <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-edit-photos&id=' . $member_id)); ?>" 
                                class="button">
                                 <?php _e('Edit Photos', 'asosiasi'); ?>
@@ -168,7 +168,7 @@ if ($member) {
                         <div class="inside" style="padding: 20px;">
                             <!-- Main Image Preview -->
                             <div class="main-image-preview" style="margin-bottom: 30px;">
-                                <h3><?php _e('Main Image', 'asosiasi'); ?></h3>
+                                <h3><?php _e('Foto Utama', 'asosiasi'); ?></h3>
                                 <?php if (isset($member_images['mandatory'])): ?>
                                     <img src="<?php echo esc_url($member_images['mandatory']['url']); ?>" 
                                          alt="<?php echo esc_attr($member['company_name']); ?>"
@@ -183,7 +183,7 @@ if ($member) {
                             <!-- Additional Images Preview -->
                             <?php if (!empty($member_images['optional'])): ?>
                                 <div class="additional-images">
-                                    <h3><?php _e('Additional Images', 'asosiasi'); ?></h3>
+                                    <h3><?php _e('Foto Tambahan', 'asosiasi'); ?></h3>
                                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
                                         <?php foreach ($member_images['optional'] as $order => $image): ?>
                                             <div style="aspect-ratio: 4/3; overflow: hidden;">
