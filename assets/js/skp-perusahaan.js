@@ -135,13 +135,15 @@
     function initFormHandlers() {
         $('#skp-form').on('submit', function(e) {
             e.preventDefault();
+
             
             const formData = new FormData(this);
             const isEdit = formData.get('id') ? true : false;
-            
+           
             formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
             formData.append('nonce', $('#skp_nonce').val());
 
+ 
             const submitBtn = $(this).find('button[type="submit"]');
             submitBtn.prop('disabled', true).text(isEdit ? 'Menyimpan...' : 'Menambahkan...');
             
@@ -177,6 +179,8 @@
             const skpId = $(this).data('id');
             loadSKPData(skpId);
         });
+
+        // ... rest of the code
     }
 
     // Load SKP data for editing

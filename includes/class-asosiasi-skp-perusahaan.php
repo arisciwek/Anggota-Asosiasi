@@ -175,7 +175,7 @@ class Asosiasi_SKP_Perusahaan {
         $update_format = array('%s', '%d', '%s', '%s', '%s');
 
         // Handle file upload if new file is provided
-        if ($file) {
+        if ($file && !empty($file['tmp_name'])) {
             if (!$this->validate_file($file)) {
                 return new WP_Error('invalid_file', __('Invalid file type. Only PDF files are allowed.', 'asosiasi'));
             }
@@ -209,7 +209,7 @@ class Asosiasi_SKP_Perusahaan {
             return new WP_Error('db_update_error', __('Failed to update SKP data.', 'asosiasi'));
         }
 
-        // Delete old file if new file was uploaded
+        // Delete old file if new file was uploaded successfully
         if (isset($old_file)) {
             @unlink($this->get_file_path($old_file));
         }
