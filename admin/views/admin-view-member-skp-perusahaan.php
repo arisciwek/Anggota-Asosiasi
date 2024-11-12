@@ -3,13 +3,15 @@
  * Template for SKP Perusahaan section in member view
  *
  * @package Asosiasi
- * @version 1.2.2
+ * @version 1.2.3
  * Path: admin/views/admin-view-member-skp-perusahaan.php
  * 
  * Changelog:
- * 1.2.2 - 2024-03-14
- * - Added modal template include
- * - Fixed modal form loading issue
+ * 1.2.3 - 2024-03-16
+ * - Added service short name column to display associated service
+ * - Reordered columns to place service after SKP number
+ * - Updated table header structure while maintaining existing functionality
+ * 1.2.2 - Added modal template include
  * 1.2.1 - Added PDF column with proper icon handling
  * 1.2.0 - Initial responsive table implementation
  */
@@ -45,6 +47,7 @@ if ($member) {
                             <tr>
                                 <th scope="col" class="skp-column-number"><?php _e('No', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-nomor"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
+                                <th scope="col" class="skp-column-service"><?php _e('Layanan', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-pj"><?php _e('Penanggung Jawab', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
                                 <th scope="col" class="skp-column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
@@ -55,7 +58,7 @@ if ($member) {
                         </thead>
                         <tbody id="company-skp-list">
                             <tr>
-                                <td colspan="8" class="skp-loading">
+                                <td colspan="9" class="skp-loading">
                                     <span class="spinner is-active"></span>
                                     <?php _e('Loading SKP data...', 'asosiasi'); ?>
                                 </td>
