@@ -3,12 +3,15 @@
  * Template for SKP Perusahaan section in member view
  *
  * @package Asosiasi
- * @version 1.2.1
+ * @version 1.2.2
  * Path: admin/views/admin-view-member-skp-perusahaan.php
  * 
  * Changelog:
- * 1.2.0 - Added PDF column with proper icon handling
- * 1.1.0 - Initial responsive table implementation
+ * 1.2.2 - 2024-03-14
+ * - Added modal template include
+ * - Fixed modal form loading issue
+ * 1.2.1 - Added PDF column with proper icon handling
+ * 1.2.0 - Initial responsive table implementation
  */
 
 if (!defined('ABSPATH')) {
@@ -63,11 +66,11 @@ if ($member) {
             </fieldset>
         </div>
     </div>
+
+    <?php 
+    // Include modal template
+    require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
+    ?>
     <?php
 }
-
-// Modifikasi JavaScript untuk render PDF icon dan handling
 ?>
-<script>
-// Script moved to skp-perusahaan.js
-</script>

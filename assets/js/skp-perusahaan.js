@@ -229,7 +229,6 @@
                 'borderColor': ''
             });
         },
-
         submitForm() {
             const formData = new FormData(this.$form[0]);
             const isEdit = !!formData.get('id');
@@ -325,7 +324,7 @@
             $field.after(`<span class="error-message" style="color: #dc3232; display: block; margin-top: 5px;">${message}</span>`);
             $field.css('border-color', '#dc3232');
         },
-        
+
         loadSKPList() {
             this.setLoading(true);
 
@@ -352,20 +351,6 @@
                 this.setLoading(false);
             });
         },
-
-        setLoading(isLoading) {
-            if (isLoading) {
-                this.$companyList.html(`
-                    <tr>
-                        <td colspan="8" class="skp-loading">
-                            <span class="spinner is-active"></span>
-                            ${asosiasiSKPPerusahaan.strings.loading}
-                        </td>
-                    </tr>
-                `);
-            }
-        },
-
         renderSKPList(list) {
             console.log('Rendering SKP list:', list);
             
@@ -427,6 +412,19 @@
                     </td>
                 </tr>
             `);
+        },
+
+        setLoading(isLoading) {
+            if (isLoading) {
+                this.$companyList.html(`
+                    <tr>
+                        <td colspan="8" class="skp-loading">
+                            <span class="spinner is-active"></span>
+                            ${asosiasiSKPPerusahaan.strings.loading}
+                        </td>
+                    </tr>
+                `);
+            }
         },
 
         setSubmitting(isSubmitting) {
