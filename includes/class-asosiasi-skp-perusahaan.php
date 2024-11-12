@@ -3,10 +3,13 @@
  * Kelas untuk menangani operasi CRUD SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.1.0
+ * @version 1.2.0
  * Path: includes/class-asosiasi-skp-perusahaan.php
  * 
  * Changelog:
+ * 1.2.0 - 2024-03-15
+ * - Added service_id handling in add_skp and update_skp methods
+ * - Updated get_skp and get_member_skp to include service info
  * 1.1.0 - Added secure file handling methods
  * 1.0.0 - Initial version
  */
@@ -95,6 +98,7 @@ class Asosiasi_SKP_Perusahaan {
             $this->table_name,
             array(
                 'member_id' => $data['member_id'],
+                'service_id' => $data['service_id'],
                 'nomor_skp' => $data['nomor_skp'],
                 'penanggung_jawab' => $data['penanggung_jawab'],
                 'tanggal_terbit' => $data['tanggal_terbit'],
@@ -102,7 +106,7 @@ class Asosiasi_SKP_Perusahaan {
                 'file_path' => $file_path,
                 'status' => 'active'
             ),
-            array('%d', '%s', '%s', '%s', '%s', '%s', '%s')
+            array('%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s')
         );
 
         if ($result === false) {
@@ -119,10 +123,15 @@ class Asosiasi_SKP_Perusahaan {
      */
     public function get_member_skp($member_id) {
         global $wpdb;
+        $services_table = $wpdb->prefix . 'asosiasi_services';
         
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE member_id = %d ORDER BY created_at DESC",
+                "SELECT s.*, srv.short_name as service_short_name, srv.full_name as service_full_name 
+                FROM {$this->table_name} s 
+                LEFT JOIN {$services_table} srv ON s.service_id = srv.id 
+                WHERE s.member_id = %d 
+                ORDER BY s.created_at DESC",
                 $member_id
             ),
             ARRAY_A
@@ -134,9 +143,14 @@ class Asosiasi_SKP_Perusahaan {
      */
     public function get_skp($id) {
         global $wpdb;
+        $services_table = $wpdb->prefix . 'asosiasi_services';
+        
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE id = %d",
+                "SELECT s.*, srv.short_name as service_short_name, srv.full_name as service_full_name 
+                FROM {$this->table_name} s 
+                LEFT JOIN {$services_table} srv ON s.service_id = srv.id 
+                WHERE s.id = %d",
                 $id
             ),
             ARRAY_A
@@ -153,11 +167,12 @@ class Asosiasi_SKP_Perusahaan {
         $data = $this->sanitize_skp_data($data);
         $update_data = array(
             'nomor_skp' => $data['nomor_skp'],
+            'service_id' => $data['service_id'],
             'penanggung_jawab' => $data['penanggung_jawab'],
             'tanggal_terbit' => $data['tanggal_terbit'],
             'masa_berlaku' => $data['masa_berlaku']
         );
-        $update_format = array('%s', '%s', '%s', '%s');
+        $update_format = array('%s', '%d', '%s', '%s', '%s');
 
         // Handle file upload if new file is provided
         if ($file) {
@@ -259,35 +274,11 @@ class Asosiasi_SKP_Perusahaan {
     private function sanitize_skp_data($data) {
         return array(
             'member_id' => absint($data['member_id']),
+            'service_id' => absint($data['service_id']),
             'nomor_skp' => sanitize_text_field($data['nomor_skp']),
             'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
             'tanggal_terbit' => sanitize_text_field($data['tanggal_terbit']),
             'masa_berlaku' => sanitize_text_field($data['masa_berlaku'])
         );
-    }
-
-    /**
-     * Clean up expired SKPs
-     */
-    public function cleanup_expired_skp() {
-        global $wpdb;
-        
-        $expired_skps = $wpdb->get_results(
-            "SELECT * FROM {$this->table_name} WHERE masa_berlaku < CURDATE() AND status = 'active'",
-            ARRAY_A
-        );
-
-        foreach ($expired_skps as $skp) {
-            $wpdb->update(
-                $this->table_name,
-                array(
-                    'status' => 'expired',
-                    'status_changed_at' => current_time('mysql')
-                ),
-                array('id' => $skp['id']),
-                array('%s', '%s'),
-                array('%d')
-            );
-        }
     }
 }

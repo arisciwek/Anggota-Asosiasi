@@ -3,8 +3,13 @@
  * Modal template for SKP Perusahaan
  * 
  * @package Asosiasi
- * @version 1.1.0
+ * @version 1.2.0
  * Path: admin/views/admin-view-member-modal-skp-perusahaan.php
+ * 
+ * Changelog:
+ * 1.2.0 - 2024-03-15
+ * - Added service selection dropdown field with member's services
+ * 1.1.0 - Initial version
  */
 
 if (!defined('ABSPATH')) {
@@ -12,6 +17,10 @@ if (!defined('ABSPATH')) {
 }
 
 $member_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Get member's services for dropdown
+$services = new Asosiasi_Services();
+$member_services = $services->get_member_services($member_id);
 ?>
 
 <div id="skp-modal" class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display:none;">
@@ -29,9 +38,37 @@ $member_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             <!-- Hidden Fields -->
             <input type="hidden" id="member_id" name="member_id" value="<?php echo esc_attr($member_id); ?>">
             <input type="hidden" id="skp_id" name="id" value="">
-            <input type="hidden" id="skp_type" name="skp_type" value="">
 
             <div class="skp-form-body">
+                <!-- Service Selection -->
+                <div class="skp-form-row">
+                    <label for="service_id" class="skp-form-label">
+                        <?php _e('Layanan', 'asosiasi'); ?>
+                        <span class="required">*</span>
+                    </label>
+                    <div class="skp-form-field">
+                        <select id="service_id" name="service_id" class="regular-text" required>
+                            <option value=""><?php _e('Pilih Layanan', 'asosiasi'); ?></option>
+                            <?php 
+                            if ($member_services) {
+                                foreach ($member_services as $service_id) {
+                                    $service = $services->get_service($service_id);
+                                    if ($service) {
+                                        printf(
+                                            '<option value="%d">%s - %s</option>',
+                                            esc_attr($service['id']),
+                                            esc_html($service['short_name']),
+                                            esc_html($service['full_name'])
+                                        );
+                                    }
+                                }
+                            }
+                            ?>
+                        </select>
+                        <p class="description"><?php _e('Pilih layanan untuk SKP ini', 'asosiasi'); ?></p>
+                    </div>
+                </div>
+
                 <!-- Nomor SKP -->
                 <div class="skp-form-row">
                     <label for="nomor_skp" class="skp-form-label">

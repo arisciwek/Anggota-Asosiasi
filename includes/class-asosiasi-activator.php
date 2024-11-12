@@ -1,12 +1,16 @@
 <?php
+
 /**
  * Fired during plugin activation
  *
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.2.0
  * Path: includes/class-asosiasi-activator.php
  * 
  * Changelog:
+ * 2.2.0 - 2024-03-15
+ * - Added service_id column to SKP Perusahaan table
+ * - Added foreign key constraint for service_id
  * 2.1.0 - 2024-03-13
  * - Added member_images table
  * - Added images upload directory creation
@@ -17,6 +21,35 @@
 class Asosiasi_Activator {
 
     public static function activate() {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+        $current_db_version = get_option('asosiasi_db_version', '0');
+
+        // Create tables
+        self::create_initial_tables($charset_collate);
+
+        // Run migrations if needed
+        if (version_compare($current_db_version, '2.2.0', '<')) {
+            self::migrate_add_service_id();
+            update_option('asosiasi_db_version', '2.2.0');
+        }
+
+        // Other activations
+        add_option('asosiasi_version', ASOSIASI_VERSION);
+        add_option('asosiasi_organization_name', '');
+        add_option('asosiasi_contact_email', '');
+
+        if (class_exists('Asosiasi_SKP_Cron')) {
+            Asosiasi_SKP_Cron::schedule_events();
+        }
+
+        flush_rewrite_rules();
+    }
+
+    private static function create_initial_tables($charset_collate) {
+        global $wpdb;
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
 
@@ -57,11 +90,12 @@ class Asosiasi_Activator {
             FOREIGN KEY (service_id) REFERENCES $table_services(id) ON DELETE CASCADE
         ) $charset_collate;";
 
-        // Tabel SKP Perusahaan 
+        // Tabel SKP Perusahaan updated
         $table_skp_perusahaan = $wpdb->prefix . 'asosiasi_skp_perusahaan';
         $sql_skp_perusahaan = "CREATE TABLE IF NOT EXISTS $table_skp_perusahaan (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             member_id mediumint(9) NOT NULL,
+            service_id mediumint(9) NOT NULL,         /* New column */
             nomor_skp varchar(100) NOT NULL,
             penanggung_jawab varchar(255) NOT NULL,
             tanggal_terbit date NOT NULL,
@@ -73,8 +107,10 @@ class Asosiasi_Activator {
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY member_id (member_id),
+            KEY service_id (service_id),              /* New index */
             KEY status (status),
-            FOREIGN KEY (member_id) REFERENCES $table_members(id) ON DELETE CASCADE
+            FOREIGN KEY (member_id) REFERENCES $table_members(id) ON DELETE CASCADE,
+            FOREIGN KEY (service_id) REFERENCES $table_services(id) ON DELETE CASCADE  /* New foreign key */
         ) $charset_collate;";
 
         // Tabel Member Images (New)
@@ -145,5 +181,49 @@ class Asosiasi_Activator {
 
         // Flush rewrite rules
         flush_rewrite_rules();
+    
     }
+
+    private static function migrate_add_service_id() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'asosiasi_skp_perusahaan';
+        
+        // Check if column exists
+        $column = $wpdb->get_results($wpdb->prepare(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'service_id'",
+            DB_NAME,
+            $table_name
+        ));
+
+        if (empty($column)) {
+            // First add column without constraints
+            $wpdb->query("ALTER TABLE {$table_name} 
+                         ADD COLUMN service_id mediumint(9) NULL AFTER member_id");
+
+            // Get default service
+            $default_service = $wpdb->get_var(
+                "SELECT id FROM {$wpdb->prefix}asosiasi_services ORDER BY id LIMIT 1"
+            );
+
+            if ($default_service) {
+                // Update existing records
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$table_name} SET service_id = %d WHERE service_id IS NULL",
+                    $default_service
+                ));
+            }
+
+            // Now add constraints
+            $wpdb->query("ALTER TABLE {$table_name}
+                         MODIFY COLUMN service_id mediumint(9) NOT NULL,
+                         ADD KEY service_id (service_id),
+                         ADD CONSTRAINT fk_skp_service 
+                         FOREIGN KEY (service_id) 
+                         REFERENCES {$wpdb->prefix}asosiasi_services(id) 
+                         ON DELETE CASCADE");
+        }
+    }
+
 }
