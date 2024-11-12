@@ -479,3 +479,110 @@ body.modal-open {
 }
 
 
+
+    /* SKP Table Styles */
+    .skp-table-container {
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    .skp-table {
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    .skp-table th {
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .skp-table td {
+        padding: 12px 10px;
+        vertical-align: middle;
+    }
+
+    /* Column widths */
+    .column-number { width: 50px; }
+    .column-service { width: 120px; }
+    .column-pdf { width: 60px; text-align: center; }
+    .column-status { width: 100px; }
+    .column-actions { width: 150px; }
+    .column-date { width: 120px; }
+
+    /* Status styles */
+    .skp-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background-color: #e6ffe6;
+        color: #006600;
+    }
+
+    .status-expired {
+        background-color: #ffe6e6;
+        color: #990000;
+    }
+
+    .status-inactive {
+        background-color: #f2f2f2;
+        color: #666666;
+    }
+
+    /* Loading state */
+    .skp-loading td {
+        padding: 30px !important;
+        text-align: center;
+    }
+
+    .skp-loading .spinner {
+        float: none;
+        margin: 0 10px 0 0;
+    }
+
+    .loading-text {
+        color: #666;
+    }
+
+    /* Action buttons */
+    .button-group {
+        display: flex;
+        gap: 5px;
+    }
+
+    .button-group .button {
+        padding: 4px 8px;
+        height: auto;
+        line-height: 1.5;
+    }
+
+    /* PDF icon */
+    .dashicons-pdf {
+        color: #cc0000;
+        text-decoration: none;
+        font-size: 24px;
+    }
+
+    .dashicons-pdf:hover {
+        color: #990000;
+    }
+
+    /* Add button */
+    .add-skp-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .add-skp-btn .dashicons {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        margin-top: 2px;
+    }

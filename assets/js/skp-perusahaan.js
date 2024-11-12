@@ -1,19 +1,20 @@
 /**
- * SKP Perusahaan management script
- * Version: 1.2.0
- * Path: assets/js/skp-perusahaan-3.js
+ * SKP Perusahaan handling
+ * 
+ * @package Asosiasi
+ * @version 1.3.0
+ * Path: assets/js/skp-perusahaan.js
  * 
  * Changelog:
- * 1.2.0 - 2024-03-15
- * - Added service column display
- * - Updated renderSKPList to show service_short_name
- * 1.1.0 - Initial responsive table implementation
+ * 1.3.0 - 2024-03-17
+ * - Fixed loadSKPData function for edit modal
+ * - Updated table rendering to match PHP template
+ * - Added proper error handling & messaging
+ * - Fixed modal handling
  */
 
 (function($) {
     'use strict';
-
-    let memberTable = null;
 
     // Initialize SKP Perusahaan functionality
     function initSKPPerusahaan() {
@@ -25,21 +26,24 @@
 
     // Load SKP list
     function loadSKPList() {
+        const nonce = $('#skp_nonce').val();
         $.ajax({
             url: asosiasiAdmin.ajaxurl,
             type: 'GET',
             data: {
                 action: 'get_skp_perusahaan_list',
                 member_id: $('#member_id').val(),
-                nonce: asosiasiAdmin.skpNonce
+                nonce: nonce
             },
             success: function(response) {
                 if (response.success) {
                     renderSKPList(response.data.skp_list);
+                } else {
+                    showNotice('error', response.data.message || 'Gagal memuat data SKP');
                 }
             },
             error: function() {
-                showNotice('error', 'Failed to load SKP list.');
+                showNotice('error', 'Gagal memuat data SKP');
             }
         });
     }
@@ -49,11 +53,11 @@
         const tbody = $('#company-skp-list');
         tbody.empty();
 
-        if (skpList.length === 0) {
+        if (!skpList || skpList.length === 0) {
             tbody.append(`
                 <tr>
-                    <td colspan="8" class="text-center">
-                        ${asosiasiAdmin.strings.noSKP || 'No SKP found.'}
+                    <td colspan="9" class="text-center">
+                        ${asosiasiAdmin.strings.noSKP || 'Belum ada SKP yang terdaftar'}
                     </td>
                 </tr>
             `);
@@ -64,26 +68,31 @@
             tbody.append(`
                 <tr>
                     <td>${index + 1}</td>
-                    <td>${escapeHtml(skp.service_short_name || '')}</td>
                     <td>${escapeHtml(skp.nomor_skp)}</td>
+                    <td>${escapeHtml(skp.service_short_name)}</td>
                     <td>${escapeHtml(skp.penanggung_jawab)}</td>
-                    <td>${skp.tanggal_terbit_formatted}</td>
-                    <td>${skp.masa_berlaku_formatted}</td>
-                    <td><span class="skp-status status-${skp.status}">${escapeHtml(skp.status)}</span></td>
+                    <td>${escapeHtml(skp.tanggal_terbit)}</td>
+                    <td>${escapeHtml(skp.masa_berlaku)}</td>
+                    <td><span class="skp-status status-${skp.status}">${escapeHtml(skp.status_label)}</span></td>
+                    <td>
+                        <a href="${skp.file_url}" 
+                           class="dashicons dashicons-pdf" 
+                           target="_blank"
+                           title="${asosiasiAdmin.strings.view || 'Lihat PDF'}">
+                        </a>
+                    </td>
                     <td>
                         <div class="button-group">
-                            <button type="button" class="button edit-skp" 
-                                    data-id="${skp.id}">
-                                ${asosiasiAdmin.strings.edit || 'Edit'}
-                            </button>
-                            <button type="button" class="button delete-skp" 
-                                    data-id="${skp.id}">
-                                ${asosiasiAdmin.strings.delete || 'Delete'}
-                            </button>
-                            <a href="${skp.file_url}" class="button" 
-                               target="_blank">
-                                ${asosiasiAdmin.strings.view || 'View'}
-                            </a>
+                            ${skp.can_edit ? `
+                                <button type="button" class="button edit-skp" 
+                                        data-id="${skp.id}">
+                                    ${asosiasiAdmin.strings.edit || 'Edit'}
+                                </button>
+                                <button type="button" class="button delete-skp" 
+                                        data-id="${skp.id}">
+                                    ${asosiasiAdmin.strings.delete || 'Hapus'}
+                                </button>
+                            ` : ''}
                         </div>
                     </td>
                 </tr>
@@ -94,20 +103,31 @@
     // Initialize modal
     function initModal() {
         // Add SKP button handler
-        $('.add-skp-btn').on('click', function() {
+        $('.add-skp-btn').on('click', function(e) {
+            e.preventDefault();
             resetForm();
-            $('#modal-title').text(asosiasiAdmin.strings.addSKP || 'Add SKP');
+            $('#modal-title').text(asosiasiAdmin.strings.addSKP || 'Tambah SKP');
+            $('#pdf_file').prop('required', true);
+            $('#pdf-required').show();
             $('#skp-modal').show();
         });
 
         // Close modal handler
-        $('.close, .modal-cancel').on('click', closeModal);
+        $('.skp-modal-close, .skp-modal-cancel').on('click', function(e) {
+            e.preventDefault();
+            closeModal();
+        });
 
         // Close modal when clicking outside
         $(window).on('click', function(event) {
             if ($(event.target).is('#skp-modal')) {
                 closeModal();
             }
+        });
+
+        // Prevent modal close when clicking inside modal
+        $('.skp-modal-content').on('click', function(e) {
+            e.stopPropagation();
         });
     }
 
@@ -120,8 +140,11 @@
             const isEdit = formData.get('id') ? true : false;
             
             formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
-            formData.append('nonce', asosiasiAdmin.skpNonce);
+            formData.append('nonce', $('#skp_nonce').val());
 
+            const submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true).text(isEdit ? 'Menyimpan...' : 'Menambahkan...');
+            
             $.ajax({
                 url: asosiasiAdmin.ajaxurl,
                 type: 'POST',
@@ -138,25 +161,21 @@
                     }
                 },
                 error: function() {
-                    showNotice('error', 'Server error occurred.');
+                    showNotice('error', 'Terjadi kesalahan saat menyimpan data');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false)
+                           .text(isEdit ? 'Simpan' : 'Tambah');
                 }
             });
         });
 
         // Edit button handler
-        $('#company-skp-list').on('click', '.edit-skp', function() {
+        $('#company-skp-list').on('click', '.edit-skp', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const skpId = $(this).data('id');
             loadSKPData(skpId);
-        });
-    }
-
-    // Initialize delete handlers
-    function initDeleteHandlers() {
-        $('#company-skp-list').on('click', '.delete-skp', function() {
-            const skpId = $(this).data('id');
-            if (confirm(asosiasiAdmin.strings.confirmDelete || 'Are you sure you want to delete this SKP?')) {
-                deleteSKP(skpId);
-            }
         });
     }
 
@@ -168,37 +187,65 @@
             data: {
                 action: 'get_skp_perusahaan',
                 id: skpId,
-                nonce: asosiasiAdmin.skpNonce
+                nonce: $('#skp_nonce').val()
+            },
+            beforeSend: function() {
+                $('#modal-title').text('Memuat data...');
+                $('#skp-modal').show();
+                $('#skp-form').find('input, select, button').prop('disabled', true);
             },
             success: function(response) {
                 if (response.success) {
-                    const skp = response.data;
-                    $('#skp_id').val(skp.id);
-                    $('#service_id').val(skp.service_id);
-                    $('#nomor_skp').val(skp.nomor_skp);
-                    $('#penanggung_jawab').val(skp.penanggung_jawab);
-                    $('#tanggal_terbit').val(skp.tanggal_terbit);
-                    $('#masa_berlaku').val(skp.masa_berlaku);
-                    
-                    // Make file field optional for edit
+                    fillForm(response.data.skp);
+                    $('#modal-title').text(asosiasiAdmin.strings.editSKP || 'Edit SKP');
                     $('#pdf_file').prop('required', false);
                     $('#pdf-required').hide();
-                    
-                    // Show current file info if exists
-                    if (skp.file_path) {
-                        $('#current-file').html(
-                            `<p>Current file: ${skp.file_path}</p>`
-                        );
-                    }
-
-                    $('#modal-title').text(asosiasiAdmin.strings.editSKP || 'Edit SKP');
-                    $('#skp-modal').show();
                 } else {
                     showNotice('error', response.data.message);
+                    closeModal();
                 }
             },
             error: function() {
-                showNotice('error', 'Server error occurred.');
+                showNotice('error', 'Gagal memuat data SKP');
+                closeModal();
+            },
+            complete: function() {
+                $('#skp-form').find('input, select, button').prop('disabled', false);
+            }
+        });
+    }
+
+    // Fill form with SKP data
+    function fillForm(data) {
+        $('#skp_id').val(data.id);
+        $('#service_id').val(data.service_id);
+        $('#nomor_skp').val(data.nomor_skp);
+        $('#penanggung_jawab').val(data.penanggung_jawab);
+        $('#tanggal_terbit').val(data.tanggal_terbit);
+        $('#masa_berlaku').val(data.masa_berlaku);
+
+        // Show current file info if exists
+        if (data.file_name) {
+            const fileInfo = `
+                <p class="current-file-info">
+                    File saat ini: 
+                    <strong>${data.file_name}</strong>
+                    <a href="${data.file_url}" target="_blank">
+                        <span class="dashicons dashicons-pdf"></span>
+                    </a>
+                </p>
+            `;
+            $('#current-file').html(fileInfo);
+        }
+    }
+
+    // Initialize delete handlers
+    function initDeleteHandlers() {
+        $('#company-skp-list').on('click', '.delete-skp', function(e) {
+            e.preventDefault();
+            const skpId = $(this).data('id');
+            if (confirm(asosiasiAdmin.strings.confirmDelete || 'Yakin ingin menghapus SKP ini?')) {
+                deleteSKP(skpId);
             }
         });
     }
@@ -212,7 +259,7 @@
                 action: 'delete_skp_perusahaan',
                 id: skpId,
                 member_id: $('#member_id').val(),
-                nonce: asosiasiAdmin.skpNonce
+                nonce: $('#skp_nonce').val()
             },
             success: function(response) {
                 if (response.success) {
@@ -223,7 +270,7 @@
                 }
             },
             error: function() {
-                showNotice('error', 'Server error occurred.');
+                showNotice('error', 'Gagal menghapus SKP');
             }
         });
     }
@@ -237,8 +284,6 @@
     function resetForm() {
         $('#skp-form')[0].reset();
         $('#skp_id').val('');
-        $('#pdf_file').prop('required', true);
-        $('#pdf-required').show();
         $('#current-file').empty();
         $('.error-message').remove();
     }
@@ -247,7 +292,9 @@
         const notice = $(`
             <div class="notice notice-${type} is-dismissible">
                 <p>${message}</p>
-                <button type="button" class="notice-dismiss"></button>
+                <button type="button" class="notice-dismiss">
+                    <span class="screen-reader-text">Tutup notifikasi</span>
+                </button>
             </div>
         `);
 
@@ -269,6 +316,7 @@
     }
 
     function escapeHtml(str) {
+        if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;

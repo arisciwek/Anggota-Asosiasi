@@ -3,17 +3,20 @@
  * Template for SKP Perusahaan section in member view
  *
  * @package Asosiasi
- * @version 1.2.3
+ * @version 1.2.4
  * Path: admin/views/admin-view-member-skp-perusahaan.php
  * 
  * Changelog:
- * 1.2.3 - 2024-03-16
- * - Added service short name column to display associated service
- * - Reordered columns to place service after SKP number
- * - Updated table header structure while maintaining existing functionality
+ * 1.2.4 - 2024-03-17
+ * - Fixed table structure to match AJAX response
+ * - Added status column with proper styling
+ * - Improved loading state display
+ * - Updated column structure to match formatted data
+ * 
+ * 1.2.3 - Added service column & reordered columns
  * 1.2.2 - Added modal template include
- * 1.2.1 - Added PDF column with proper icon handling
- * 1.2.0 - Initial responsive table implementation
+ * 1.2.1 - Added PDF column with icon
+ * 1.2.0 - Initial responsive table
  */
 
 if (!defined('ABSPATH')) {
@@ -32,48 +35,63 @@ if ($member) {
                 </legend>
                 
                 <div class="skp-content">
+                    <?php if (!empty($member_services)): ?>
                     <div class="skp-actions">
                         <button type="button" 
                                 class="button add-skp-btn" 
                                 data-type="company" 
                                 data-member-id="<?php echo esc_attr($member_id); ?>">
-                            <?php _e('Add SKP', 'asosiasi'); ?>
+                            <span class="dashicons dashicons-plus-alt"></span>
+                            <?php _e('Tambah SKP', 'asosiasi'); ?>
                         </button>
                     </div>
 
                     <!-- SKP List Table -->
-                    <table class="wp-list-table widefat fixed striped skp-table">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="skp-column-number"><?php _e('No', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-nomor"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-service"><?php _e('Layanan', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-pj"><?php _e('Penanggung Jawab', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-status"><?php _e('Status', 'asosiasi'); ?></th>
-                                <th scope="col" class="skp-column-pdf"><?php _e('PDF', 'asosiasi'); ?></th> 
-                                <th scope="col" class="skp-column-actions"><?php _e('Actions', 'asosiasi'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody id="company-skp-list">
-                            <tr>
-                                <td colspan="9" class="skp-loading">
-                                    <span class="spinner is-active"></span>
-                                    <?php _e('Loading SKP data...', 'asosiasi'); ?>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="skp-table-container">
+                        <table class="wp-list-table widefat fixed striped skp-table">
+                            <thead>
+                                <tr>
+                                    <th class="column-number"><?php _e('No', 'asosiasi'); ?></th>
+                                    <th class="column-nomor"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
+                                    <th class="column-service"><?php _e('Layanan', 'asosiasi'); ?></th>
+                                    <th class="column-pj"><?php _e('Penanggung Jawab', 'asosiasi'); ?></th>
+                                    <th class="column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
+                                    <th class="column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
+                                    <th class="column-status"><?php _e('Status', 'asosiasi'); ?></th>
+                                    <th class="column-pdf"><?php _e('File', 'asosiasi'); ?></th>
+                                    <th class="column-actions"><?php _e('Aksi', 'asosiasi'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="company-skp-list">
+                                <tr class="skp-loading">
+                                    <td colspan="9" class="text-center">
+                                        <span class="spinner is-active"></span>
+                                        <span class="loading-text">
+                                            <?php _e('Memuat data SKP...', 'asosiasi'); ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                    <div class="notice notice-warning inline">
+                        <p>
+                            <?php _e('Anggota belum memiliki layanan yang terdaftar. Tambahkan layanan terlebih dahulu sebelum menambah SKP.', 'asosiasi'); ?>
+                        </p>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </fieldset>
         </div>
-    </div>
 
-    <?php 
-    // Include modal template
-    require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
-    ?>
+        <?php 
+        // Include modal template if member has services
+        if (!empty($member_services)) {
+            require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
+        }
+        ?>
+    </div>
     <?php
 }
 ?>
