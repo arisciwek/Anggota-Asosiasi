@@ -3,14 +3,17 @@
  * Tampilan tab pengaturan role dan permission
  * 
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.2.1
+ * Path: admin/views/tab-roles.php
  * 
  * Changelog:
+ * 2.2.1 - 2024-11-16
+ * - Updated capability labels for consistency
+ * - Fixed manage_skp_status label
+ * 2.2.0 - 2024-11-16
+ * - Added manage_skp_status capability
  * 2.1.0 - 2024-03-13
  * - Initial release
- * - Added role management interface
- * - Added permissions matrix
- * - Added role capability management
  */
 
 if (!defined('ABSPATH')) {
@@ -19,12 +22,13 @@ if (!defined('ABSPATH')) {
 
 // Define default capabilities
 $default_caps = array(
-    'list_members' => __('Lihat Daftar Anggota', 'asosiasi'),
-    'add_members' => __('Tambah Anggota', 'asosiasi'),
-    'edit_members' => __('Edit Semua Anggota', 'asosiasi'),
-    'edit_own_members' => __('Edit Anggota Sendiri', 'asosiasi'),
-    'delete_members' => __('Hapus Anggota', 'asosiasi'),
-    'view_members' => __('Lihat Detail Anggota', 'asosiasi'),
+    'list_members' => __('Lihat Daftar Anggota Asosiasi', 'asosiasi'),
+    'view_members' => __('Lihat Detail Anggota Asosiasi', 'asosiasi'),
+    'add_members' => __('Tambah Anggota Asosiasi', 'asosiasi'),
+    'edit_members' => __('Edit Semua Anggota Asosiasi', 'asosiasi'),
+    'edit_own_members' => __('Edit Anggota Asosiasi Sendiri', 'asosiasi'),
+    'delete_members' => __('Hapus Anggota Asosiasi', 'asosiasi'),
+    'manage_skp_status' => __('Kelola Status SKP Asosiasi', 'asosiasi')
 );
 
 // Get existing role

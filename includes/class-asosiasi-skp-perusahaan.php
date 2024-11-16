@@ -174,6 +174,13 @@ class Asosiasi_SKP_Perusahaan {
         );
         $update_format = array('%s', '%d', '%s', '%s', '%s');
 
+        // Add status if present and user has capability
+        if (isset($data['status']) && 
+            (current_user_can('manage_options') || current_user_can('manage_skp_status'))) {
+            $update_data['status'] = $data['status'];
+            $update_format[] = '%s';
+        }
+
         // Handle file upload if new file is provided
         if ($file && !empty($file['tmp_name'])) {
             if (!$this->validate_file($file)) {
@@ -272,7 +279,7 @@ class Asosiasi_SKP_Perusahaan {
      * Sanitize SKP data
      */
     private function sanitize_skp_data($data) {
-        return array(
+        $sanitized = array(
             'member_id' => absint($data['member_id']),
             'service_id' => absint($data['service_id']),
             'nomor_skp' => sanitize_text_field($data['nomor_skp']),
@@ -280,5 +287,16 @@ class Asosiasi_SKP_Perusahaan {
             'tanggal_terbit' => sanitize_text_field($data['tanggal_terbit']),
             'masa_berlaku' => sanitize_text_field($data['masa_berlaku'])
         );
+
+        // Add status if present and user has capability
+        if (isset($data['status']) && 
+            (current_user_can('manage_options') || current_user_can('manage_skp_status'))) {
+            // Validate status value
+            $valid_statuses = array('active', 'activated', 'inactive');
+            $status = sanitize_text_field($data['status']);
+            $sanitized['status'] = in_array($status, $valid_statuses) ? $status : 'active';
+        }
+
+        return $sanitized;
     }
 }

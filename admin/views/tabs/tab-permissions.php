@@ -1,18 +1,16 @@
-tab-permissions.php
-
 <?php
 /**
  * Tampilan tab pengaturan hak akses role
  * 
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.2.0
+ * Path: admin/views/tab-permissions.php
  * 
  * Changelog:
+ * 2.2.0 - 2024-11-16
+ * - Added manage_skp_status permission
  * 2.1.0 - 2024-03-13
  * - Initial release of role permissions matrix
- * - Added capability to manage WordPress roles access
- * - Added permission checks and validation
- * - Added save state handling
  */
 
 if (!defined('ABSPATH')) {
@@ -26,7 +24,8 @@ $asosiasi_permissions = array(
     'add_asosiasi_members' => __('Tambah Anggota Asosiasi', 'asosiasi'),
     'edit_asosiasi_members' => __('Edit Semua Anggota Asosiasi', 'asosiasi'),
     'edit_own_asosiasi_members' => __('Edit Anggota Asosiasi Sendiri', 'asosiasi'),
-    'delete_asosiasi_members' => __('Hapus Anggota Asosiasi', 'asosiasi')
+    'delete_asosiasi_members' => __('Hapus Anggota Asosiasi', 'asosiasi'),
+    'manage_skp_status' => __('Kelola Status SKP', 'asosiasi')
 );
 
 // Get all editable roles
@@ -138,4 +137,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         <?php submit_button(__('Simpan Perubahan', 'asosiasi')); ?>
     </form>
-</div>	
+</div>
