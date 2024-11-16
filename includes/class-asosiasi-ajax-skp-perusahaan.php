@@ -3,24 +3,19 @@
 * Handle AJAX operations untuk SKP Perusahaan
 *
 * @package Asosiasi
-* @version 1.4.5
+* @version 1.4.6
 * Path: includes/class-asosiasi-ajax-skp-perusahaan.php
 * 
 * Changelog:
+* 1.4.6 - 2024-11-16
+* - Added status filtering for active/inactive SKP lists
+* - Modified get_skp_perusahaan_list to support tab separation
+* - Updated format_skp_list to handle filtered data
+* - Maintained backwards compatibility
+* 
 * 1.4.5 - 2024-03-17
 * - Added missing format_skp_list() method
 * - Fixed token verification with proper nonce handling
-* 
-* 1.4.4 - 2024-03-16
-* - Fixed nonce verification issues with edit/view operations
-* - Added proper nonce field handling
-* - Updated error messages
-* 
-* 1.4.3 - Fixed nonce verification with proper constant
-* 1.4.2 - Added service info to SKP list response
-* 1.4.1 - Rollback changes that caused list display issues
-* 1.4.0 - Added service handling in AJAX operations
-* 1.3.0 - Initial version
 */
 
 defined('ABSPATH') || exit;
@@ -79,28 +74,44 @@ class Asosiasi_Ajax_Perusahaan {
    /**
     * Get SKP list
     */
-   public function get_skp_perusahaan_list() {
-       try {
-           $this->verify_request();
+    public function get_skp_perusahaan_list() {
+        try {
+            $this->verify_request();
 
-           if (empty($_GET['member_id'])) {
-               throw new Exception(__('ID Anggota wajib diisi', 'asosiasi'));
-           }
+            if (empty($_GET['member_id'])) {
+                throw new Exception(__('ID Anggota wajib diisi', 'asosiasi'));
+            }
 
-           $skp = new Asosiasi_SKP_Perusahaan();
-           $skp_list = $skp->get_member_skp((int)$_GET['member_id']);
+            // Get status filter from request
+            $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'active';
+            
+            $skp = new Asosiasi_SKP_Perusahaan();
+            $skp_list = $skp->get_member_skp((int)$_GET['member_id']);
 
-           wp_send_json_success(array(
-               'skp_list' => $this->format_skp_list($skp_list)
-           ));
+            // Filter berdasarkan status
+            $filtered_list = array_filter($skp_list, function($item) use ($status_filter) {
+                if ($status_filter === 'active') {
+                    return $item['status'] === 'active';
+                } else {
+                    // Untuk tab tidak aktif, tampilkan yang expired dan inactive
+                    return in_array($item['status'], ['expired', 'inactive']);
+                }
+            });
 
-       } catch (Exception $e) {
-           wp_send_json_error(array(
-               'message' => $e->getMessage(),
-               'code' => 'get_list_error'
-           ));
-       }
-   }
+            // Reset array keys after filtering
+            $filtered_list = array_values($filtered_list);
+
+            wp_send_json_success(array(
+                'skp_list' => $this->format_skp_list($filtered_list)
+            ));
+
+        } catch (Exception $e) {
+            wp_send_json_error(array(
+                'message' => $e->getMessage(),
+                'code' => 'get_list_error'
+            ));
+        }
+    }
 
    /**
     * Get single SKP
@@ -342,6 +353,7 @@ class Asosiasi_Ajax_Perusahaan {
    private function get_status_label($status) {
        $labels = array(
            'active' => __('Aktif', 'asosiasi'),
+           'activated' => __('Diaktifkan', 'asosiasi'),
            'expired' => __('Kadaluarsa', 'asosiasi'),
            'inactive' => __('Tidak Aktif', 'asosiasi')
        );

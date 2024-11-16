@@ -6,14 +6,17 @@
  * Path: assets/js/skp-perusahaan.js
  * 
  * Changelog:
- * 1.3.2 - 2024-03-20
- * - Fixed member ID handling in reloadTable method
- * - Improved getMemberId function reliability
- * - Synchronized with member-skp-table-reload.js
+ * 1.3.2 - 2024-11-16
+ * - Added support for active/inactive SKP separation
+ * - Modified loadSKPList to handle tab-specific data
+ * - Updated renderSKPList for tab contexts
+ * - Added status parameter to AJAX calls
  * 
- * 1.3.1 - Added service handling in AJAX operations
- * 1.3.0 - Initial version with SKP management
+ * 1.3.1 - 2024-03-18
+ * - Added global AsosiasiSKP namespace
+ * - Added public reloadTable method for external reload
  */
+
 
 var AsosiasiSKP = AsosiasiSKP || {};
 
@@ -22,22 +25,21 @@ var AsosiasiSKP = AsosiasiSKP || {};
 
     // Initialize SKP Perusahaan functionality
     function initSKPPerusahaan() {
-        var memberId = getMemberId();
-        if (memberId) {
-            loadSKPList(memberId);
-        }
+        loadSKPList('active'); // Load active tab by default
         initModal();
         initFormHandlers();
         initDeleteHandlers();
     }
     
     // Expose public API for table reload
-    AsosiasiSKP.reloadTable = function(memberId) {
+    AsosiasiSKP.reloadTable = function(memberId, status = 'active') {
         if (!memberId) {
-            memberId = getMemberId();
+            memberId = $('#member_id').val();
         }
         if (memberId) {
-            loadSKPList(memberId);
+            loadSKPList(status, memberId);
+        } else {
+            console.warn('Member ID not provided for SKP table reload');
         }
     };
 
@@ -47,13 +49,14 @@ var AsosiasiSKP = AsosiasiSKP || {};
                new URLSearchParams(window.location.search).get('id');
     }
 
-    // Load SKP list
-    function loadSKPList(memberId) {
-        if (!memberId) {
-            return;
-        }
-
+    // Modify loadSKPList to accept status parameter
+    function loadSKPList(status = 'active', memberId = null) {
         const nonce = $('#skp_nonce').val();
+        if (!memberId) {
+            memberId = $('#member_id').val();
+        }
+        
+        console.log('Loading SKP list for member:', memberId, 'status:', status);
         
         $.ajax({
             url: asosiasiAdmin.ajaxurl,
@@ -61,11 +64,12 @@ var AsosiasiSKP = AsosiasiSKP || {};
             data: {
                 action: 'get_skp_perusahaan_list',
                 member_id: memberId,
+                status: status,
                 nonce: nonce
             },
             success: function(response) {
                 if (response.success) {
-                    renderSKPList(response.data.skp_list);
+                    renderSKPList(response.data.skp_list, status);
                 } else {
                     showNotice('error', response.data.message || 'Gagal memuat data SKP');
                 }
@@ -291,15 +295,19 @@ var AsosiasiSKP = AsosiasiSKP || {};
         });
     }
 
-    function renderSKPList(skpList) {
-        const tbody = $('#company-skp-list');
+    // Render SKP list with status context
+    function renderSKPList(skpList, status) {
+        const targetId = status === 'active' ? '#active-skp-list' : '#inactive-skp-list';
+        const tbody = $(targetId);
         tbody.empty();
 
         if (!skpList || skpList.length === 0) {
             tbody.append(`
                 <tr>
                     <td colspan="9" class="text-center">
-                        ${asosiasiAdmin.strings.noSKP || 'Belum ada SKP yang terdaftar'}
+                        ${status === 'active' ? 
+                            (asosiasiAdmin.strings.noActiveSKP || 'Tidak ada SKP aktif') : 
+                            (asosiasiAdmin.strings.noInactiveSKP || 'Tidak ada SKP tidak aktif')}
                     </td>
                 </tr>
             `);

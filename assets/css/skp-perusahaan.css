@@ -2,9 +2,82 @@
  * SKP Perusahaan Styles
  * 
  * @package Asosiasi
- * @version 1.1.0
+ * @version 1.2.0
  * Path: assets/css/skp-perusahaan.css
+ * 
+ * Changelog:
+ * 1.2.0 - 2024-11-16
+ * - Added tab navigation styles
+ * - Added tab content container styles
+ * - Improved table container spacing in tabs
+ * - Maintained existing table and component styles
+ * 
+ * 1.1.0 - Initial responsive table
  */
+
+/* Existing styles remain unchanged ... */
+
+/* Tab Navigation Styles */
+.skp-tabs {
+    margin-top: 20px;
+}
+
+.skp-tabs .nav-tab-wrapper {
+    margin-bottom: 0;
+    border-bottom: 1px solid #c3c4c7;
+    padding-bottom: 0;
+}
+
+.skp-tabs .nav-tab {
+    margin-bottom: -1px;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-bottom: none;
+}
+
+.skp-tabs .nav-tab-active {
+    border-bottom: 1px solid #f0f0f1;
+    background: #f0f0f1;
+    color: #000;
+}
+
+/* Tab Content Styles */
+.skp-tabs .tab-content {
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+.skp-tabs .tab-pane {
+    display: none;
+}
+
+.skp-tabs .tab-pane.active {
+    display: block;
+}
+
+/* Adjust table container in tabs */
+.skp-tabs .skp-table-container {
+    margin-top: 0;
+}
+
+/* Loading state in tabs */
+.skp-tabs .skp-loading {
+    background: #f0f0f1;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .skp-tabs .nav-tab {
+        margin: 0 2px -1px;
+        padding: 6px 10px;
+    }
+    
+    .skp-tabs .tab-content {
+        padding: 15px;
+    }
+}
 
 /* Main Container */
 .skp-container {
