@@ -11,12 +11,12 @@
  * - Modified loadSKPList to handle tab-specific data
  * - Updated renderSKPList for tab contexts
  * - Added status parameter to AJAX calls
+ * - Fixed event handlers for new tab structure
  * 
  * 1.3.1 - 2024-03-18
  * - Added global AsosiasiSKP namespace
  * - Added public reloadTable method for external reload
  */
-
 
 var AsosiasiSKP = AsosiasiSKP || {};
 
@@ -29,6 +29,7 @@ var AsosiasiSKP = AsosiasiSKP || {};
         initModal();
         initFormHandlers();
         initDeleteHandlers();
+        initTabHandlers();
     }
     
     // Expose public API for table reload
@@ -43,20 +44,32 @@ var AsosiasiSKP = AsosiasiSKP || {};
         }
     };
 
-    // Get member ID from hidden input or URL
-    function getMemberId() {
-        return $('#member_id').val() || 
-               new URLSearchParams(window.location.search).get('id');
+    // Initialize tab handlers
+    function initTabHandlers() {
+        $('.nav-tab-wrapper .nav-tab').on('click', function(e) {
+            e.preventDefault();
+            const $this = $(this);
+            const status = $this.data('tab');
+            
+            // Update active tab
+            $('.nav-tab-wrapper .nav-tab').removeClass('nav-tab-active');
+            $this.addClass('nav-tab-active');
+            
+            // Show corresponding content
+            $('.tab-pane').removeClass('active');
+            $(`#skp-${status}`).addClass('active');
+            
+            // Load data for the tab
+            loadSKPList(status);
+        });
     }
-
+    // Add this after getMemberId function
     // Modify loadSKPList to accept status parameter
     function loadSKPList(status = 'active', memberId = null) {
         const nonce = $('#skp_nonce').val();
         if (!memberId) {
-            memberId = $('#member_id').val();
+            memberId = getMemberId();
         }
-        
-        console.log('Loading SKP list for member:', memberId, 'status:', status);
         
         $.ajax({
             url: asosiasiAdmin.ajaxurl,
@@ -80,221 +93,7 @@ var AsosiasiSKP = AsosiasiSKP || {};
         });
     }
 
-    // Initialize modal
-    function initModal() {
-        // Add SKP button handler
-        $('.add-skp-btn').on('click', function(e) {
-            e.preventDefault();
-            resetForm();
-            $('#modal-title').text(asosiasiAdmin.strings.addSKP || 'Tambah SKP');
-            $('#pdf_file').prop('required', true);
-            $('#pdf-required').show();
-            $('#skp-modal').show();
-        });
-
-        // Close modal handler
-        $('.skp-modal-close, .skp-modal-cancel').on('click', function(e) {
-            e.preventDefault();
-            closeModal();
-        });
-
-        // Close modal when clicking outside
-        $(window).on('click', function(event) {
-            if ($(event.target).is('#skp-modal')) {
-                closeModal();
-            }
-        });
-
-        // Prevent modal close when clicking inside modal
-        $('.skp-modal-content').on('click', function(e) {
-            e.stopPropagation();
-        });
-    }
-
-    // Initialize form handlers
-    function initFormHandlers() {
-        $('#skp-form').on('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const isEdit = formData.get('id') ? true : false;
-           
-            formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
-            formData.append('nonce', $('#skp_nonce').val());
-
-            const submitBtn = $(this).find('button[type="submit"]');
-            submitBtn.prop('disabled', true).text(isEdit ? 'Menyimpan...' : 'Menambahkan...');
-            
-            $.ajax({
-                url: asosiasiAdmin.ajaxurl,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        showNotice('success', response.data.message);
-                        loadSKPList(getMemberId());
-                        closeModal();
-                    } else {
-                        showNotice('error', response.data.message);
-                    }
-                },
-                error: function() {
-                    showNotice('error', 'Terjadi kesalahan saat menyimpan data');
-                },
-                complete: function() {
-                    submitBtn.prop('disabled', false)
-                           .text(isEdit ? 'Simpan' : 'Tambah');
-                }
-            });
-        });
-
-        // Edit button handler
-        $('#company-skp-list').on('click', '.edit-skp', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const skpId = $(this).data('id');
-            loadSKPData(skpId);
-        });
-    }
-
-    // Initialize delete handlers
-    function initDeleteHandlers() {
-        $('#company-skp-list').on('click', '.delete-skp', function(e) {
-            e.preventDefault();
-            const skpId = $(this).data('id');
-            if (confirm(asosiasiAdmin.strings.confirmDelete || 'Yakin ingin menghapus SKP ini?')) {
-                deleteSKP(skpId);
-            }
-        });
-    }
-
-    // Load SKP Perusahaan data for editing
-    function loadSKPData(skpId) {
-        $.ajax({
-            url: asosiasiAdmin.ajaxurl,
-            type: 'GET',
-            data: {
-                action: 'get_skp_perusahaan',
-                id: skpId,
-                nonce: $('#skp_nonce').val()
-            },
-            beforeSend: function() {
-                $('#modal-title').text('Memuat data...');
-                $('#skp-modal').show();
-                $('#skp-form').find('input, select, button').prop('disabled', true);
-            },
-            success: function(response) {
-                if (response.success) {
-                    fillForm(response.data.skp);
-                    $('#modal-title').text(asosiasiAdmin.strings.editSKP || 'Edit SKP');
-                    $('#pdf_file').prop('required', false);
-                    $('#pdf-required').hide();
-                } else {
-                    showNotice('error', response.data.message);
-                    closeModal();
-                }
-            },
-            error: function() {
-                showNotice('error', 'Gagal memuat data SKP');
-                closeModal();
-            },
-            complete: function() {
-                $('#skp-form').find('input, select, button').prop('disabled', false);
-            }
-        });
-    }
-
-    // Delete SKP
-    function deleteSKP(skpId) {
-        $.ajax({
-            url: asosiasiAdmin.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'delete_skp_perusahaan',
-                id: skpId,
-                member_id: getMemberId(),
-                nonce: $('#skp_nonce').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    showNotice('success', response.data.message);
-                    loadSKPList(getMemberId());
-                } else {
-                    showNotice('error', response.data.message);
-                }
-            },
-            error: function() {
-                showNotice('error', 'Gagal menghapus SKP');
-            }
-        });
-    }
-
-    // Fill form with SKP data
-    function fillForm(data) {
-        $('#skp_id').val(data.id);
-        $('#service_id').val(data.service_id);
-        $('#nomor_skp').val(data.nomor_skp);
-        $('#penanggung_jawab').val(data.penanggung_jawab);
-        $('#tanggal_terbit').val(data.tanggal_terbit);
-        $('#masa_berlaku').val(data.masa_berlaku);
-
-        // Show current file info if exists
-        if (data.file_name) {
-            const fileInfo = `
-                <p class="current-file-info">
-                    File saat ini: 
-                    <strong>${data.file_name}</strong>
-                    <a href="${data.file_url}" target="_blank">
-                        <span class="dashicons dashicons-pdf"></span>
-                    </a>
-                </p>
-            `;
-            $('#current-file').html(fileInfo);
-        }
-    }
-
-    // Utility functions
-    function closeModal() {
-        $('#skp-modal').hide();
-        resetForm();
-    }
-
-    function resetForm() {
-        $('#skp-form')[0].reset();
-        $('#skp_id').val('');
-        $('#current-file').empty();
-        $('.error-message').remove();
-    }
-
-    function showNotice(type, message) {
-        const notice = $(`
-            <div class="notice notice-${type} is-dismissible">
-                <p>${message}</p>
-                <button type="button" class="notice-dismiss">
-                    <span class="screen-reader-text">Tutup notifikasi</span>
-                </button>
-            </div>
-        `);
-
-        $('.wrap > h1').after(notice);
-
-        // Auto dismiss after 5 seconds
-        setTimeout(function() {
-            notice.fadeOut(300, function() {
-                $(this).remove();
-            });
-        }, 5000);
-
-        // Dismiss button handler
-        notice.find('.notice-dismiss').on('click', function() {
-            notice.fadeOut(300, function() {
-                $(this).remove();
-            });
-        });
-    }
-
+    // Add this after loadSKPList
     // Render SKP list with status context
     function renderSKPList(skpList, status) {
         const targetId = status === 'active' ? '#active-skp-list' : '#inactive-skp-list';
@@ -356,10 +155,213 @@ var AsosiasiSKP = AsosiasiSKP || {};
         div.textContent = str;
         return div.innerHTML;
     }
+    
+    // Add after escapeHtml function
+    function showNotice(type, message) {
+        const notice = $(`
+            <div class="notice notice-${type} is-dismissible">
+                <p>${message}</p>
+                <button type="button" class="notice-dismiss">
+                    <span class="screen-reader-text">Tutup notifikasi</span>
+                </button>
+            </div>
+        `);
+
+        $('.wrap > h1').after(notice);
+
+        // Auto dismiss after 5 seconds
+        setTimeout(function() {
+            notice.fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 5000);
+
+        // Dismiss button handler
+        notice.find('.notice-dismiss').on('click', function() {
+            notice.fadeOut(300, function() {
+                $(this).remove();
+            });
+        });
+    }
+
+    // Get member ID from hidden input or URL
+    function getMemberId() {
+        return $('#member_id').val() || 
+               new URLSearchParams(window.location.search).get('id');
+    }
+
+    // Initialize form handlers
+    function initFormHandlers() {
+        // Move event delegation to container that always exists
+        $('#skp-perusahaan-section').on('click', '.edit-skp', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const skpId = $(this).data('id');
+            loadSKPData(skpId);
+        });
+
+        $('#skp-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const isEdit = formData.get('id') ? true : false;
+           
+            formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
+            formData.append('nonce', $('#skp_nonce').val());
+
+            const submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true).text(isEdit ? 'Menyimpan...' : 'Menambahkan...');
+            
+            $.ajax({
+                url: asosiasiAdmin.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        showNotice('success', response.data.message);
+                        // Reload both tabs after update
+                        loadSKPList('active');
+                        loadSKPList('inactive');
+                        closeModal();
+                    } else {
+                        showNotice('error', response.data.message);
+                    }
+                },
+                error: function() {
+                    showNotice('error', 'Terjadi kesalahan saat menyimpan data');
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false)
+                           .text(isEdit ? 'Simpan' : 'Tambah');
+                }
+            });
+        });
+    }
+
+    // Initialize delete handlers
+    function initDeleteHandlers() {
+        // Update event delegation to container
+        $('#skp-perusahaan-section').on('click', '.delete-skp', function(e) {
+            e.preventDefault();
+            const skpId = $(this).data('id');
+            if (confirm(asosiasiAdmin.strings.confirmDelete || 'Yakin ingin menghapus SKP ini?')) {
+                deleteSKP(skpId);
+            }
+        });
+    }
+
+    // Initialize modal handlers
+    function initModal() {
+        // Add SKP button handler
+        $('.add-skp-btn').on('click', function(e) {
+            e.preventDefault();
+            resetForm();
+            $('#modal-title').text(asosiasiAdmin.strings.addSKP || 'Tambah SKP');
+            $('#pdf_file').prop('required', true);
+            $('#pdf-required').show();
+            $('#skp-modal').show();
+        });
+
+        // Close modal handlers
+        $('.skp-modal-close, .skp-modal-cancel').on('click', function(e) {
+            e.preventDefault();
+            closeModal();
+        });
+
+        $(window).on('click', function(event) {
+            if ($(event.target).is('#skp-modal')) {
+                closeModal();
+            }
+        });
+
+        $('.skp-modal-content').on('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    // Load SKP data for editing
+    function loadSKPData(skpId) {
+        $.ajax({
+            url: asosiasiAdmin.ajaxurl,
+            type: 'GET',
+            data: {
+                action: 'get_skp_perusahaan',
+                id: skpId,
+                nonce: $('#skp_nonce').val()
+            },
+            beforeSend: function() {
+                $('#modal-title').text('Memuat data...');
+                $('#skp-modal').show();
+                $('#skp-form').find('input, select, button').prop('disabled', true);
+            },
+            success: function(response) {
+                if (response.success) {
+                    fillForm(response.data.skp);
+                    $('#modal-title').text(asosiasiAdmin.strings.editSKP || 'Edit SKP');
+                    $('#pdf_file').prop('required', false);
+                    $('#pdf-required').hide();
+                } else {
+                    showNotice('error', response.data.message);
+                    closeModal();
+                }
+            },
+            error: function() {
+                showNotice('error', 'Gagal memuat data SKP');
+                closeModal();
+            },
+            complete: function() {
+                $('#skp-form').find('input, select, button').prop('disabled', false);
+            }
+        });
+    }
+
+    // Fill form with SKP data
+    function fillForm(data) {
+        $('#skp_id').val(data.id);
+        $('#service_id').val(data.service_id);
+        $('#nomor_skp').val(data.nomor_skp);
+        $('#penanggung_jawab').val(data.penanggung_jawab);
+        $('#tanggal_terbit').val(data.tanggal_terbit);
+        $('#masa_berlaku').val(data.masa_berlaku);
+        
+        // Set status if field exists
+        if ($('#status').length) {
+            $('#status').val(data.status);
+        }
+
+        // Show current file info if exists
+        if (data.file_name) {
+            const fileInfo = `
+                <p class="current-file-info">
+                    File saat ini: 
+                    <strong>${data.file_name}</strong>
+                    <a href="${data.file_url}" target="_blank">
+                        <span class="dashicons dashicons-pdf"></span>
+                    </a>
+                </p>
+            `;
+            $('#current-file').html(fileInfo);
+        }
+    }
+
+    // Rest of the utility functions remain unchanged...
+    function closeModal() {
+        $('#skp-modal').hide();
+        resetForm();
+    }
+
+    function resetForm() {
+        $('#skp-form')[0].reset();
+        $('#skp_id').val('');
+        $('#current-file').empty();
+        $('.error-message').remove();
+    }
 
     // Initialize when document is ready
     $(document).ready(function() {
-        if ($('#company-skp-list').length) {
+        if ($('#skp-perusahaan-section').length) {
             initSKPPerusahaan();
         }
     });
