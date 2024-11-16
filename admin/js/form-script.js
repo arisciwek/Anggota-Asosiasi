@@ -2,7 +2,13 @@
  * Script untuk form tambah/edit anggota
  * 
  * @package Asosiasi
- * @version 1.0.0
+ * @version 1.1.0
+ * 
+ * Changelog:
+ * 1.1.0 - 2024-03-19
+ * - Added SKP table reload after successful member save/update
+ * - Added check for AsosiasiSKP namespace existence
+ * 1.0.0 - Initial version
  */
 
 (function($) {
@@ -71,6 +77,29 @@
                 }
                 return false;
             }
+
+            // Jika form valid, handle success callback
+            var $form = $(this);
+            var $submitButton = $form.find('button[type="submit"]');
+            var memberId = $('#member_id').val() || $form.data('member-id');
+            
+            $submitButton.prop('disabled', true);
+
+            // Use timeout to ensure DOM updates are complete
+            setTimeout(function() {
+                // Check if SKP reload function exists and call it
+                if (typeof AsosiasiSKP !== 'undefined' && typeof AsosiasiSKP.reloadTable === 'function' && memberId) {
+                    try {
+                        console.log('Reloading SKP table for member:', memberId);
+                        AsosiasiSKP.reloadTable(memberId); // Pass member ID
+                    } catch (error) {
+                        console.error('Error reloading SKP table:', error);
+                    }
+                }
+
+                // Re-enable submit button
+                $submitButton.prop('disabled', false);
+            }, 500);
         });
     }
 
@@ -147,4 +176,4 @@
         }
     });
 
-})(jQuery);	
+})(jQuery);

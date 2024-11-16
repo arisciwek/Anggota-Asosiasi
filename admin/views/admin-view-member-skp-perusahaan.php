@@ -30,6 +30,7 @@ if ($member) {
         <div class="skp-container">
             <!-- SKP Perusahaan Section -->
             <fieldset class="skp-card skp-section" id="skp-perusahaan-section">
+                <input type="hidden" id="member_id" value="<?php echo esc_attr($member_id); ?>">
                 <legend>
                     <h3><?php _e('SKP Perusahaan', 'asosiasi'); ?></h3>
                 </legend>

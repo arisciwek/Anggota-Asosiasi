@@ -3,19 +3,17 @@
  * Class untuk menangani semua enqueue scripts dan styles
  *
  * @package Asosiasi
- * @version 1.3.0
+ * @version 1.4.2
+ * Path: includes/class-asosiasi-enqueue.php
  * 
  * Changelog:
- * 1.3.0 - 2024-03-12
- * - Fixed SKP Perusahaan assets loading
- * - Improved modal handling
- * - Added proper screen detection
- * - Enhanced string localization
+ * 1.4.2 - 2024-03-20
+ * - Added member SKP table reload script with proper dependencies
+ * - Fixed script loading sequence for SKP functionality
  * 
- * 1.2.0 - 2024-03-11
- * - Added SKP Perusahaan functionality
- * 
- * 1.1.0 - Initial enhancement version
+ * 1.4.1 - Fixed path issues and script loading order
+ * 1.4.0 - Added SKP table reload functionality
+ * 1.3.0 - Added modal and form handling improvements
  */
 
 class Asosiasi_Enqueue {
@@ -138,11 +136,20 @@ class Asosiasi_Enqueue {
         // Dashicons for PDF icon
         wp_enqueue_style('dashicons');
 
-        // Enqueue SKP scripts
+        // Enqueue SKP scripts in correct order
         wp_enqueue_script(
             'asosiasi-skp-perusahaan',
             ASOSIASI_URL . 'assets/js/skp-perusahaan.js',
             array('jquery'),
+            $this->version,
+            true
+        );
+
+        // Enqueue member SKP table reload script
+        wp_enqueue_script(
+            'asosiasi-member-skp-table-reload',
+            ASOSIASI_URL . 'assets/js/member-skp-table-reload.js',
+            array('jquery', 'asosiasi-skp-perusahaan'),
             $this->version,
             true
         );
