@@ -170,7 +170,7 @@ var AsosiasiSKP = AsosiasiSKP || {};
         });
     }
 
-    // Load SKP data for editing
+    // Load SKP Perusahaan data for editing
     function loadSKPData(skpId) {
         $.ajax({
             url: asosiasiAdmin.ajaxurl,

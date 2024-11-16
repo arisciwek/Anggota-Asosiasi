@@ -131,6 +131,25 @@ $member_services = $services->get_member_services($member_id);
                     </div>
                 </div>
 
+                <!-- Status SKP -->
+                <?php if (current_user_can('manage_options') || current_user_can('manage_skp_status')): ?>
+                    <div class="skp-form-row">
+                        <label for="status" class="skp-form-label">
+                            <?php _e('Status SKP', 'asosiasi'); ?>
+                        </label>
+                        <div class="skp-form-field">
+                            <select id="status" name="status" class="regular-text">
+                                <option value="active"><?php _e('Aktif', 'asosiasi'); ?></option>
+                                <option value="activated"><?php _e('Diaktifkan', 'asosiasi'); ?></option>
+                                <option value="inactive"><?php _e('Tidak Aktif', 'asosiasi'); ?></option>
+                            </select>
+                            <p class="description">
+                                <?php _e('Status ini akan override status default berdasarkan masa berlaku', 'asosiasi'); ?>
+                            </p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- File Upload -->
                 <div class="skp-form-row">
                     <label for="pdf_file" class="skp-form-label">
