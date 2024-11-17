@@ -2,82 +2,16 @@
  * SKP Perusahaan Styles
  * 
  * @package Asosiasi
- * @version 1.2.0
+ * @version 1.3.0
  * Path: assets/css/skp-perusahaan.css
  * 
  * Changelog:
- * 1.2.0 - 2024-11-16
- * - Added tab navigation styles
- * - Added tab content container styles
- * - Improved table container spacing in tabs
- * - Maintained existing table and component styles
- * 
- * 1.1.0 - Initial responsive table
+ * 1.3.0 - 2024-11-17
+ * - Fixed status dropdown position
+ * - Cleaned up duplicated CSS classes
+ * - Improved modal z-index consistency
+ * - Reorganized CSS structure
  */
-
-/* Existing styles remain unchanged ... */
-
-/* Tab Navigation Styles */
-.skp-tabs {
-    margin-top: 20px;
-}
-
-.skp-tabs .nav-tab-wrapper {
-    margin-bottom: 0;
-    border-bottom: 1px solid #c3c4c7;
-    padding-bottom: 0;
-}
-
-.skp-tabs .nav-tab {
-    margin-bottom: -1px;
-    font-size: 14px;
-    padding: 8px 15px;
-    border-bottom: none;
-}
-
-.skp-tabs .nav-tab-active {
-    border-bottom: 1px solid #f0f0f1;
-    background: #f0f0f1;
-    color: #000;
-}
-
-/* Tab Content Styles */
-.skp-tabs .tab-content {
-    background: #f0f0f1;
-    border: 1px solid #c3c4c7;
-    border-top: none;
-    padding: 20px;
-}
-
-.skp-tabs .tab-pane {
-    display: none;
-}
-
-.skp-tabs .tab-pane.active {
-    display: block;
-}
-
-/* Adjust table container in tabs */
-.skp-tabs .skp-table-container {
-    margin-top: 0;
-}
-
-/* Loading state in tabs */
-.skp-tabs .skp-loading {
-    background: #f0f0f1;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 782px) {
-    .skp-tabs .nav-tab {
-        margin: 0 2px -1px;
-        padding: 6px 10px;
-    }
-    
-    .skp-tabs .tab-content {
-        padding: 15px;
-    }
-}
 
 /* Main Container */
 .skp-container {
@@ -116,7 +50,25 @@
     margin-bottom: 15px;
 }
 
+.add-skp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.add-skp-btn .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    margin-top: 2px;
+}
+
 /* Table Styles */
+.skp-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
 .skp-table {
     border-collapse: collapse;
     width: 100%;
@@ -134,31 +86,57 @@
 }
 
 /* Table Column Widths */
-.skp-column-number {
-    width: 50px;
+.skp-column-number { width: 50px; }
+.skp-column-service { width: 120px; }
+.skp-column-pdf { width: 60px; text-align: center; }
+.skp-column-status { width: 120px; }
+.skp-column-actions { width: 150px; }
+.skp-column-date { width: 120px; }
+
+/* Status Styles */
+.status-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
 }
 
-.skp-column-date {
-    width: 120px;
-}
-
-.skp-column-status {
-    width: 100px;
-}
-
-.skp-column-actions {
-    width: 150px;
-    text-align: right;
-}
-
-/* Status Badges */
 .skp-status {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 12px;
     line-height: 1.4;
     font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-change-trigger {
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    color: #757575;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status-change-trigger:hover {
+    color: #2271b1;
+}
+
+.status-select {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1;
+    min-width: 150px;
+    background: white;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
 }
 
 .skp-status-active {
@@ -176,6 +154,36 @@
     color: #50575e;
 }
 
+/* PDF Icon Styles */
+.skp-pdf-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url('../images/pdf-icon.svg') no-repeat center;
+    background-size: contain;
+    vertical-align: middle;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.skp-pdf-icon:hover {
+    opacity: 1;
+}
+
+.skp-pdf-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.skp-pdf-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* Loading State */
 .skp-loading {
     text-align: center;
@@ -184,86 +192,30 @@
     font-style: italic;
 }
 
-/* Action Buttons in Table */
-.skp-actions-group {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.skp-actions-group .button {
-    min-height: 30px;
-    line-height: 28px;
-    padding: 0 10px;
-}
-
-/* Empty State */
-.skp-empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: #757575;
-    font-style: italic;
-}
-
-/* Responsive Design */
-@media screen and (max-width: 782px) {
-    .skp-table {
-        display: block;
-        overflow-x: auto;
-    }
-
-    .skp-column-actions {
-        width: auto;
-    }
-    
-    .skp-actions-group {
-        flex-wrap: wrap;
-    }
-    
-    .skp-actions-group .button {
-        flex: 1;
-        text-align: center;
-        min-width: 70px;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .skp-actions,
-    .skp-actions-group {
-        display: none;
-    }
-    
-    .skp-card {
-        border: none;
-        box-shadow: none;
-    }
-    
-    .skp-table th,
-    .skp-table td {
-        padding: 6px;
-    }
+.skp-loading .spinner {
+    float: none;
+    margin: 0 10px 0 0;
 }
 
 /* Modal Styles */
 .skp-modal {
-    display: none;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 100000;
-    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 159999;
     padding: 20px;
+    overflow-y: auto;
+    display: none;
 }
 
 .skp-modal-content {
     position: relative;
-    background-color: #fff;
-    margin: 2% auto;
-    width: 100%;
+    background: #fff;
+    margin: 40px auto;
+    padding: 0;
     max-width: 600px;
     border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .skp-modal-header {
@@ -319,7 +271,9 @@
 
 .skp-form-field input[type="text"],
 .skp-form-field input[type="date"],
-.skp-form-field input[type="file"] {
+.skp-form-field input[type="file"],
+.skp-form-field select,
+.skp-form-field textarea {
     width: 100%;
 }
 
@@ -345,8 +299,75 @@
     gap: 8px;
 }
 
-/* Responsive Modal */
+/* Tab Navigation */
+.skp-tabs {
+    margin-top: 20px;
+}
+
+.skp-tabs .nav-tab-wrapper {
+    margin-bottom: 0;
+    border-bottom: 1px solid #c3c4c7;
+    padding-bottom: 0;
+}
+
+.skp-tabs .nav-tab {
+    margin-bottom: -1px;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-bottom: none;
+}
+
+.skp-tabs .nav-tab-active {
+    border-bottom: 1px solid #f0f0f1;
+    background: #f0f0f1;
+    color: #000;
+}
+
+.skp-tabs .tab-content {
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+.skp-tabs .tab-pane {
+    display: none;
+}
+
+.skp-tabs .tab-pane.active {
+    display: block;
+}
+
+/* Responsive Design */
 @media screen and (max-width: 782px) {
+    .skp-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .skp-column-actions {
+        width: auto;
+    }
+    
+    .skp-actions-group {
+        flex-wrap: wrap;
+    }
+    
+    .skp-actions-group .button {
+        flex: 1;
+        text-align: center;
+        min-width: 70px;
+    }
+    
+    .skp-tabs .nav-tab {
+        margin: 0 2px -1px;
+        padding: 6px 10px;
+    }
+    
+    .skp-tabs .tab-content {
+        padding: 15px;
+    }
+    
     .skp-modal {
         padding: 10px;
     }
@@ -362,10 +383,26 @@
     .skp-form-footer {
         padding: 12px 16px;
     }
+}
+
+/* Print Styles */
+@media print {
+    .skp-actions,
+    .skp-actions-group,
+    .skp-modal,
+    .status-change-trigger,
+    .status-select {
+        display: none !important;
+    }
     
-    .skp-form-field input[type="text"],
-    .skp-form-field input[type="date"] {
-        max-width: none;
+    .skp-card {
+        border: none;
+        box-shadow: none;
+    }
+    
+    .skp-table th,
+    .skp-table td {
+        padding: 6px;
     }
 }
 
@@ -376,314 +413,4 @@
 
 .skp-modal[aria-hidden="false"] {
     display: block;
-}
-
-/* Print styles */
-@media print {
-    .skp-modal {
-        display: none !important;
-    }
-}
-
-/* Table Column Widths */
-.skp-column-pdf {
-    width: 60px;
-    text-align: center;
-}
-
-/* PDF Icon Styles */
-.skp-pdf-icon {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    background: url('../images/pdf-icon.svg') no-repeat center;
-    background-size: contain;
-    vertical-align: middle;
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-}
-
-.skp-pdf-icon:hover {
-    opacity: 1;
-}
-
-.skp-pdf-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.skp-pdf-link:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Loading State */
-.skp-loading {
-    text-align: center;
-    color: #666;
-    padding: 20px !important;
-}
-
-.skp-loading .spinner {
-    float: none;
-    margin: 0 10px 0 0;
-}
-
-/* PDF Icon Styles */
-.skp-pdf-icon {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    background: url('../images/pdf-icon.svg') no-repeat center;
-    background-size: contain;
-    vertical-align: middle;
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-}
-
-.skp-pdf-icon:hover {
-    opacity: 1;
-}
-
-.skp-pdf-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.skp-pdf-link:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Table Column Widths */
-.skp-column-pdf {
-    width: 60px;
-    text-align: center;
-}
-
-
-.skp-modal {
-    position: fixed;
-    z-index: 100000;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: none;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.skp-modal-content {
-    position: relative;
-    background: #fff;
-    margin: 2% auto;
-    max-width: 600px;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-body.modal-open {
-    overflow: hidden;
-}
-
-
-
-/* Ensure modal is above other elements */
-.skp-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 159999; /* Higher than WP admin bar */
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.skp-modal-content {
-    background: #fff;
-    padding: 20px;
-    max-width: 600px;
-    margin: 40px auto;
-    border-radius: 4px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-}
-
-.skp-form-row {
-    margin-bottom: 20px;
-}
-
-.skp-form-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.skp-form-field input[type="text"],
-.skp-form-field input[type="date"] {
-    width: 100%;
-}
-
-.skp-current-file {
-    margin-top: 10px;
-    padding: 10px;
-    background: #f0f0f1;
-    border-radius: 4px;
-}
-
-.skp-form-footer {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
-    text-align: right;
-}
-
-.skp-form-footer .button {
-    margin-left: 10px;
-}
-
-
-
-    /* SKP Table Styles */
-    .skp-table-container {
-        margin-top: 20px;
-        overflow-x: auto;
-    }
-
-    .skp-table {
-        border-spacing: 0;
-        width: 100%;
-    }
-
-    .skp-table th {
-        padding: 10px;
-        text-align: left;
-        font-weight: 600;
-    }
-
-    .skp-table td {
-        padding: 12px 10px;
-        vertical-align: middle;
-    }
-
-    /* Column widths */
-    .column-number { width: 50px; }
-    .column-service { width: 120px; }
-    .column-pdf { width: 60px; text-align: center; }
-    .column-status { width: 100px; }
-    .column-actions { width: 150px; }
-    .column-date { width: 120px; }
-
-    /* Status styles */
-    .skp-status {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-    }
-
-    .status-active {
-        background-color: #e6ffe6;
-        color: #006600;
-    }
-
-    .status-expired {
-        background-color: #ffe6e6;
-        color: #990000;
-    }
-
-    .status-inactive {
-        background-color: #f2f2f2;
-        color: #666666;
-    }
-
-    /* Loading state */
-    .skp-loading td {
-        padding: 30px !important;
-        text-align: center;
-    }
-
-    .skp-loading .spinner {
-        float: none;
-        margin: 0 10px 0 0;
-    }
-
-    .loading-text {
-        color: #666;
-    }
-
-    /* Action buttons */
-    .button-group {
-        display: flex;
-        gap: 5px;
-    }
-
-    .button-group .button {
-        padding: 4px 8px;
-        height: auto;
-        line-height: 1.5;
-    }
-
-    /* PDF icon */
-    .dashicons-pdf {
-        color: #cc0000;
-        text-decoration: none;
-        font-size: 24px;
-    }
-
-    .dashicons-pdf:hover {
-        color: #990000;
-    }
-
-    /* Add button */
-    .add-skp-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .add-skp-btn .dashicons {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        margin-top: 2px;
-    }
-
-    .status-wrapper {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.status-change-trigger {
-    border: none;
-    background: none;
-    padding: 0;
-    cursor: pointer;
-    color: #757575;
-}
-
-.status-change-trigger:hover {
-    color: #2271b1;
-}
-
-.status-select {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    z-index: 1;
-    min-width: 120px;
 }
