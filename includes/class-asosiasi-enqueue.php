@@ -178,7 +178,23 @@ class Asosiasi_Enqueue {
                     'view' => __('Lihat PDF', 'asosiasi'),
                     'close' => __('Tutup', 'asosiasi'),
                     'cancel' => __('Batal', 'asosiasi'),
-                    'dismiss' => __('Tutup notifikasi', 'asosiasi')
+                    'dismiss' => __('Tutup notifikasi', 'asosiasi'),
+
+                    // Add status related strings
+                    'statusActive' => __('Aktif', 'asosiasi'),
+                    'statusInactive' => __('Tidak Aktif', 'asosiasi'),
+                    'statusExpired' => __('Kadaluarsa', 'asosiasi'),
+                    'statusActivated' => __('Diaktifkan', 'asosiasi'),
+                    'selectStatus' => __('Pilih Status', 'asosiasi'),
+                    
+                    // Status change modal strings
+                    'changeStatus' => __('Ubah Status', 'asosiasi'),
+                    'statusChangeSuccess' => __('Status SKP berhasil diubah', 'asosiasi'),
+                    'statusChangeError' => __('Gagal mengubah status SKP', 'asosiasi'),
+                    'statusChangeReason' => __('Alasan perubahan status', 'asosiasi'),
+                    'statusChangeConfirm' => __('Yakin ingin mengubah status SKP ini?', 'asosiasi'),
+                    'noActiveSKP' => __('Tidak ada SKP aktif', 'asosiasi'),
+                    'noInactiveSKP' => __('Tidak ada SKP tidak aktif', 'asosiasi')
                 )
             )
         );

@@ -30,6 +30,7 @@ var AsosiasiSKP = AsosiasiSKP || {};
         initFormHandlers();
         initDeleteHandlers();
         initTabHandlers();
+        initStatusChangeHandlers(); // Add this line
     }
     
     // Expose public API for table reload
@@ -63,6 +64,7 @@ var AsosiasiSKP = AsosiasiSKP || {};
             loadSKPList(status);
         });
     }
+
     // Add this after getMemberId function
     // Modify loadSKPList to accept status parameter
     function loadSKPList(status = 'active', memberId = null) {
@@ -122,7 +124,29 @@ var AsosiasiSKP = AsosiasiSKP || {};
                     <td>${escapeHtml(skp.penanggung_jawab)}</td>
                     <td>${escapeHtml(skp.tanggal_terbit)}</td>
                     <td>${escapeHtml(skp.masa_berlaku)}</td>
-                    <td><span class="skp-status status-${skp.status}">${escapeHtml(skp.status_label)}</span></td>
+                    <td>
+                        <div class="status-wrapper">
+                            <span class="skp-status status-${skp.status}">${escapeHtml(skp.status_label)}</span>
+                            ${window.can_change_status ? `
+                                <button type="button" 
+                                        class="status-change-trigger" 
+                                        data-id="${skp.id}" 
+                                        data-current="${skp.status}"
+                                        aria-label="${asosiasiAdmin.strings.changeStatus || 'Ubah status'}">
+                                    <span class="dashicons dashicons-arrow-down-alt2"></span>
+                                </button>
+                                <select class="status-select" 
+                                        style="display:none;"
+                                        data-id="${skp.id}" 
+                                        data-current-status="${skp.status}">
+                                    <option value="">${asosiasiAdmin.strings.selectStatus || 'Pilih Status'}</option>
+                                    ${getAvailableStatuses(skp.status).map(s => 
+                                        `<option value="${s.value}">${s.label}</option>`
+                                    ).join('')}
+                                </select>
+                            ` : ''}
+                        </div>
+                    </td>
                     <td>
                         <a href="${skp.file_url}" 
                            class="dashicons dashicons-pdf" 
@@ -155,7 +179,131 @@ var AsosiasiSKP = AsosiasiSKP || {};
         div.textContent = str;
         return div.innerHTML;
     }
-    
+
+    /**
+     * Get available status options based on current status
+     */
+    function getAvailableStatuses(currentStatus) {
+        switch (currentStatus) {
+            case 'active':
+                return [
+                    { 
+                        value: 'inactive', 
+                        label: asosiasiAdmin.strings.statusInactive || 'Tidak Aktif'
+                    },
+                    { 
+                        value: 'expired', 
+                        label: asosiasiAdmin.strings.statusExpired || 'Kadaluarsa'
+                    }
+                ];
+            case 'inactive':
+                return [
+                    { 
+                        value: 'activated', 
+                        label: asosiasiAdmin.strings.statusActivated || 'Diaktifkan'
+                    }
+                ];
+            case 'expired':
+                return [
+                    { 
+                        value: 'activated', 
+                        label: asosiasiAdmin.strings.statusActivated || 'Diaktifkan'
+                    }
+                ];
+            case 'activated':
+                return [
+                    { 
+                        value: 'inactive', 
+                        label: asosiasiAdmin.strings.statusInactive || 'Tidak Aktif'
+                    }
+                ];
+            default:
+                return [];
+        }
+    }
+
+    /**
+     * Initialize status change handlers
+     */
+    function initStatusChangeHandlers() {
+        // Toggle status select dropdown
+        $(document).on('click', '.status-change-trigger', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $select = $(this).siblings('.status-select');
+            $('.status-select').not($select).hide();
+            $select.toggle();
+        });
+
+        // Handle status selection
+        $(document).on('change', '.status-select', function() {
+            const $select = $(this);
+            const skpId = $select.data('id');
+            const oldStatus = $select.data('current-status');
+            const newStatus = $select.val();
+
+            if (!newStatus) return;
+            
+            // Hide select
+            $select.hide();
+
+            // Populate status change modal
+            $('#status_skp_id').val(skpId);
+            $('#status_old_status').val(oldStatus);
+            $('#status_new_status').val(newStatus);
+            $('#status_reason').val('');
+            
+            // Reset select to placeholder
+            $select.val('');
+            
+            // Show modal
+            $('#status-change-modal').show();
+        });
+
+        // Close dropdowns when clicking outside
+        $(window).on('click', function(e) {
+            if (!$(e.target).closest('.status-wrapper').length) {
+                $('.status-select').hide();
+            }
+        });
+
+        // Handle status change form submission
+        $('#status-change-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            formData.append('action', 'update_skp_status');
+            formData.append('nonce', asosiasiAdmin.strings.nonce);
+
+            $.ajax({
+                url: asosiasiAdmin.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        // Reload both tabs to ensure proper status display
+                        loadSKPList('active');
+                        loadSKPList('inactive');
+                        // Also reload history tab if it exists
+                        if ($('#skp-history').length) {
+                            loadStatusHistory();
+                        }
+                        showNotice('success', response.data.message);
+                    } else {
+                        showNotice('error', response.data.message);
+                    }
+                    $('#status-change-modal').hide();
+                },
+                error: function() {
+                    showNotice('error', asosiasiAdmin.strings.errorServer);
+                    $('#status-change-modal').hide();
+                }
+            });
+        });
+    }
+
     // Add after escapeHtml function
     function showNotice(type, message) {
         const notice = $(`

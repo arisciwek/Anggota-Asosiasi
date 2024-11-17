@@ -659,3 +659,31 @@ body.modal-open {
         font-size: 16px;
         margin-top: 2px;
     }
+
+    .status-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-change-trigger {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    color: #757575;
+}
+
+.status-change-trigger:hover {
+    color: #2271b1;
+}
+
+.status-select {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 1;
+    min-width: 120px;
+}

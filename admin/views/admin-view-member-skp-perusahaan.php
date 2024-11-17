@@ -3,21 +3,20 @@
  * Template for SKP Perusahaan section in member view
  *
  * @package Asosiasi
- * @version 1.3.0
+ * @version 1.4.0
  * Path: admin/views/admin-view-member-skp-perusahaan.php
  * 
  * Changelog:
+ * 1.4.0 - 2024-11-17
+ * - Added status change functionality with history
+ * - Added status change modal with reason input
+ * - Added history tab for status changes
+ * - Added permission checks for status changes
+ * 
  * 1.3.0 - 2024-11-16
  * - Added tab navigation for active/inactive SKP separation
  * - Restructured table layout for tab panes
  * - Added container IDs for JavaScript handlers
- * - Maintained existing functionality while adding tab support
- * 
- * 1.2.4 - 2024-03-17
- * - Fixed table structure to match AJAX response
- * - Added status column with proper styling
- * - Improved loading state display
- * - Updated column structure to match formatted data
  */
 
 if (!defined('ABSPATH')) {
@@ -26,6 +25,7 @@ if (!defined('ABSPATH')) {
 
 if ($member) {
     $member_services = $services->get_member_services($member_id);
+    $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
     ?>
     <div class="wrap">
         <div class="skp-container">
@@ -56,6 +56,9 @@ if ($member) {
                                 </a>
                                 <a href="#skp-inactive" class="nav-tab" data-tab="inactive">
                                     <?php _e('SKP Tidak Aktif', 'asosiasi'); ?>
+                                </a>
+                                <a href="#skp-history" class="nav-tab" data-tab="history">
+                                    <?php _e('Riwayat Status', 'asosiasi'); ?>
                                 </a>
                             </nav>
 
@@ -122,6 +125,35 @@ if ($member) {
                                         </table>
                                     </div>
                                 </div>
+
+                                <!-- History Tab -->
+                                <div id="skp-history" class="tab-pane">
+                                    <div class="skp-table-container">
+                                        <table class="wp-list-table widefat fixed striped skp-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="column-number"><?php _e('No', 'asosiasi'); ?></th>
+                                                    <th class="column-skp"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
+                                                    <th class="column-status"><?php _e('Status Lama', 'asosiasi'); ?></th>
+                                                    <th class="column-status"><?php _e('Status Baru', 'asosiasi'); ?></th>
+                                                    <th class="column-reason"><?php _e('Alasan', 'asosiasi'); ?></th>
+                                                    <th class="column-user"><?php _e('Diubah Oleh', 'asosiasi'); ?></th>
+                                                    <th class="column-date"><?php _e('Waktu', 'asosiasi'); ?></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="status-history-list">
+                                                <tr class="skp-loading">
+                                                    <td colspan="7" class="text-center">
+                                                        <span class="spinner is-active"></span>
+                                                        <span class="loading-text">
+                                                            <?php _e('Memuat riwayat status...', 'asosiasi'); ?>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     <?php else: ?>
@@ -133,10 +165,70 @@ if ($member) {
                     <?php endif; ?>
                 </div>
             </fieldset>
+
+            <!-- Tepat sebelum tag penutup </div> terakhir dan sebelum require modal -->
+            <script>
+                window.can_change_status = <?php echo current_user_can('manage_options') || current_user_can('manage_skp_status') ? 'true' : 'false'; ?>;
+            </script>
         </div>
 
+
+        <?php if ($can_change_status): ?>
+        <!-- Status Change Modal -->
+        <div id="status-change-modal" class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="status-modal-title" style="display:none;">
+            <div class="skp-modal-content">
+                <div class="skp-modal-header">
+                    <h2 id="status-modal-title" class="skp-modal-title">
+                        <?php _e('Ubah Status SKP', 'asosiasi'); ?>
+                    </h2>
+                    <button type="button" class="skp-modal-close" aria-label="<?php esc_attr_e('Close modal', 'asosiasi'); ?>">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form id="status-change-form" method="post" class="skp-form">
+                    <?php wp_nonce_field('asosiasi_skp_status_nonce', 'status_nonce'); ?>
+                    
+                    <input type="hidden" id="status_skp_id" name="skp_id" value="">
+                    <input type="hidden" id="status_skp_type" name="skp_type" value="company">
+                    <input type="hidden" id="status_old_status" name="old_status" value="">
+                    <input type="hidden" id="status_new_status" name="new_status" value="">
+
+                    <div class="skp-form-body">
+                        <!-- Status Change Reason -->
+                        <div class="skp-form-row">
+                            <label for="status_reason" class="skp-form-label">
+                                <?php _e('Alasan Perubahan Status', 'asosiasi'); ?>
+                                <span class="required">*</span>
+                            </label>
+                            <div class="skp-form-field">
+                                <textarea id="status_reason" 
+                                         name="reason" 
+                                         class="large-text" 
+                                         rows="4"
+                                         required></textarea>
+                                <p class="description">
+                                    <?php _e('Jelaskan alasan perubahan status SKP ini', 'asosiasi'); ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="skp-form-footer">
+                        <button type="button" class="button skp-modal-cancel">
+                            <?php _e('Batal', 'asosiasi'); ?>
+                        </button>
+                        <button type="submit" class="button button-primary">
+                            <?php _e('Simpan Perubahan', 'asosiasi'); ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <?php 
-        // Include modal template if member has services
+        // Include SKP modal template if member has services
         if (!empty($member_services)) {
             require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
         }
