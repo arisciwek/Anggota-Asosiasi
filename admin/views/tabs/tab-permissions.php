@@ -19,12 +19,12 @@ if (!defined('ABSPATH')) {
 
 // Define permissions that can be assigned
 $asosiasi_permissions = array(
-    'list_asosiasi_members' => __('Lihat Daftar Anggota Asosiasi', 'asosiasi'),
-    'view_asosiasi_members' => __('Lihat Detail Anggota Asosiasi', 'asosiasi'),
-    'add_asosiasi_members' => __('Tambah Anggota Asosiasi', 'asosiasi'),
-    'edit_asosiasi_members' => __('Edit Semua Anggota Asosiasi', 'asosiasi'),
-    'edit_own_asosiasi_members' => __('Edit Anggota Asosiasi Sendiri', 'asosiasi'),
-    'delete_asosiasi_members' => __('Hapus Anggota Asosiasi', 'asosiasi'),
+    'list_asosiasi_members' => __('Lihat Daftar Anggota', 'asosiasi'),
+    'view_asosiasi_members' => __('Lihat Detail Anggota', 'asosiasi'),
+    'add_asosiasi_members' => __('Tambah Anggota', 'asosiasi'),
+    'edit_asosiasi_members' => __('Edit Semua Anggota', 'asosiasi'),
+    'edit_own_asosiasi_members' => __('Edit Anggota Sendiri', 'asosiasi'),
+    'delete_asosiasi_members' => __('Hapus Anggota', 'asosiasi'),
     'manage_skp_status' => __('Kelola Status SKP', 'asosiasi')
 );
 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <input type="hidden" name="action" value="update_role_permissions">
 
         <p class="description">
-            <?php _e('Atur hak akses untuk setiap role WordPress dalam mengelola Anggota Asosiasi. Administrator secara otomatis memiliki akses penuh.', 'asosiasi'); ?>
+            <?php _e('Atur hak akses untuk setiap role dalam mengelola Anggota Asosiasi. Administrator secara otomatis memiliki akses penuh.', 'asosiasi'); ?>
         </p>
 
         <table class="widefat fixed permissions-matrix">
