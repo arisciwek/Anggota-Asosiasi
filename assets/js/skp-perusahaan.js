@@ -67,29 +67,49 @@ var AsosiasiSKP = AsosiasiSKP || {};
 
     // Add this after getMemberId function
     // Modify loadSKPList to accept status parameter
-    function loadSKPList(status = 'active', memberId = null) {
-        const nonce = $('#skp_nonce').val();
+    function loadSKPList(status = 'active') {
+        const memberId = getMemberId();
         if (!memberId) {
-            memberId = getMemberId();
+            console.warn('Member ID not found');
+            return;
         }
+
+        const targetId = status === 'active' ? '#active-skp-list' : '#inactive-skp-list';
+        const $target = $(targetId);
         
+        // Show loading state
+        $target.html(`
+            <tr class="skp-loading">
+                <td colspan="9" class="text-center">
+                    <span class="spinner is-active"></span>
+                    <span class="loading-text">
+                        ${status === 'active' ? 
+                            'Memuat data SKP aktif...' : 
+                            'Memuat data SKP tidak aktif...'}
+                    </span>
+                </td>
+            </tr>
+        `);
+
         $.ajax({
-            url: asosiasiAdmin.ajaxurl,
+            url: ajaxurl,
             type: 'GET',
             data: {
                 action: 'get_skp_perusahaan_list',
                 member_id: memberId,
                 status: status,
-                nonce: nonce
+                nonce: $('#skp_nonce').val()
             },
             success: function(response) {
                 if (response.success) {
                     renderSKPList(response.data.skp_list, status);
                 } else {
+                    console.error('Error loading SKP list:', response.data);
                     showNotice('error', response.data.message || 'Gagal memuat data SKP');
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
                 showNotice('error', 'Gagal memuat data SKP');
             }
         });
@@ -302,6 +322,58 @@ var AsosiasiSKP = AsosiasiSKP || {};
                 }
             });
         });
+    }
+
+    // Handle status change form submission
+    $('#status-change-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        formData.append('action', 'update_skp_status');
+        formData.append('nonce', $('#skp_nonce').val());
+
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    // Reload both tabs to ensure proper status display
+                    loadSKPList('active');
+                    setTimeout(() => {
+                        loadSKPList('inactive');
+                    }, 300);
+                    
+                    // Also reload history tab if it exists
+                    if ($('#skp-history').length) {
+                        loadStatusHistory();
+                    }
+                    showNotice('success', response.data.message);
+                } else {
+                    console.error('Error:', response.data.message);
+                    showNotice('error', response.data.message);
+                }
+                $('#status-change-modal').hide();
+            },
+            error: function(xhr, status, error) {
+                console.error('Ajax error:', status, error);
+                showNotice('error', asosiasiAdmin.strings.errorServer);
+                $('#status-change-modal').hide();
+            }
+        });
+    });
+        
+    // Add this helper function to better handle tab updates
+    function reloadAllTabs(activeFirst = true) {
+        if (activeFirst) {
+            loadSKPList('active');
+            setTimeout(() => loadSKPList('inactive'), 300);
+        } else {
+            loadSKPList('inactive');
+            setTimeout(() => loadSKPList('active'), 300);
+        }
     }
 
     // Add after escapeHtml function

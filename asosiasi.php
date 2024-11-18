@@ -3,7 +3,7 @@
  * Plugin Name: Asosiasi
  * Plugin URI: http://example.com
  * Description: Plugin CRUD untuk anggota asosiasi yang berupa perusahaan.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Nama Penulis
@@ -16,6 +16,11 @@
  * @package Asosiasi
  * 
  * Changelog:
+ * 2.2.0 - 2024-11-17
+ * - Added SKP status management feature
+ * - Added status history tracking
+ * - Enhanced SKP management interface
+ * 
  * 2.1.0 - 2024-03-13
  * - Added member images feature
  * - Added image management system
@@ -38,7 +43,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin version
-define('ASOSIASI_VERSION', '2.1.0');
+define('ASOSIASI_VERSION', '2.2.0');
 
 // Plugin constants
 define('ASOSIASI_FILE', __FILE__);
@@ -97,6 +102,7 @@ add_action('admin_notices', 'asosiasi_display_requirement_errors');
 if (empty(asosiasi_check_requirements())) {
     // Core classes
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-activator.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-upload-directories.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-deactivator.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-crud.php';
@@ -104,12 +110,16 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-admin.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-public.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-member-images.php'; // Add this line
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-member-images.php';
 
     // SKP related classes
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-perusahaan.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-cron.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-skp-perusahaan.php';
+
+    // SKP Status management classes - New
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-status-skp-perusahaan.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-status-skp-perusahaan.php';
 
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
@@ -140,8 +150,9 @@ if (empty(asosiasi_check_requirements())) {
         // Initialize asset handler
         new Asosiasi_Enqueue(ASOSIASI_VERSION);
         
-        // Initialize AJAX handler
+        // Initialize AJAX handlers
         new Asosiasi_Ajax_Perusahaan();
+        new Asosiasi_Ajax_Status_Skp_Perusahaan(); // Add status handler
         
         // Run the plugin
         $plugin->run();

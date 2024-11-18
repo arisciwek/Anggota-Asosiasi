@@ -26,13 +26,16 @@ class Asosiasi_Activator {
         // Create tables
         self::create_initial_tables();
 
-        // Run migrations if needed
-        if (version_compare($current_db_version, '2.2.0', '<')) {
-            update_option('asosiasi_db_version', '2.2.0');
+        // Run specific migrations if needed
+        if (version_compare($current_db_version, '2.3.0', '<')) {
+            self::migrate_to_2_3_0();
+            update_option('asosiasi_db_version', '2.3.0');
         }
 
-        if (version_compare($current_db_version, '2.3.0', '<')) {
-            update_option('asosiasi_db_version', '2.3.0');
+        // Run newer migrations here...
+        if (version_compare($current_db_version, '2.3.1', '<')) {
+            self::migrate_skp_status_enum();
+            update_option('asosiasi_db_version', '2.3.1');
         }
 
         // Set default options
@@ -115,6 +118,38 @@ class Asosiasi_Activator {
                 continue;
             }
             dbDelta($sql);
+        }
+    }
+
+    /**
+     * Migration untuk menambahkan status 'activated' ke enum
+     */
+    private static function migrate_skp_status_enum() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'asosiasi_skp_perusahaan';
+        
+        // Log untuk debugging
+        if (WP_DEBUG) {
+            error_log('Starting SKP status enum migration...');
+        }
+
+        try {
+            // Jalankan ALTER TABLE langsung
+            $wpdb->query("ALTER TABLE {$table_name} 
+                         MODIFY COLUMN status 
+                         ENUM('active', 'expired', 'inactive', 'activated') 
+                         NOT NULL DEFAULT 'active'");
+
+            if (WP_DEBUG) {
+                error_log('SKP status enum migration completed successfully');
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            if (WP_DEBUG) {
+                error_log('SKP status enum migration failed: ' . $e->getMessage());
+            }
+            return false;
         }
     }
 

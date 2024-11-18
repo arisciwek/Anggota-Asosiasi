@@ -91,7 +91,8 @@ class Asosiasi_Ajax_Perusahaan {
             // Filter berdasarkan status
             $filtered_list = array_filter($skp_list, function($item) use ($status_filter) {
                 if ($status_filter === 'active') {
-                    return $item['status'] === 'active';
+                    // Tampilkan status active dan activated di tab aktif
+                    return in_array($item['status'], ['active', 'activated']);
                 } else {
                     // Untuk tab tidak aktif, tampilkan yang expired dan inactive
                     return in_array($item['status'], ['expired', 'inactive']);
@@ -112,6 +113,7 @@ class Asosiasi_Ajax_Perusahaan {
             ));
         }
     }
+
 
    /**
     * Get single SKP
