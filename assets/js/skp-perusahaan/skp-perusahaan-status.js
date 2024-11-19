@@ -2,14 +2,16 @@
  * Status handlers untuk SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.0.2
+ * @version 1.0.3
  * Path: assets/js/skp-perusahaan/skp-perusahaan-status.js
  * 
  * Changelog:
- * 1.0.2 - 2024-11-19
- * - Changed asosiasiAdmin references to asosiasiSKPPerusahaan
- * - Added safety checks for strings object
- * 1.0.1 - Fixed jQuery initialization pattern
+ * 1.0.3 - 2024-11-19
+ * - Fixed status select change handler
+ * - Fixed modal trigger
+ * - Fixed data attributes access
+ * 1.0.2 - Changed string references
+ * 1.0.1 - Fixed initialization
  * 1.0.0 - Initial version
  */
 
@@ -35,42 +37,32 @@ var AsosiasiSKPPerusahaanStatus = {};
                 // Hide other open selects
                 $('.status-select').not($select).hide();
                 $select.toggle();
-
-                // Populate status options if empty
-                if (!$select.children().length) {
-                    const currentStatus = $(this).data('current');
-                    const options = ['<option value="">' + 
-                        (asosiasiSKPPerusahaan.strings.selectStatus || 'Pilih Status') + 
-                        '</option>'];
-
-                    AsosiasiSKPUtils.getAvailableStatuses(currentStatus).forEach(function(status) {
-                        options.push(`<option value="${status.value}">${status.label}</option>`);
-                    });
-
-                    $select.html(options.join(''));
-                }
             });
 
-            // Handle status selection
-            $(document).on('change', '.status-select', function() {
+            // Handle status selection - FIXED
+            $(document).on('change', '.status-select select', function() {
                 const $select = $(this);
-                const skpId = $select.closest('.status-wrapper').data('skp-id');
-                const oldStatus = $select.closest('.status-wrapper').data('current-status');
+                const skpId = $select.data('id');
+                const oldStatus = $select.data('current');
                 const newStatus = $select.val();
 
                 if (!newStatus) return;
 
-                // Hide select and reset
-                $select.hide().val('');
+                // Hide select wrapper
+                $select.closest('.status-select').hide();
 
                 // Populate modal fields
                 $('#status_skp_id').val(skpId);
                 $('#status_old_status').val(oldStatus);
                 $('#status_new_status').val(newStatus);
-                $('#status_reason').val('').focus();
+                $('#status_reason').val('');
 
                 // Show modal
                 $('#status-change-modal').show();
+                $('#status_reason').focus();
+                
+                // Reset select
+                $select.val('');
             });
 
             // Close dropdowns when clicking outside
@@ -182,7 +174,7 @@ var AsosiasiSKPPerusahaanStatus = {};
                 },
                 error: function(xhr, status, error) {
                     console.error('Status history load error:', error);
-                        AsosiasiSKPUtils.showNotice('error', 
+                    AsosiasiSKPUtils.showNotice('error', 
                         asosiasiSKPPerusahaan.strings.loadHistoryError || 
                         'Gagal memuat riwayat status'
                     );
@@ -223,10 +215,7 @@ var AsosiasiSKPPerusahaanStatus = {};
                         </td>
                         <td>${AsosiasiSKPUtils.escapeHtml(item.reason)}</td>
                         <td>${AsosiasiSKPUtils.escapeHtml(item.changed_by)}</td>
-                        <td>
-                            ${AsosiasiSKPUtils.formatDate(item.changed_at)}
-                            ${AsosiasiSKPUtils.formatTime(item.changed_at)}
-                        </td>
+                        <td>${AsosiasiSKPUtils.formatDate(item.changed_at)} ${AsosiasiSKPUtils.formatTime(item.changed_at)}</td>
                     </tr>
                 `);
             });

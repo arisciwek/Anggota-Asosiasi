@@ -2,14 +2,16 @@
  * Main handler untuk SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.0.1
+ * @version 1.0.2
  * Path: assets/js/skp-perusahaan/skp-perusahaan.js
  * 
  * Changelog:
- * 1.0.1 - 2024-11-19
- * - Fixed string references to use asosiasiSKPPerusahaan instead of asosiasiAdmin
- * - Improved error handling
- * - Added proper data validation
+ * 1.0.2 - 2024-11-19
+ * - Fixed edit button text references
+ * - Fixed status dropdown functionality
+ * - Added data attributes for status handling
+ * - Added proper status change trigger
+ * 1.0.1 - Fixed string references
  * 1.0.0 - Initial version
  */
 
@@ -78,9 +80,7 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                 <td colspan="9" class="text-center">
                     <span class="spinner is-active"></span>
                     <span class="loading-text">
-                        ${status === 'active' ? 
-                            asosiasiSKPPerusahaan.strings.loading : 
-                            asosiasiSKPPerusahaan.strings.loading}
+                        ${asosiasiSKPPerusahaan.strings.loading || 'Memuat data SKP...'}
                     </span>
                 </td>
             </tr>
@@ -120,8 +120,8 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                 <tr>
                     <td colspan="9" class="text-center">
                         ${status === 'active' ? 
-                            asosiasiSKPPerusahaan.strings.noActiveSKP : 
-                            asosiasiSKPPerusahaan.strings.noInactiveSKP}
+                            (asosiasiSKPPerusahaan.strings.noActiveSKP || 'Tidak ada SKP aktif') : 
+                            (asosiasiSKPPerusahaan.strings.noInactiveSKP || 'Tidak ada SKP tidak aktif')}
                     </td>
                 </tr>
             `);
@@ -129,6 +129,11 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
         }
 
         skpList.forEach((skp, index) => {
+            const availableStatuses = AsosiasiSKPUtils.getAvailableStatuses(skp.status);
+            const statusOptions = availableStatuses.map(status => 
+                `<option value="${status.value}">${status.label}</option>`
+            ).join('');
+
             tbody.append(`
                 <tr>
                     <td>${index + 1}</td>
@@ -138,18 +143,26 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.tanggal_terbit)}</td>
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.masa_berlaku)}</td>
                     <td>
-                        <div class="status-wrapper">
+                        <div class="status-wrapper" data-skp-id="${skp.id}" data-current-status="${skp.status}">
                             <span class="skp-status status-${skp.status}">
                                 ${AsosiasiSKPUtils.escapeHtml(skp.status_label)}
                             </span>
                             ${window.can_change_status ? `
                                 <button type="button" 
                                         class="status-change-trigger" 
-                                        data-id="${skp.id}" 
+                                        data-id="${skp.id}"
                                         data-current="${skp.status}"
-                                        aria-label="${asosiasiSKPPerusahaan.strings.changeStatus}">
+                                        aria-label="${asosiasiSKPPerusahaan.strings.changeStatus || 'Ubah Status'}">
                                     <span class="dashicons dashicons-arrow-down-alt2"></span>
                                 </button>
+                                <div class="status-select" style="display:none;">
+                                    <select data-id="${skp.id}" data-current="${skp.status}">
+                                        <option value="">
+                                            ${asosiasiSKPPerusahaan.strings.selectStatus || 'Pilih Status'}
+                                        </option>
+                                        ${statusOptions}
+                                    </select>
+                                </div>
                             ` : ''}
                         </div>
                     </td>
@@ -157,7 +170,7 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                         <a href="${skp.file_url}" 
                            class="dashicons dashicons-pdf" 
                            target="_blank"
-                           title="${asosiasiSKPPerusahaan.strings.view}">
+                           title="${asosiasiSKPPerusahaan.strings.view || 'Lihat PDF'}">
                         </a>
                     </td>
                     <td>
@@ -165,11 +178,11 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                             ${skp.can_edit ? `
                                 <button type="button" class="button edit-skp" 
                                         data-id="${skp.id}">
-                                    ${asosiasiSKPPerusahaan.strings.edit}
+                                    ${asosiasiSKPPerusahaan.strings.edit || 'Edit'}
                                 </button>
                                 <button type="button" class="button delete-skp" 
                                         data-id="${skp.id}">
-                                    ${asosiasiSKPPerusahaan.strings.delete}
+                                    ${asosiasiSKPPerusahaan.strings.delete || 'Hapus'}
                                 </button>
                             ` : ''}
                         </div>
@@ -178,6 +191,7 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
             `);
         });
     }
+
 
     // Initialize when document is ready
     $(document).ready(function() {

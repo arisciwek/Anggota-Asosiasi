@@ -82,9 +82,8 @@ class Asosiasi_Enqueue_SKP_Perusahaan {
            array('jquery', 'asosiasi-skp-utils', 'asosiasi-skp-perusahaan'),
            $this->version,
            true
-       );
+       );// ... kode sebelumnya tetap sama ...
 
-       // Localize script untuk global strings dan settings
        wp_localize_script(
            'asosiasi-skp-perusahaan',
            'asosiasiSKPPerusahaan',
@@ -114,9 +113,16 @@ class Asosiasi_Enqueue_SKP_Perusahaan {
                    'statusChangeReason' => __('Alasan perubahan status', 'asosiasi'),
                    'statusChangeConfirm' => __('Yakin ingin mengubah status SKP ini?', 'asosiasi'),
                    'noActiveSKP' => __('Tidak ada SKP aktif', 'asosiasi'),
-                   'noInactiveSKP' => __('Tidak ada SKP tidak aktif', 'asosiasi')
+                   'noInactiveSKP' => __('Tidak ada SKP tidak aktif', 'asosiasi'),
+                   'edit' => __('Edit', 'asosiasi'),
+                   'delete' => __('Hapus', 'asosiasi'),
+                   'view' => __('Lihat PDF', 'asosiasi'),
+                   'dismissNotice' => __('Tutup notifikasi', 'asosiasi'),
+                   'fieldRequired' => __('Field %s wajib diisi', 'asosiasi')
                )
            )
        );
    }
 }
+
+
