@@ -1,4 +1,22 @@
-/* Dashboard specific styles */
+/**
+ * Style untuk halaman dashboard admin
+ * 
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: assets/css/dashboard-style.css
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-11-17
+ * - Peningkatan UI untuk panel statistik
+ * - Optimasi layout responsif
+ * - Penambahan style untuk tabel SKP
+ * 
+ * 2.1.0 - 2024-03-13
+ * - Desain ulang panel selamat datang
+ * - Peningkatan style daftar anggota
+ * - Perbaikan kompatibilitas mobile
+ */
+
 .asosiasi-dashboard {
     margin: 20px;
 }

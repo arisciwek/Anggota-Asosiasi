@@ -1,6 +1,18 @@
-/* Global styles for Asosiasi plugin admin */
+/**
+ * Global admin styles for Asosiasi plugin
+ *
+ * @package Asosiasi
+ * @version 2.1.0
+ * Path: admin/css/admin-global.css
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-03-14
+ * - Added responsive design improvements
+ * - Enhanced notice styling
+ * - Added service tag styles
+ * 2.0.0 - Initial version with basic admin styles
+ */
 
-/* Common table styles */
 .wp-list-table .column-services {
     width: 20%;
 }

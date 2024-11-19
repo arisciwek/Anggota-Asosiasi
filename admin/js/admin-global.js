@@ -1,6 +1,18 @@
 /**
  * Global JavaScript functionality for Asosiasi plugin admin
+ *
+ * @package Asosiasi
+ * @version 2.1.0
+ * Path: admin/js/admin-global.js
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-03-14
+ * - Added service tag tooltips
+ * - Enhanced notice handling
+ * - Improved delete confirmation UI
+ * 2.0.0 - Initial version with basic admin functionality
  */
+
 (function($) {
     'use strict';
 

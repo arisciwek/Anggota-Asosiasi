@@ -1,5 +1,6 @@
 /**
  * SKP Perusahaan handling
+ * File ini tidak digunakan lagi karena sudah dipecah
  * 
  * @package Asosiasi
  * @version 1.3.2

@@ -1,0 +1,154 @@
+/**
+ * Style untuk halaman edit foto member
+ * 
+ * @package Asosiasi
+ * @version 2.1.0
+ * Path: admin/css/member-images-style.css
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-11-19
+ * - Added card styles from admin-edit-member-images.php
+ * - Added image grid layout
+ * - Improved form and button styles
+ * - Maintained responsive design
+ */
+
+/* Card Layout */
+.card {
+    max-width: 640px;
+    margin-top: 20px;
+}
+
+.card .inside {
+    padding: 20px;
+}
+
+/* Section Headers */
+.mandatory-image-section h3,
+.optional-images-section h3 {
+    margin: 0 0 15px 0;
+}
+
+/* Image Sections */
+.mandatory-image-section {
+    margin-bottom: 30px;
+}
+
+.mandatory-image-section img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+}
+
+.optional-images-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.optional-images-section img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+/* Image Containers */
+.optional-image {
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.image-preview {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Upload Area */
+.upload-placeholder {
+    border: 2px dashed #ddd;
+    padding: 20px;
+    text-align: center;
+    background: #f9f9f9;
+    margin-bottom: 10px;
+}
+
+.upload-form {
+    margin-top: 10px;
+}
+
+.upload-form input[type="file"] {
+    margin-bottom: 10px;
+}
+
+/* Action Buttons */
+.image-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-actions .button {
+    flex: 1;
+    text-align: center;
+}
+
+/* Helper Text */
+.image-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.required {
+    color: #dc3232;
+}
+
+/* Notice Styling */
+.notice {
+    margin: 20px 0;
+}
+
+/* Back Button */
+.page-title-action {
+    margin-left: 10px;
+    margin-top: -3px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .optional-images-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .image-actions {
+        flex-direction: column;
+    }
+
+    .image-actions .button {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .optional-images-section {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        margin-right: 10px;
+        margin-left: 10px;
+    }
+
+    .inside {
+        padding: 15px;
+    }
+}

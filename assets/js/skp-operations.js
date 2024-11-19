@@ -1,3 +1,19 @@
+/**
+ * SKP operations handlers
+ * 
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: assets/js/skp-operations.js
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-11-17
+ * - Added status change functionality
+ * - Enhanced form validation
+ * - Improved modal handling
+ * 2.1.0 - Added file size validation
+ * 2.0.0 - Initial SKP operations
+ */
+
 (function($) {
     'use strict';
 

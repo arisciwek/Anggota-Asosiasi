@@ -1,27 +1,28 @@
 /**
- * Script untuk form tambah/edit anggota
+ * Script form member
  * 
  * @package Asosiasi
- * @version 1.1.0
+ * @version 2.1.0
+ * Path: admin/js/member-form-script.js
  * 
  * Changelog:
- * 1.1.0 - 2024-03-19
- * - Added SKP table reload after successful member save/update
- * - Added check for AsosiasiSKP namespace existence
- * 1.0.0 - Initial version
+ * 2.1.0 - 2024-11-19
+ * - Extracted from form-script.js
+ * - Optimized for member form handling
+ * - Improved validation and error handling
  */
 
 (function($) {
     'use strict';
 
-    // Fungsi untuk menginisialisasi form
-    function initForm() {
+    // Fungsi untuk menginisialisasi form member
+    function initMemberForm() {
         initFormValidation();
         initServiceSelection();
         initRequiredFields();
     }
 
-    // Validasi form
+    // Validasi form member
     function initFormValidation() {
         $('#member-form').on('submit', function(e) {
             var hasError = false;
@@ -69,7 +70,6 @@
                 }
             }
 
-            // Jika ada error, fokus ke field pertama yang error
             if (hasError) {
                 e.preventDefault();
                 if (firstError) {
@@ -77,29 +77,6 @@
                 }
                 return false;
             }
-
-            // Jika form valid, handle success callback
-            var $form = $(this);
-            var $submitButton = $form.find('button[type="submit"]');
-            var memberId = $('#member_id').val() || $form.data('member-id');
-            
-            $submitButton.prop('disabled', true);
-
-            // Use timeout to ensure DOM updates are complete
-            setTimeout(function() {
-                // Check if SKP reload function exists and call it
-                if (typeof AsosiasiSKP !== 'undefined' && typeof AsosiasiSKP.reloadTable === 'function' && memberId) {
-                    try {
-                        console.log('Reloading SKP table for member:', memberId);
-                        AsosiasiSKP.reloadTable(memberId); // Pass member ID
-                    } catch (error) {
-                        console.error('Error reloading SKP table:', error);
-                    }
-                }
-
-                // Re-enable submit button
-                $submitButton.prop('disabled', false);
-            }, 500);
         });
     }
 
@@ -142,37 +119,12 @@
         });
     }
 
-    // Clear form ketika tombol Batal diklik
-    function initCancelButton() {
-        $('.button-cancel').on('click', function(e) {
-            if (formIsDirty()) {
-                if (!confirm('Ada perubahan yang belum disimpan. Yakin ingin membatalkan?')) {
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
-    }
-
-    // Cek apakah form sudah dimodifikasi
-    function formIsDirty() {
-        var isDirty = false;
-        $('input, select, textarea').each(function() {
-            if ($(this).val() !== $(this).prop('defaultValue')) {
-                isDirty = true;
-                return false;
-            }
-        });
-        return isDirty;
-    }
-
     // Inisialisasi saat dokumen siap
     $(document).ready(function() {
         try {
-            initForm();
-            initCancelButton();
+            initMemberForm();
         } catch (error) {
-            console.error('Error initializing form:', error);
+            console.error('Error initializing member form:', error);
         }
     });
 

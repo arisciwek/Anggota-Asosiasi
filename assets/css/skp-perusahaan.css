@@ -1,19 +1,22 @@
 /**
- * SKP Perusahaan Styles
+ * Style untuk SKP Perusahaan
  * 
  * @package Asosiasi
- * @version 1.3.0
+ * @version 2.2.0
  * Path: assets/css/skp-perusahaan.css
  * 
  * Changelog:
- * 1.3.0 - 2024-11-17
- * - Fixed status dropdown position
- * - Cleaned up duplicated CSS classes
- * - Improved modal z-index consistency
- * - Reorganized CSS structure
+ * 2.2.0 - 2024-11-17
+ * - Penambahan style untuk manajemen status
+ * - Peningkatan tampilan tab aktif/tidak aktif
+ * - Optimasi tampilan riwayat status
+ * 
+ * 2.1.0 - 2024-03-13
+ * - Penyesuaian layout tabel
+ * - Perbaikan style modal
+ * - Peningkatan responsivitas
  */
 
-/* Main Container */
 .skp-container {
     margin: 20px 0;
 }

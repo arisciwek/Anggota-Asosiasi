@@ -1,3 +1,18 @@
+/**
+ * Dashboard specific JavaScript functionality
+ *
+ * @package Asosiasi
+ * @version 2.1.0
+ * Path: admin/js/dashboard-script.js
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-03-14 
+ * - Added real-time search filtering
+ * - Enhanced service tag tooltips
+ * - Added flash message handling
+ * 2.0.0 - Initial dashboard functionality
+ */
+
 jQuery(document).ready(function($) {
     'use strict';
 

@@ -104,7 +104,12 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-activator.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-upload-directories.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-deactivator.php';
+    
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-member.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-settings.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-perusahaan.php';
+
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-crud.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-services.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi.php';
@@ -143,26 +148,26 @@ if (empty(asosiasi_check_requirements())) {
     /**
      * Initialize plugin
      */
+
     function run_asosiasi() {
         // Initialize main plugin class
         $plugin = new Asosiasi();
         
-        // Initialize asset handler
-        new Asosiasi_Enqueue(ASOSIASI_VERSION);
+        // Initialize context-specific enqueuers 
+        new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
+        new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
+        new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
         
         // Initialize AJAX handlers
         new Asosiasi_Ajax_Perusahaan();
-        new Asosiasi_Ajax_Status_Skp_Perusahaan(); // Add status handler
+        new Asosiasi_Ajax_Status_Skp_Perusahaan();
         
         // Run the plugin
         $plugin->run();
 
         // Load SKP functionality if needed
-        if (is_admin()) {
-            // Initialize SKP features
-            if (class_exists('Asosiasi_SKP_Cron')) {
-                Asosiasi_SKP_Cron::schedule_events();
-            }
+        if (is_admin() && class_exists('Asosiasi_SKP_Cron')) {
+            Asosiasi_SKP_Cron::schedule_events();
         }
     }
 

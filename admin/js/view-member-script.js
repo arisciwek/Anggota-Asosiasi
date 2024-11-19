@@ -1,4 +1,18 @@
-// admin/js/view-member-script.js
+/**
+ * Member view page JavaScript
+ *
+ * @package Asosiasi  
+ * @version 2.1.0
+ * Path: admin/js/view-member-script.js
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-03-14
+ * - Added keyboard accessibility for service tags
+ * - Enhanced delete confirmations
+ * - Added auto-dismiss notices
+ * 2.0.0 - Initial member view functionality
+ */
+
 (function($) {
     'use strict';
 

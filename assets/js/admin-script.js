@@ -1,3 +1,18 @@
+/**
+* Global admin functionality for Asosiasi
+*
+* @package Asosiasi
+* @version 2.1.0
+* Path: assets/js/admin-script.js
+* 
+* Changelog:
+* 2.1.0 - 2024-03-14
+* - Enhanced service checkbox handling
+* - Added form validation 
+* - Improved search filtering
+* 2.0.0 - Initial admin functionality
+*/
+
 jQuery(document).ready(function($) {
     // Handle service checkboxes
     $('.service-checkbox input[type="checkbox"]').on('change', function() {

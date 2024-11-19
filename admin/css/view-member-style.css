@@ -1,4 +1,20 @@
-/* admin/css/view-member-style.css */
+/**
+ * Member view page specific styles
+ *
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: admin/css/view-member-style.css
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-03-14
+ * - Added service tooltip accessibility
+ * - Enhanced member actions layout
+ * - Improved responsive design
+ * 2.1.0 - Added service tags styling
+ * 2.0.0 - Initial version
+ */
+
+/* Member information cards */
 .member-info-card,
 .member-services-card,
 .member-actions-card {

@@ -1,12 +1,18 @@
 <?php
 /**
- * Halaman edit foto member
+ * Halaman edit foto member dengan layout dua kolom
  *
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.2.0
  * Path: admin/views/admin-edit-member-images.php
  * 
  * Changelog:
+ * 2.2.0 - 2024-11-19
+ * - Restruktur layout menjadi dua kolom
+ * - Kolom kiri untuk foto utama
+ * - Kolom kanan untuk foto tambahan
+ * - Optimasi spacing dan alignment
+ * 
  * 2.1.0 - 2024-03-13
  * - Initial release
  * - Added dedicated page for image management
@@ -95,98 +101,108 @@ if ($member) {
         
         <?php settings_errors('member_images'); ?>
 
-        <div class="card" style="max-width: 640px; margin-top: 20px;">
-            <div class="inside" style="padding: 20px;">
-                <!-- Mandatory Image Section -->
-                <div class="mandatory-image-section">
-                    <h3><?php _e('Main Image', 'asosiasi'); ?> <span class="required">*</span></h3>
-                    <div style="margin: 20px 0;">
-                        <?php if (isset($member_images['mandatory'])): ?>
-                            <div class="image-preview">
-                                <img src="<?php echo esc_url($member_images['mandatory']['url']); ?>" 
-                                     alt="<?php echo esc_attr($member['company_name']); ?>">
-                                
-                                <form method="post" class="image-actions">
-                                    <?php wp_nonce_field('delete_member_image'); ?>
-                                    <input type="hidden" name="action" value="delete_image">
-                                    <input type="hidden" name="image_type" value="mandatory">
-                                    <button type="submit" class="button" 
-                                            onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this image?', 'asosiasi'); ?>')">
-                                        <?php _e('Delete Image', 'asosiasi'); ?>
-                                    </button>
-                                </form>
-                            </div>
-                        <?php else: ?>
-                            <div class="upload-placeholder">
-                                <p><?php _e('No main image uploaded', 'asosiasi'); ?></p>
-                            </div>
-                        <?php endif; ?>
+        <div class="image-management-container">
+            <!-- Kolom Kiri: Foto Utama -->
+            <div class="main-image-column">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><?php _e('Main Image', 'asosiasi'); ?> <span class="required">*</span></h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mandatory-image-section">
+                            <?php if (isset($member_images['mandatory'])): ?>
+                                <div class="image-preview main-image-preview">
+                                    <img src="<?php echo esc_url($member_images['mandatory']['url']); ?>" 
+                                         alt="<?php echo esc_attr($member['company_name']); ?>">
+                                    
+                                    <form method="post" class="image-actions">
+                                        <?php wp_nonce_field('delete_member_image'); ?>
+                                        <input type="hidden" name="action" value="delete_image">
+                                        <input type="hidden" name="image_type" value="mandatory">
+                                        <button type="submit" class="button" 
+                                                onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this image?', 'asosiasi'); ?>')">
+                                            <?php _e('Delete Image', 'asosiasi'); ?>
+                                        </button>
+                                    </form>
+                                </div>
+                            <?php else: ?>
+                                <div class="upload-placeholder main-image-placeholder">
+                                    <p><?php _e('No main image uploaded', 'asosiasi'); ?></p>
+                                </div>
+                            <?php endif; ?>
 
-                        <form method="post" enctype="multipart/form-data" class="upload-form">
-                            <?php wp_nonce_field('upload_member_image'); ?>
-                            <input type="hidden" name="action" value="upload_image">
-                            <input type="hidden" name="image_type" value="mandatory">
-                            <div>
-                                <input type="file" name="member_image" accept="image/jpeg,image/png" required>
-                                <input type="submit" class="button" 
-                                       value="<?php echo isset($member_images['mandatory']) ? 
-                                             esc_attr__('Replace Image', 'asosiasi') : 
-                                             esc_attr__('Upload Image', 'asosiasi'); ?>">
-                            </div>
-                            <p class="image-description">
-                                <?php _e('Maximum file size: 1.5MB. Allowed formats: JPG, PNG', 'asosiasi'); ?>
-                            </p>
-                        </form>
+                            <form method="post" enctype="multipart/form-data" class="upload-form main-image-form">
+                                <?php wp_nonce_field('upload_member_image'); ?>
+                                <input type="hidden" name="action" value="upload_image">
+                                <input type="hidden" name="image_type" value="mandatory">
+                                <div class="form-row">
+                                    <input type="file" name="member_image" accept="image/jpeg,image/png" required>
+                                    <input type="submit" class="button" 
+                                           value="<?php echo isset($member_images['mandatory']) ? 
+                                                 esc_attr__('Replace Image', 'asosiasi') : 
+                                                 esc_attr__('Upload Image', 'asosiasi'); ?>">
+                                </div>
+                                <p class="image-description">
+                                    <?php _e('Maximum file size: 1.5MB. Allowed formats: JPG, PNG', 'asosiasi'); ?>
+                                </p>
+                            </form>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Optional Images Section -->
-                <div class="optional-images-section">
-                    <h3><?php _e('Additional Images', 'asosiasi'); ?></h3>
-                    <div class="optional-images-grid">
-                        <?php for ($i = 1; $i <= 3; $i++): ?>
-                            <div class="optional-image">
-                                <?php if (isset($member_images['optional'][$i])): ?>
-                                    <div class="image-preview">
-                                        <img src="<?php echo esc_url($member_images['optional'][$i]['url']); ?>" 
-                                             alt="<?php printf(esc_attr__('Optional image %d', 'asosiasi'), $i); ?>">
-                                        
-                                        <form method="post" class="image-actions">
-                                            <?php wp_nonce_field('delete_member_image'); ?>
-                                            <input type="hidden" name="action" value="delete_image">
-                                            <input type="hidden" name="image_type" value="optional">
-                                            <input type="hidden" name="image_order" value="<?php echo $i; ?>">
-                                            <button type="submit" class="button" 
-                                                    onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this image?', 'asosiasi'); ?>')">
-                                                <?php _e('Delete', 'asosiasi'); ?>
-                                            </button>
-                                        </form>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="upload-placeholder">
-                                        <p><?php printf(esc_html__('Optional Image %d', 'asosiasi'), $i); ?></p>
-                                    </div>
-                                <?php endif; ?>
-
-                                <form method="post" enctype="multipart/form-data" class="upload-form">
-                                    <?php wp_nonce_field('upload_member_image'); ?>
-                                    <input type="hidden" name="action" value="upload_image">
-                                    <input type="hidden" name="image_type" value="optional">
-                                    <input type="hidden" name="image_order" value="<?php echo $i; ?>">
-                                    <div>
-                                        <input type="file" name="member_image" accept="image/jpeg,image/png" required>
-                                        <input type="submit" class="button" 
-                                               value="<?php echo isset($member_images['optional'][$i]) ? 
-                                                     esc_attr__('Replace', 'asosiasi') : 
-                                                     esc_attr__('Upload', 'asosiasi'); ?>">
-                                    </div>
-                                </form>
-                            </div>
-                        <?php endfor; ?>
+            <!-- Kolom Kanan: Foto Tambahan -->
+            <div class="additional-images-column">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><?php _e('Additional Images', 'asosiasi'); ?></h3>
                     </div>
-                    <p class="image-description">
-                        <?php _e('Maximum file size: 1.5MB per image. Allowed formats: JPG, PNG', 'asosiasi'); ?>
-                    </p>
+                    <div class="card-body">
+                        <div class="optional-images-grid">
+                            <?php for ($i = 1; $i <= 3; $i++): ?>
+                                <div class="optional-image">
+                                    <?php if (isset($member_images['optional'][$i])): ?>
+                                        <div class="image-preview">
+                                            <img src="<?php echo esc_url($member_images['optional'][$i]['url']); ?>" 
+                                                 alt="<?php printf(esc_attr__('Optional image %d', 'asosiasi'), $i); ?>">
+                                            
+                                            <form method="post" class="image-actions">
+                                                <?php wp_nonce_field('delete_member_image'); ?>
+                                                <input type="hidden" name="action" value="delete_image">
+                                                <input type="hidden" name="image_type" value="optional">
+                                                <input type="hidden" name="image_order" value="<?php echo $i; ?>">
+                                                <button type="submit" class="button" 
+                                                        onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this image?', 'asosiasi'); ?>')">
+                                                    <?php _e('Delete', 'asosiasi'); ?>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="upload-placeholder">
+                                            <p><?php printf(esc_html__('Optional Image %d', 'asosiasi'), $i); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <form method="post" enctype="multipart/form-data" class="upload-form">
+                                        <?php wp_nonce_field('upload_member_image'); ?>
+                                        <input type="hidden" name="action" value="upload_image">
+                                        <input type="hidden" name="image_type" value="optional">
+                                        <input type="hidden" name="image_order" value="<?php echo $i; ?>">
+                                        <div class="form-row">
+                                            <input type="file" name="member_image" accept="image/jpeg,image/png" required>
+                                            <input type="submit" class="button" 
+                                                   value="<?php echo isset($member_images['optional'][$i]) ? 
+                                                         esc_attr__('Replace', 'asosiasi') : 
+                                                         esc_attr__('Upload', 'asosiasi'); ?>">
+                                        </div>
+                                    </form>
+                                </div>
+                            <?php endfor; ?>
+                        </div>
+                        <p class="image-description">
+                            <?php _e('Maximum file size: 1.5MB per image. Allowed formats: JPG, PNG', 'asosiasi'); ?>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

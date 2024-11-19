@@ -1,4 +1,19 @@
-/* Dashboard styles */
+/**
+ * Dashboard specific styles for Asosiasi plugin
+ *
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: admin/css/dashboard-style.css
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-03-14
+ * - Added service tag tooltips
+ * - Enhanced search box styling
+ * - Improved responsive layouts
+ * 2.1.0 - Added welcome panel styles
+ * 2.0.0 - Initial version
+ */
+
 .asosiasi-welcome-panel {
     background: #fff !important;
     color: #1d2327 !important;

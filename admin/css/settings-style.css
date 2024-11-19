@@ -1,0 +1,78 @@
+/**
+ * Settings page styles
+ *
+ * @package Asosiasi
+ * @version 2.1.0
+ * Path: admin/css/settings-style.css
+ * 
+ * Changelog:
+ * 2.1.0 - 2024-11-19
+ * - Initial version extracted from admin-global.css and form-style.css
+ * - Added settings specific styles
+ */
+
+/* Basic form styles */
+.form-table {
+    margin-top: 20px;
+}
+
+.form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.regular-text {
+    width: 25em;
+}
+
+/* Roles and Capabilities */
+.role-capabilities {
+    margin-bottom: 2em;
+}
+
+.role-info {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+    margin-top: 20px;
+}
+
+/* Permissions Matrix */
+.permissions-matrix {
+    border-collapse: collapse;
+    margin-top: 1em;
+    background: #fff;
+}
+
+.permissions-matrix th,
+.permissions-matrix td {
+    text-align: center;
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+.permissions-matrix .column-role {
+    text-align: left;
+    width: 200px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .form-table,
+    .form-table tbody,
+    .form-table tr,
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .permissions-matrix {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .regular-text {
+        width: 100%;
+    }
+}

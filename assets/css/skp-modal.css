@@ -1,4 +1,22 @@
-/* SKP Modal Styles */
+/**
+ * Style untuk modal SKP
+ * 
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: assets/css/skp-modal.css
+ * 
+ * Changelog:
+ * 2.2.0 - 2024-11-17
+ * - Penyesuaian z-index untuk kompatibilitas
+ * - Peningkatan style form status
+ * - Optimasi tampilan mobile
+ * 
+ * 2.1.0 - 2024-03-13
+ * - Perbaikan layout form
+ * - Penambahan animasi transisi
+ * - Peningkatan aksesibilitas
+ */
+
 .skp-modal {
     display: none;
     position: fixed;
