@@ -6,7 +6,7 @@
  * Path: assets/js/skp-perusahaan/skp-perusahaan-status.js
  * 
  * Changelog:
- * 1.0.3 - 2024-11-19
+ * 1.0.3 - 2024-11-19 11:27 WIB
  * - Fixed status select change handler
  * - Fixed modal trigger
  * - Fixed data attributes access
