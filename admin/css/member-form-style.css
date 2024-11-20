@@ -1,152 +1,144 @@
 /**
- * Style untuk halaman edit foto member dengan layout dua kolom
+ * Style form member
  * 
  * @package Asosiasi
- * @version 2.2.0
- * Path: admin/css/member-images-style.css
+ * @version 2.1.0
+ * Path: admin/css/form-style.css
  * 
  * Changelog:
- * 2.2.0 - 2024-11-19
- * - Restructured layout for two-column design
- * - Enhanced card styling
- * - Improved spacing and alignment
- * - Added responsive breakpoints
- * 
- * 2.1.0 - 2024-11-19
- * - Initial version with basic image management styles
+ * 2.1.0 - 2024-11-19 15:40 WIB
+ * - Initial creation based on admin-add-member-page.php requirements
+ * - Added styles for form layout, inputs, validation
+ * - Added service checklist styles
  */
 
-/* Container Layout */
-.image-management-container {
-    display: flex;
-    gap: 20px;
+/* Form Layout */
+.form-table {
     margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0 15px;
 }
 
-.main-image-column {
-    flex: 0 0 40%;
-    max-width: 40%;
+.form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+    vertical-align: top;
+    text-align: left;
+    font-weight: 600;
 }
 
-.additional-images-column {
-    flex: 0 0 60%;
-    max-width: 60%;
+.form-table td {
+    padding: 15px 10px;
+    vertical-align: middle;
+    position: relative;
 }
 
-/* Card Styling */
-.card {
+/* Input Fields */
+.form-table input[type="text"],
+.form-table input[type="email"],
+.form-table input[type="tel"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+}
+
+.form-table input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: 2px solid transparent;
+}
+
+/* Services Checklist */
+.services-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     background: #fff;
-    border: 1px solid #ccd0d4;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    margin: 5px 0;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
 }
 
-.card-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #ccd0d4;
-    background: #f8f9fa;
-}
-
-.card-header h3 {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.card-body {
-    padding: 20px;
-}
-
-/* Main Image Styles */
-.main-image-preview img {
-    width: 100%;
-    height: auto;
-    border: 1px solid #ddd;
-    margin-bottom: 15px;
-}
-
-.main-image-placeholder {
-    aspect-ratio: 4/3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Optional Images Grid */
-.optional-images-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.optional-image {
-    border: 1px solid #ddd;
-    padding: 10px;
-    background: #f8f9fa;
-}
-
-.optional-image img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-}
-
-/* Upload Areas */
-.upload-placeholder {
-    border: 2px dashed #ddd;
-    padding: 20px;
-    text-align: center;
-    background: #f9f9f9;
-    margin-bottom: 15px;
-}
-
-.form-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.service-checkbox {
+    display: block;
     margin-bottom: 10px;
+    padding: 3px 0;
 }
 
-.form-row input[type="file"] {
-    width: 100%;
+.service-checkbox:last-child {
+    margin-bottom: 0;
 }
 
-/* Action Buttons */
-.image-actions {
-    margin-top: 10px;
+.service-checkbox input[type="checkbox"] {
+    margin-right: 8px;
 }
 
-.image-actions .button {
-    width: 100%;
-}
-
-/* Helper Text */
-.image-description {
-    font-size: 0.9em;
+.service-full-name {
     color: #666;
-    margin-top: 10px;
+    font-size: 0.9em;
+    margin-left: 5px;
 }
 
+/* Required Field */
 .required {
-    color: #dc3232;
+    color: #d63638;
+    margin-left: 3px;
 }
 
-/* Notice Styling */
-.notice {
-    margin: 20px 0;
+/* Error States */
+.form-invalid input {
+    border-color: #d63638;
 }
 
-/* Responsive Design */
-@media screen and (max-width: 1200px) {
-    .image-management-container {
-        flex-direction: column;
+.error-message {
+    color: #d63638;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Submit Section */
+.submit {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.submit .button {
+    margin-right: 10px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .form-table, 
+    .form-table tbody, 
+    .form-table tr, 
+    .form-table th, 
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
     }
 
-    .main-image-column,
-    .additional-images-column {
-        flex: 0 0 100%;
-        max-width: 100%;
+    .form-table th {
+        padding-bottom: 0;
     }
 
-    .
+    .form-table input[type="text"],
+    .form-table input[type="email"],
+    .form-table input[type="tel"] {
+        max-width: none;
+    }
+
+    .services-checkbox-list {
+        max-width: none;
+    }
     
+    .submit {
+        margin-left: 0;
+        text-align: center;
+    }
+}

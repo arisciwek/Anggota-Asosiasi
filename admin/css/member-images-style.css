@@ -6,7 +6,7 @@
  * Path: admin/css/member-images-style.css
  * 
  * Changelog:
- * 2.1.0 - 2024-11-19 12:10:05
+ * 2.1.0 - 2024-11-19
  * - Added card styles from admin-edit-member-images.php
  * - Added image grid layout
  * - Improved form and button styles
@@ -152,3 +152,144 @@
         padding: 15px;
     }
 }
+
+
+/*
+ * edit member image
+ *
+ */
+
+
+/* Container Layout */
+.image-management-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.main-image-column {
+    flex: 0 0 40%;
+    max-width: 40%;
+}
+
+.additional-images-column {
+    flex: 0 0 60%;
+    max-width: 60%;
+}
+
+/* Card Styling */
+.card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ccd0d4;
+    background: #f8f9fa;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Main Image Styles */
+.main-image-preview img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.main-image-placeholder {
+    aspect-ratio: 4/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Optional Images Grid */
+.optional-images-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.optional-image {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #f8f9fa;
+}
+
+.optional-image img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+/* Upload Areas */
+.upload-placeholder {
+    border: 2px dashed #ddd;
+    padding: 20px;
+    text-align: center;
+    background: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-row input[type="file"] {
+    width: 100%;
+}
+
+/* Action Buttons */
+.image-actions {
+    margin-top: 10px;
+}
+
+.image-actions .button {
+    width: 100%;
+}
+
+/* Helper Text */
+.image-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 10px;
+}
+
+.required {
+    color: #dc3232;
+}
+
+/* Notice Styling */
+.notice {
+    margin: 20px 0;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    .image-management-container {
+        flex-direction: column;
+    }
+
+    .main-image-column,
+    .additional-images-column {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+    

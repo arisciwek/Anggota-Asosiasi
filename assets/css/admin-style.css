@@ -1,24 +1,16 @@
-/**
- * Style admin global
+/* Main Admin Styles
  * 
  * @package Asosiasi
- * @version 2.2.0
- * Path: assets/css/admin-style.css
+ * @version 2.1.0
  * 
  * Changelog:
- * 2.2.0 - 2024-11-17
- * - Menambah style untuk manajemen status SKP
- * - Perbaikan layout tabel dan responsif
- * - Peningkatan style komponen modal
- * 
  * 2.1.0 - 2024-03-13
- * - Menambah style matriks perizinan
- * - Peningkatan antarmuka manajemen peran
- * - Menambah layout responsif untuk semua komponen
- * 
- * 2.0.0 - Versi awal
+ * - Added permissions matrix styles
+ * - Improved table layouts for permissions
+ * - Added responsive styles for permissions matrix
  */
 
+/* Styles for admin member form */
 .services-checkbox-list {
     max-height: 200px;
     overflow-y: auto;
