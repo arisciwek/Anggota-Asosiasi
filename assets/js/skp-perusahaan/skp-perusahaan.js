@@ -6,7 +6,7 @@
  * Path: assets/js/skp-perusahaan/skp-perusahaan.js
  * 
  * Changelog:
- * 1.0.2 - 2024-11-19
+ * 1.0.2 - 2024-11-20
  * - Fixed edit button text references
  * - Fixed status dropdown functionality
  * - Added data attributes for status handling
