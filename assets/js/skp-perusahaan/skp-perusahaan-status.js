@@ -2,17 +2,14 @@
  * Status handlers untuk SKP Perusahaan
  *
  * @package Asosiasi
- * @version 1.0.3
+ * @version 1.0.4
  * Path: assets/js/skp-perusahaan/skp-perusahaan-status.js
  * 
  * Changelog:
- * 1.0.3 - 2024-11-19 11:27 WIB
- * - Fixed status select change handler
- * - Fixed modal trigger
- * - Fixed data attributes access
- * 1.0.2 - Changed string references
- * 1.0.1 - Fixed initialization
- * 1.0.0 - Initial version
+ * 1.0.4 - 2024-11-19 15:35 WIB
+ * - Fixed status label rendering in history tab 
+ * - Added status label property usage
+ * - Improved error handling
  */
 
 var AsosiasiSKPPerusahaanStatus = {};
@@ -199,26 +196,46 @@ var AsosiasiSKPPerusahaanStatus = {};
             }
 
             history.forEach((item, index) => {
+                // Dapatkan class CSS sesuai status
+                const oldStatusClass = this.getStatusClassFromLabel(item.old_status);
+                const newStatusClass = this.getStatusClassFromLabel(item.new_status);
+                
                 $historyList.append(`
                     <tr>
                         <td>${index + 1}</td>
                         <td>${AsosiasiSKPUtils.escapeHtml(item.nomor_skp)}</td>
                         <td>
-                            <span class="skp-status status-${item.old_status}">
-                                ${AsosiasiSKPUtils.escapeHtml(item.old_status_label)}
+                            <span class="skp-status ${oldStatusClass}">
+                                ${AsosiasiSKPUtils.escapeHtml(item.old_status)}
                             </span>
                         </td>
                         <td>
-                            <span class="skp-status status-${item.new_status}">
-                                ${AsosiasiSKPUtils.escapeHtml(item.new_status_label)}
+                            <span class="skp-status ${newStatusClass}">
+                                ${AsosiasiSKPUtils.escapeHtml(item.new_status)}
                             </span>
                         </td>
                         <td>${AsosiasiSKPUtils.escapeHtml(item.reason)}</td>
                         <td>${AsosiasiSKPUtils.escapeHtml(item.changed_by)}</td>
-                        <td>${AsosiasiSKPUtils.formatDate(item.changed_at)} ${AsosiasiSKPUtils.formatTime(item.changed_at)}</td>
+                        <td>${item.changed_at}</td>
                     </tr>
                 `);
             });
+        },
+
+        // Helper function untuk mendapatkan class CSS dari label status
+        getStatusClassFromLabel: function(label) {
+            label = label.toLowerCase();
+            const statusMap = {
+                'aktif': 'skp-status-active',
+                'active': 'skp-status-active',
+                'diaktifkan': 'skp-status-active', 
+                'activated': 'skp-status-active',
+                'tidak aktif': 'skp-status-inactive',
+                'inactive': 'skp-status-inactive',
+                'kadaluarsa': 'skp-status-expired',
+                'expired': 'skp-status-expired'
+            };
+            return statusMap[label] || 'skp-status-inactive';
         }
     };
 

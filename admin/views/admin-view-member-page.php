@@ -7,7 +7,7 @@
  * Path: admin/views/admin-view-member-page.php
  * 
  * Changelog:
- * 2.2.0 - 2024-11-14
+ * 2.2.0 - 2024-11-15
  * - Removed image upload/delete forms
  * - Added Edit Photos button
  * - Enlarged image previews
