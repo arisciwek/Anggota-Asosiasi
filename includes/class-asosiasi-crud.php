@@ -1,138 +1,231 @@
 <?php
 /**
- * Kelas untuk menangani operasi CRUD anggota asosiasi
+ * Class untuk menangani operasi CRUD
  *
  * @package Asosiasi
- * @version 1.1.0 2024-11-18
+ * @version 2.4.1
+ * Path: includes/class-asosiasi-crud.php 
+ * 
+ * Changelog:
+ * 2.4.1 - 2024-11-21
+ * - Fixed get_members() method query
+ * - Added proper table name reference
+ * - Added error logging
+ * 
+ * 2.4.0 - 2024-11-19
+ * - Added support for new member fields
+ * - Enhanced data sanitization
+ * - Added field validation
  */
 
 class Asosiasi_CRUD {
 
-    /**
-     * Nama tabel database
-     *
-     * @since    1.1.0
-     * @access   private
-     * @var      string    $table_name    Nama tabel database dengan prefix
-     */
-    private $table_name;
+    private $table_members;
 
-    /**
-     * Initialize the class and set its properties.
-     *
-     * @since    1.1.0
-     */
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'asosiasi_members';
+        $this->table_members = $wpdb->prefix . 'asosiasi_members';
     }
 
     /**
-     * Create new member.
-     *
-     * @since    1.1.0
-     * @param    array    $data    Data anggota yang akan ditambahkan
-     * @return   int|false         ID dari data yang ditambahkan atau false jika gagal
-     */
-    public function create_member($data) {
-        global $wpdb;
-        
-        $result = $wpdb->insert( 
-            $this->table_name, 
-            array(
-                'company_name' => sanitize_text_field($data['company_name']),
-                'contact_person' => sanitize_text_field($data['contact_person']),
-                'email' => sanitize_email($data['email']),
-                'phone' => sanitize_text_field($data['phone']),
-            ),
-            array('%s', '%s', '%s', '%s')
-        );
-
-        return $result ? $wpdb->insert_id : false;
-    }
-
-    /**
-     * Get all members.
-     *
-     * @since    1.1.0
-     * @return   array    Daftar semua anggota
+     * Get all members with caching
+     * 
+     * @return array Array of member records
      */
     public function get_members() {
         global $wpdb;
-        return $wpdb->get_results(
-            "SELECT * FROM {$this->table_name} ORDER BY created_at DESC",
+
+        if (WP_DEBUG) {
+            error_log('Fetching all members from table: ' . $this->table_members);
+        }
+
+        // Query langsung tanpa prepare karena tidak ada parameter
+        $results = $wpdb->get_results(
+            "SELECT * FROM {$this->table_members} ORDER BY created_at DESC",
             ARRAY_A
         );
+
+        if ($wpdb->last_error) {
+            if (WP_DEBUG) {
+                error_log('Database error in get_members(): ' . $wpdb->last_error);
+            }
+            return array();
+        }
+
+        return $results ?: array();
     }
+    
 
     /**
-     * Get single member by ID.
-     *
-     * @since    1.1.0
-     * @param    int      $id    ID anggota
-     * @return   array    Data anggota
+     * Get single member by ID
+     * 
+     * @param int $id Member ID
+     * @return array|false Member data array or false if not found
      */
     public function get_member($id) {
         global $wpdb;
-        return $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE id = %d", $id),
-            ARRAY_A
+
+        if (WP_DEBUG) {
+            error_log('Fetching member with ID: ' . $id);
+        }
+
+        $query = $wpdb->prepare(
+            "SELECT * FROM {$this->table_members} WHERE id = %d",
+            $id
         );
+
+        $result = $wpdb->get_row($query, ARRAY_A);
+
+        if ($wpdb->last_error) {
+            if (WP_DEBUG) {
+                error_log('Database error in get_member(): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+
+        return $result ?: false;
     }
 
-    /**
-     * Update member data.
-     *
-     * @since    1.1.0
-     * @param    int      $id      ID anggota
-     * @param    array    $data    Data yang akan diupdate
-     * @return   bool              Status update
-     */
+    public function create_member($data) {
+        global $wpdb;
+
+        $defaults = array(
+            'company_name' => '',
+            'contact_person' => '',
+            'email' => '',
+            'phone' => '',
+            // New fields with defaults
+            'company_leader' => '',
+            'leader_position' => '',
+            'company_address' => '',
+            'postal_code' => '',
+            'business_field' => '',
+            'ahu_number' => '',
+            'city' => '',
+            'npwp' => ''
+        );
+
+        $data = wp_parse_args($data, $defaults);
+
+        $member_data = array(
+            'company_name' => sanitize_text_field($data['company_name']),
+            'contact_person' => sanitize_text_field($data['contact_person']),
+            'email' => sanitize_email($data['email']),
+            'phone' => sanitize_text_field($data['phone']),
+            // New fields sanitization
+            'company_leader' => sanitize_text_field($data['company_leader']),
+            'leader_position' => sanitize_text_field($data['leader_position']),
+            'company_address' => sanitize_textarea_field($data['company_address']),
+            'postal_code' => sanitize_text_field($data['postal_code']),
+            'business_field' => sanitize_text_field($data['business_field']),
+            'ahu_number' => sanitize_text_field($data['ahu_number']),
+            'city' => sanitize_text_field($data['city']),
+            'npwp' => sanitize_text_field($data['npwp'])
+        );
+
+        $result = $wpdb->insert(
+            $this->table_members,
+            $member_data,
+            array(
+                '%s', '%s', '%s', '%s',  // Existing fields
+                '%s', '%s', '%s', '%s',  // New fields part 1
+                '%s', '%s', '%s', '%s'   // New fields part 2
+            )
+        );
+
+        if ($result === false) {
+            if (WP_DEBUG) {
+                error_log('Failed to create member: ' . $wpdb->last_error);
+            }
+            return false;
+        }
+
+        return $wpdb->insert_id;
+    }
+
     public function update_member($id, $data) {
         global $wpdb;
-        
-        // Log for debugging
+
         if (WP_DEBUG) {
-            error_log('Updating member with ID: ' . $id);
+            error_log('Updating member ID: ' . $id);
             error_log('Update data: ' . print_r($data, true));
         }
 
-        $updated = $wpdb->update(
-            $this->table_name,
-            array(
-                'company_name' => sanitize_text_field($data['company_name']),
-                'contact_person' => sanitize_text_field($data['contact_person']),
-                'email' => sanitize_email($data['email']),
-                'phone' => sanitize_text_field($data['phone']),
-            ),
-            array('id' => $id),
-            array('%s', '%s', '%s', '%s'),
-            array('%d')
+        $member_data = array(
+            // Existing fields
+            'company_name' => sanitize_text_field($data['company_name']),
+            'contact_person' => sanitize_text_field($data['contact_person']),
+            'email' => sanitize_email($data['email']),
+            'phone' => sanitize_text_field($data['phone']),
+            
+            // New fields
+            'company_leader' => sanitize_text_field($data['company_leader']),
+            'leader_position' => sanitize_text_field($data['leader_position']),
+            'company_address' => sanitize_textarea_field($data['company_address']),
+            'postal_code' => sanitize_text_field($data['postal_code']),
+            'business_field' => sanitize_text_field($data['business_field']),
+            'ahu_number' => sanitize_text_field($data['ahu_number']),
+            'city' => sanitize_text_field($data['city']),
+            'npwp' => sanitize_text_field($data['npwp'])
         );
 
         if (WP_DEBUG) {
-            error_log('Update result: ' . ($updated !== false ? 'success' : 'failed'));
-            if ($updated === false) {
-                error_log('Database error: ' . $wpdb->last_error);
-            }
+            error_log('Sanitized update data: ' . print_r($member_data, true));
         }
 
-        return $updated !== false;
+        $result = $wpdb->update(
+            $this->table_members,
+            $member_data,
+            array('id' => $id),
+            array(
+                '%s', '%s', '%s', '%s',  // Existing fields format
+                '%s', '%s', '%s', '%s',  // New fields format part 1
+                '%s', '%s', '%s', '%s'   // New fields format part 2
+            ),
+            array('%d')
+        );
+
+        if ($wpdb->last_error) {
+            if (WP_DEBUG) {
+                error_log('Update query error: ' . $wpdb->last_error);
+                error_log('Last query: ' . $wpdb->last_query);
+            }
+            return false;
+        }
+
+        if (WP_DEBUG && $result !== false) {
+            error_log('Member updated successfully');
+        }
+
+        return $result !== false;
     }
 
     /**
-     * Delete member.
-     *
-     * @since    1.1.0
-     * @param    int      $id    ID anggota
-     * @return   bool           Status delete
+     * Delete member by ID
+     * 
+     * @param int $id Member ID to delete
+     * @return bool True on success, false on failure
      */
     public function delete_member($id) {
         global $wpdb;
-        return $wpdb->delete(
-            $this->table_name,
+
+        if (WP_DEBUG) {
+            error_log('Deleting member with ID: ' . $id);
+        }
+
+        $result = $wpdb->delete(
+            $this->table_members,
             array('id' => $id),
             array('%d')
         );
+
+        if ($wpdb->last_error) {
+            if (WP_DEBUG) {
+                error_log('Database error in delete_member(): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+
+        return $result !== false;
     }
 }

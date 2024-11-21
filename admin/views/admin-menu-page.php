@@ -17,8 +17,10 @@ if (!defined('ABSPATH')) {
 
 $crud = new Asosiasi_CRUD();
 $services = new Asosiasi_Services();
-$total_members = count($crud->get_members());
+
+// Get members data once
 $members = $crud->get_members();
+$total_members = !empty($members) ? count($members) : 0;
 
 // Handle delete action
 if (isset($_POST['action']) && isset($_POST['member_id'])) {
@@ -36,10 +38,12 @@ if (isset($_POST['action']) && isset($_POST['member_id'])) {
                 'success'
             );
         }
-        $members = $crud->get_members(); // Refresh list
-        $total_members = count($members); // Update total
+        // Refresh list setelah delete
+        $members = $crud->get_members();
+        $total_members = !empty($members) ? count($members) : 0;
     }
 }
+
 ?>
 
 <div class="wrap">

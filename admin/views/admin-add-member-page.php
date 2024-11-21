@@ -1,12 +1,21 @@
 <?php
 /**
- * Tampilan halaman tambah/edit anggota dengan enhanced logging
+ * Tampilan halaman tambah/edit anggota 
  *
  * @package Asosiasi
- * @version 2.6.0
+ * @version 2.7.1
+ * Path: admin/views/admin-add-member-page.php
+ * 
  * Changelog:
- * 2.6.0 - Menambahkan detailed logging untuk debug redirect
- * 2.5.0 - Integrasi dengan Asosiasi_Logger
+ * 2.7.1 - 2024-11-21
+ * - Removed redundant data sanitization since it's handled in CRUD layer
+ * - Maintained all existing functionality and validation
+ * 
+ * 2.7.0 - 2024-11-21
+ * - Added new company info fields
+ * - Added new leader info fields
+ * - Added address fields
+ * - Reorganized form sections
  */
 
 if (!defined('ABSPATH')) {
@@ -115,6 +124,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
     if (WP_DEBUG) {
         error_log("Processing form submission");
+        error_log("POST data: " . print_r($_POST, true));
     }
 
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_member')) {
@@ -122,15 +132,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         wp_die(__('Invalid nonce specified', 'asosiasi'));
     }
 
+    // Collect all fields without sanitization (handled by CRUD layer)
     $data = array(
-        'company_name' => sanitize_text_field($_POST['company_name']),
-        'contact_person' => sanitize_text_field($_POST['contact_person']),
-        'email' => sanitize_email($_POST['email']),
-        'phone' => sanitize_text_field($_POST['phone'])
+        // Basic Info
+        'company_name' => $_POST['company_name'],
+        'contact_person' => $_POST['contact_person'],
+        'email' => $_POST['email'],
+        'phone' => $_POST['phone'],
+        
+        // New Fields
+        'business_field' => isset($_POST['business_field']) ? $_POST['business_field'] : '',
+        'ahu_number' => isset($_POST['ahu_number']) ? $_POST['ahu_number'] : '',
+        'npwp' => isset($_POST['npwp']) ? $_POST['npwp'] : '',
+        
+        // Leader Info
+        'company_leader' => isset($_POST['company_leader']) ? $_POST['company_leader'] : '',
+        'leader_position' => isset($_POST['leader_position']) ? $_POST['leader_position'] : '',
+        
+        // Address Info
+        'company_address' => isset($_POST['company_address']) ? $_POST['company_address'] : '',
+        'city' => isset($_POST['city']) ? $_POST['city'] : '',
+        'postal_code' => isset($_POST['postal_code']) ? $_POST['postal_code'] : ''
     );
 
     if (WP_DEBUG) {
-        error_log("Sanitized data: " . print_r($data, true));
+        error_log("Raw form data: " . print_r($data, true));
     }
 
     $required_fields = array('company_name', 'contact_person', 'email');
@@ -157,7 +183,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         if ($is_edit) {
             error_log("Attempting to update member $member_id");
             if ($crud->update_member($member_id, $data)) {
-                error_log("Member update successful");
                 $services->add_member_services($member_id, $selected_services);
                 try_redirect(
                     admin_url("admin.php?page=asosiasi-view-member&id={$member_id}"),
@@ -206,89 +231,205 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
 
     <form method="post" action="" id="member-form">
         <?php wp_nonce_field('save_member'); ?>
-        <table class="form-table">
-            <tr valign="top">
-                <th scope="row">
-                    <label for="company_name"><?php _e('Nama Perusahaan', 'asosiasi'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text" 
-                           id="company_name"
-                           name="company_name" 
-                           value="<?php echo $member ? esc_attr($member['company_name']) : ''; ?>"
-                           class="regular-text"
-                           required>
-                </td>
-            </tr>
-            <tr valign="top">
-                <th scope="row">
-                    <label for="contact_person"><?php _e('Nama Kontak', 'asosiasi'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text" 
-                           id="contact_person"
-                           name="contact_person" 
-                           value="<?php echo $member ? esc_attr($member['contact_person']) : ''; ?>"
-                           class="regular-text"
-                           required>
-                </td>
-            </tr>
-            <tr valign="top">
-                <th scope="row">
-                    <label for="email"><?php _e('Email', 'asosiasi'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="email" 
-                           id="email"
-                           name="email" 
-                           value="<?php echo $member ? esc_attr($member['email']) : ''; ?>"
-                           class="regular-text"
-                           required>
-                </td>
-            </tr>
-            <tr valign="top">
-                <th scope="row">
-                    <label for="phone"><?php _e('Telepon', 'asosiasi'); ?></label>
-                </th>
-                <td>
-                    <input type="tel" 
-                           id="phone"
-                           name="phone" 
-                           value="<?php echo $member ? esc_attr($member['phone']) : ''; ?>"
-                           class="regular-text">
-                </td>
-            </tr>
-            <tr valign="top">
-                <th scope="row">
-                    <label><?php _e('Layanan', 'asosiasi'); ?></label>
-                </th>
-                <td>
-                    <?php if ($all_services = $services->get_services()): ?>
-                        <div class="services-checkbox-list">
-                            <?php foreach ($all_services as $service): ?>
-                                <label class="service-checkbox">
-                                    <input type="checkbox" 
-                                           name="member_services[]" 
-                                           value="<?php echo esc_attr($service['id']); ?>"
-                                           <?php checked(in_array($service['id'], $member_services)); ?>>
-                                    <?php echo esc_html($service['short_name']); ?> - 
-                                    <span class="service-full-name">
-                                        <?php echo esc_html($service['full_name']); ?>
-                                    </span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <p class="description">
-                            <?php _e('Belum ada layanan yang tersedia. ', 'asosiasi'); ?>
-                            <a href="<?php echo admin_url('admin.php?page=asosiasi-settings'); ?>">
-                                <?php _e('Tambah layanan', 'asosiasi'); ?>
-                            </a>
-                        </p>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        </table>
+
+        <div class="form-wrapper">
+            <!-- Informasi Umum -->
+            <h2><?php _e('Informasi Umum', 'asosiasi'); ?></h2>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="company_name"><?php _e('Nama Perusahaan', 'asosiasi'); ?> <span class="required">*</span></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="company_name"
+                               name="company_name" 
+                               value="<?php echo $member ? esc_attr($member['company_name']) : ''; ?>"
+                               class="regular-text"
+                               required>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="business_field"><?php _e('Bidang Usaha', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="business_field"
+                               name="business_field" 
+                               value="<?php echo $member ? esc_attr($member['business_field']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="ahu_number"><?php _e('Nomor Pengesahan AHU', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="ahu_number"
+                               name="ahu_number" 
+                               value="<?php echo $member ? esc_attr($member['ahu_number']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="npwp"><?php _e('NPWP', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="npwp"
+                               name="npwp" 
+                               value="<?php echo $member ? esc_attr($member['npwp']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Informasi Pimpinan -->
+            <h2><?php _e('Informasi Pimpinan', 'asosiasi'); ?></h2>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="company_leader"><?php _e('Pimpinan Perusahaan', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="company_leader"
+                               name="company_leader" 
+                               value="<?php echo $member ? esc_attr($member['company_leader']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="leader_position"><?php _e('Jabatan', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="leader_position"
+                               name="leader_position" 
+                               value="<?php echo $member ? esc_attr($member['leader_position']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Kontak & Lokasi -->
+            <h2><?php _e('Kontak & Lokasi', 'asosiasi'); ?></h2>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="company_address"><?php _e('Alamat Perusahaan', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <textarea id="company_address"
+                                 name="company_address" 
+                                 class="large-text"
+                                 rows="3"><?php echo $member ? esc_textarea($member['company_address']) : ''; ?></textarea>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="city"><?php _e('Kabupaten / Kota', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="city"
+                               name="city" 
+                               value="<?php echo $member ? esc_attr($member['city']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="postal_code"><?php _e('Kode Pos', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="postal_code"
+                               name="postal_code" 
+                               value="<?php echo $member ? esc_attr($member['postal_code']) : ''; ?>"
+                               class="small-text"
+                               maxlength="5">
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="contact_person"><?php _e('Nama Kontak', 'asosiasi'); ?> <span class="required">*</span></label>
+                    </th>
+                    <td>
+                        <input type="text" 
+                               id="contact_person"
+                               name="contact_person" 
+                               value="<?php echo $member ? esc_attr($member['contact_person']) : ''; ?>"
+                               class="regular-text"
+                               required>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="email"><?php _e('Email', 'asosiasi'); ?> <span class="required">*</span></label>
+                    </th>
+                    <td>
+                        <input type="email" 
+                               id="email"
+                               name="email" 
+                               value="<?php echo $member ? esc_attr($member['email']) : ''; ?>"
+                               class="regular-text"
+                               required>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="phone"><?php _e('Telepon', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <input type="tel" 
+                               id="phone"
+                               name="phone" 
+                               value="<?php echo $member ? esc_attr($member['phone']) : ''; ?>"
+                               class="regular-text">
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Layanan -->
+            <h2><?php _e('Layanan', 'asosiasi'); ?></h2>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">
+                        <label><?php _e('Layanan', 'asosiasi'); ?></label>
+                    </th>
+                    <td>
+                        <?php if ($all_services = $services->get_services()): ?>
+                            <div class="services-checkbox-list">
+                                <?php foreach ($all_services as $service): ?>
+                                    <label class="service-checkbox">
+                                        <input type="checkbox" 
+                                               name="member_services[]" 
+                                               value="<?php echo esc_attr($service['id']); ?>"
+                                               <?php checked(in_array($service['id'], $member_services)); ?>>
+                                        <?php echo esc_html($service['short_name']); ?> - 
+                                        <span class="service-full-name">
+                                            <?php echo esc_html($service['full_name']); ?>
+                                        </span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <p class="description">
+                                <?php _e('Belum ada layanan yang tersedia. ', 'asosiasi'); ?>
+                                <a href="<?php echo admin_url('admin.php?page=asosiasi-settings'); ?>">
+                                    <?php _e('Tambah layanan', 'asosiasi'); ?>
+                                </a>
+                            </p>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         <p class="submit">
             <input type="submit" 

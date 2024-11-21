@@ -38,6 +38,12 @@ class Asosiasi_Activator {
             update_option('asosiasi_db_version', '2.3.1');
         }
 
+        // Add new member fields migration
+        if (version_compare($current_db_version, '2.4.0', '<')) {
+            self::migrate_member_fields();
+            update_option('asosiasi_db_version', '2.4.0');
+        }
+
         // Set default options
         self::setup_default_options();
 
@@ -47,6 +53,66 @@ class Asosiasi_Activator {
         }
 
         flush_rewrite_rules();
+    }
+
+    /**
+     * Migration untuk menambah field member baru
+     */
+    private static function migrate_member_fields() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'asosiasi_members';
+
+        // Log untuk debugging
+        if (WP_DEBUG) {
+            error_log('Starting member fields migration...');
+        }
+
+        try {
+            // Array of new columns and their definitions
+            $new_columns = array(
+                'company_leader' => 'VARCHAR(100)',
+                'leader_position' => 'VARCHAR(100)', 
+                'company_address' => 'TEXT',
+                'postal_code' => 'VARCHAR(10)',
+                'business_field' => 'VARCHAR(100)',
+                'ahu_number' => 'VARCHAR(100)',
+                'city' => 'VARCHAR(100)',
+                'npwp' => 'VARCHAR(50)'
+            );
+
+            // Add each column if it doesn't exist
+            foreach ($new_columns as $column => $definition) {
+                $check_column = $wpdb->get_results($wpdb->prepare(
+                    "SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                     WHERE TABLE_SCHEMA = %s 
+                     AND TABLE_NAME = %s 
+                     AND COLUMN_NAME = %s",
+                    DB_NAME,
+                    $table_name,
+                    $column
+                ));
+
+                if (empty($check_column)) {
+                    $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN {$column} {$definition}");
+                    
+                    if (WP_DEBUG) {
+                        error_log("Added column {$column} to members table");
+                    }
+                }
+            }
+
+            if (WP_DEBUG) {
+                error_log('Member fields migration completed successfully');
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            if (WP_DEBUG) {
+                error_log('Member fields migration failed: ' . $e->getMessage());
+            }
+            return false;
+        }
     }
 
     /**
