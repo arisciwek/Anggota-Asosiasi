@@ -126,6 +126,8 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-status-skp-perusahaan.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-status-skp-perusahaan.php';
 
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-settings.php';
+
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
     register_deactivation_hook(__FILE__, array('Asosiasi_Deactivator', 'deactivate'));
@@ -152,6 +154,9 @@ if (empty(asosiasi_check_requirements())) {
     function run_asosiasi() {
         // Initialize main plugin class
         $plugin = new Asosiasi();
+        
+        // Initialize settings handler
+        new Asosiasi_Settings();
         
         // Initialize context-specific enqueuers 
         new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);

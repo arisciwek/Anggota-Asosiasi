@@ -1,12 +1,18 @@
 <?php
+
 /**
  * Tampilan halaman pengaturan utama
  * 
  * @package Asosiasi
- * @version 2.1.2
+ * @version 2.1.3
  * 
  * Changelog:
- * 2.1.2 - 2024-03-13 12:01:10
+ * 2.1.3 - 2024-11-19
+ * - Added Ketua Umum field
+ * - Added Sekretaris Umum field
+ * - Maintained existing organization settings functionality
+ * 
+ * 2.1.2 - 2024-03-13
  * - Added permissions management tab
  * - Updated tab labels for better context
  * - Reorganized tab order for better UX
@@ -78,6 +84,26 @@ $tab_paths = array(
                         <td>
                             <input type="text" id="asosiasi_organization_name" name="asosiasi_organization_name" 
                                 value="<?php echo esc_attr(get_option('asosiasi_organization_name')); ?>" class="regular-text">
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label for="asosiasi_ketua_umum"><?php _e('Ketua Umum', 'asosiasi'); ?></label>
+                        </th>
+                        <td>
+                            <input type="text" id="asosiasi_ketua_umum" name="asosiasi_ketua_umum" 
+                                value="<?php echo esc_attr(get_option('asosiasi_ketua_umum')); ?>" class="regular-text">
+                            <p class="description"><?php _e('Nama lengkap ketua umum organisasi', 'asosiasi'); ?></p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label for="asosiasi_sekretaris_umum"><?php _e('Sekretaris Umum', 'asosiasi'); ?></label>
+                        </th>
+                        <td>
+                            <input type="text" id="asosiasi_sekretaris_umum" name="asosiasi_sekretaris_umum" 
+                                value="<?php echo esc_attr(get_option('asosiasi_sekretaris_umum')); ?>" class="regular-text">
+                            <p class="description"><?php _e('Nama lengkap sekretaris umum organisasi', 'asosiasi'); ?></p>
                         </td>
                     </tr>
                     <tr valign="top">
