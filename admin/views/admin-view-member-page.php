@@ -7,7 +7,7 @@
  * Path: admin/views/admin-view-member-page.php
  * 
  * Changelog:
- * 2.2.0 - 2024-11-15 10:10:12
+ * 2.2.0 - 2024-11-15
  * - Removed image upload/delete forms
  * - Added Edit Photos button
  * - Enlarged image previews
@@ -59,7 +59,7 @@ if ($member) {
             <!-- Container flex -->
             <div style="display: flex; gap: 20px;">
                 <!-- Left Column -->
-                <div style="flex: 0 0 45%;">
+                <div style="flex: 0 0 32%;">
                     <!-- Company Information Card -->
                     <div class="card" style="max-width: 800px; margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd;">
@@ -155,8 +155,13 @@ if ($member) {
                     </div>
                 </div>
 
+                <div style="flex: 0 0 36%;">
+                     <!-- Middle Column - Additional Info -->
+                    <?php include ASOSIASI_DIR . 'admin/views/admin-view-member-additional-info.php'; ?>
+                </div>
+
                 <!-- Right Column - Member Images -->
-                <div style="flex: 0 0 55%;">
+                <div style="flex: 0 0 32%;">
                     <div class="card" style="margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
                             <?php _e('Foto Anggota', 'asosiasi'); ?>
