@@ -3,7 +3,7 @@
  * Dashboard dan daftar anggota asosiasi
  *
  * @package Asosiasi
- * @version 2.1.0
+ * @version 2.1.0 10:10:03
  * Changelog:
  * 2.1.0 - Menambahkan link ke detail anggota pada nama perusahaan
  * 2.0.0 - Menggabungkan dashboard dengan list members
