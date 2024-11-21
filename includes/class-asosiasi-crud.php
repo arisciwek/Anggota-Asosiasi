@@ -3,7 +3,7 @@
  * Kelas untuk menangani operasi CRUD anggota asosiasi
  *
  * @package Asosiasi
- * @version 1.1.0
+ * @version 1.1.0 2024-11-18
  */
 
 class Asosiasi_CRUD {
