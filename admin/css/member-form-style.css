@@ -142,3 +142,61 @@
         text-align: center;
     }
 }
+
+/* Setelah di ubah jadi 2 kolom */
+
+/* Layout styles */
+.form-wrapper {
+    margin-top: 20px;
+}
+
+.two-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.form-section {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-section h2 {
+    margin-top: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.2em;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+    .two-column-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* Keep existing form styles */
+.form-table {
+    margin-top: 0;
+}
+
+.form-table th {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.services-section {
+    grid-column: 1 / -1;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+.informasi-pimpinan{
+    margin-top: 20px;
+}
