@@ -69,6 +69,27 @@ class Asosiasi_Settings {
                 'default' => ''
             )
         );
+            
+        // Certificate settings
+        register_setting(
+            'asosiasi_settings_group',
+            'asosiasi_certificate_header',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default' => ''
+            )
+        );
+        
+        register_setting(
+            'asosiasi_settings_group', 
+            'asosiasi_certificate_footer',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default' => ''
+            )
+        );
     }
 
     /**

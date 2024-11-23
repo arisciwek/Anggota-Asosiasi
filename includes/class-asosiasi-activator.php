@@ -52,6 +52,9 @@ class Asosiasi_Activator {
             Asosiasi_SKP_Cron::schedule_events();
         }
 
+        // Di method activate(), tambahkan:
+        self::setup_certificate_template();
+
         flush_rewrite_rules();
     }
 
@@ -151,6 +154,7 @@ class Asosiasi_Activator {
             '{table_skp_perusahaan}' => $wpdb->prefix . 'asosiasi_skp_perusahaan',
             '{table_member_images}' => $wpdb->prefix . 'asosiasi_member_images',
             '{table_status_history}' => $wpdb->prefix . 'asosiasi_skp_status_history',
+            '{table_certificate_log}' => $wpdb->prefix . 'asosiasi_certificate_log',
             '{wp_users_table}' => $wpdb->users
         );
 
@@ -170,7 +174,8 @@ class Asosiasi_Activator {
             'services',       // Contains both services and member_services
             'member-images',  // Depends on members
             'skp-perusahaan', // Depends on members and services
-            'status-history'  // Depends on skp_perusahaan
+            'status-history',  // Depends on skp_perusahaan
+            'certificate-log'    // Depends on members and users
         );
         
         foreach ($tables as $table) {
@@ -184,6 +189,56 @@ class Asosiasi_Activator {
                 continue;
             }
             dbDelta($sql);
+        }
+    }
+
+    /**
+     * Create certificate related tables
+     */
+    private static function create_certificate_tables() {
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+        // Create upload directory
+        $upload_dir = wp_upload_dir();
+        $cert_dir = $upload_dir['basedir'] . '/asosiasi-certificates';
+        
+        if (!file_exists($cert_dir)) {
+            wp_mkdir_p($cert_dir);
+            
+            // Add .htaccess for security
+            //$htaccess = $cert_dir . '/.htaccess';
+            $htaccess =  $cert_dir . '/templates/.htaccess';
+
+            if (!file_exists($htaccess)) {
+                $content = "Options -Indexes\n";
+                $content .= "<FilesMatch '\.(php|php\.|php3|php4|php5|php7|phtml|pl|py|jsp|asp|htm|shtml|sh|cgi)$'>\n";
+                $content .= "Order Deny,Allow\n";
+                $content .= "Deny from all\n";
+                $content .= "</FilesMatch>\n";
+                
+                file_put_contents($htaccess, $content);
+            }
+
+            // Add index.php
+            $index = $cert_dir . '/index.php';
+            if (!file_exists($index)) {
+                file_put_contents($index, '<?php // Silence is golden');
+            }
+        }
+    }
+    /**
+     * Setup certificate template
+     */
+    private static function setup_certificate_template() {
+        // Load helper
+        require_once ASOSIASI_DIR . 'helpers/certificate-templates.php';
+        
+        // Create template directories
+        asosiasi_create_template_directories();
+            
+        // Copy default template if not exists
+        if (!asosiasi_template_exists()) {
+            asosiasi_copy_default_template();
         }
     }
 

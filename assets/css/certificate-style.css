@@ -1,0 +1,51 @@
+/**
+* Certificate download styles
+* 
+* @package Asosiasi
+* @version 1.0.0
+* Path: assets/css/certificate-style.css
+* 
+* Changelog:
+* 1.0.0 - 2024-11-22
+* - Initial release
+* - Added download button styles
+* - Added loading spinner animation
+*/
+
+.certificate-download {
+   margin: 20px 0;
+   padding: 15px;
+   background: #fff;
+   border: 1px solid #c3c4c7;
+   border-radius: 4px;
+}
+
+.certificate-download .button {
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+}
+
+.certificate-download .description {
+   margin-top: 8px;
+   color: #646970;
+}
+
+/* Loading spinner */
+.dashicons.rotating {
+   animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+   from {
+       transform: rotate(0deg);
+   }
+   to {
+       transform: rotate(360deg);
+   }
+}
+
+/* Notice positioning */
+.notice {
+   margin: 20px 0;
+}

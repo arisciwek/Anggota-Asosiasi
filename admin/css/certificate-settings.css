@@ -1,0 +1,46 @@
+/**
+ * Style untuk tab sertifikat di settings
+ * 
+ * @package Asosiasi
+ * @version 1.0.0
+ * Path: admin/css/certificate-settings.css
+ * 
+ * Changelog:
+ * 1.0.0 - 2024-11-21 18:15 WIB
+ */
+
+.certificate-settings .current-template {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.certificate-settings .current-template .dashicons {
+    color: #2271b1;
+    margin-right: 5px;
+}
+
+.certificate-settings .current-template .dashicons-warning {
+    color: #d63638;
+}
+
+.template-upload-form {
+    max-width: 600px;
+    margin: 20px 0;
+}
+
+.template-fields-guide {
+    margin-top: 30px;
+}
+
+.template-fields-guide code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+}
+
+@media screen and (max-width: 782px) {
+    .template-upload-form {
+        max-width: 100%;
+    }
+}

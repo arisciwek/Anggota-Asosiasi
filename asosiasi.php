@@ -100,6 +100,10 @@ add_action('admin_notices', 'asosiasi_display_requirement_errors');
 
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
+
+    // Load helpers first
+    require_once ASOSIASI_DIR . 'helpers/member-certificate-templates.php';
+
     // Core classes
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-activator.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-upload-directories.php';
@@ -127,6 +131,13 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-status-skp-perusahaan.php';
 
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-settings.php';
+
+    // Generate Sertifikat
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-certificate.php';
+
+    // Certificate class
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-certificate.php'; // Add this line
+
 
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
@@ -166,6 +177,12 @@ if (empty(asosiasi_check_requirements())) {
         // Initialize AJAX handlers
         new Asosiasi_Ajax_Perusahaan();
         new Asosiasi_Ajax_Status_Skp_Perusahaan();
+
+        // Generate Sertifikat 
+        new Asosiasi_Enqueue_Certificate(ASOSIASI_VERSION);
+
+        // Initialize certificate handler
+        new Asosiasi_Certificate();
         
         // Run the plugin
         $plugin->run();

@@ -123,7 +123,7 @@ if ($member) {
                         <?php endif; ?>
                     </div>
 
-                    <!-- Actions Card -->
+                    <!-- Actions Card --><!-- Actions Card -->
                     <div class="card" style="max-width: 800px; margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd;">
                             <?php _e('Aksi', 'asosiasi'); ?>
@@ -151,6 +151,12 @@ if ($member) {
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="member_id" value="<?php echo $member_id; ?>">
                             </form>
+
+                            <?php 
+                            error_log('Calling asosiasi_after_member_info with member_id: ' . $member_id);
+                            // Add download certificate button through hook
+                            do_action('asosiasi_after_member_info', $member_id); 
+                            ?>
                         </div>
                     </div>
                 </div>
