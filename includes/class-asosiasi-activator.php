@@ -53,7 +53,7 @@ class Asosiasi_Activator {
         }
 
         // Di method activate(), tambahkan:
-        self::setup_certificate_template();
+        //self::setup_certificate_template();
 
         flush_rewrite_rules();
     }
@@ -228,7 +228,7 @@ class Asosiasi_Activator {
     }
     /**
      * Setup certificate template
-     */
+     *
     private static function setup_certificate_template() {
         // Load helper
         require_once ASOSIASI_DIR . 'helpers/certificate-templates.php';
@@ -241,6 +241,7 @@ class Asosiasi_Activator {
             asosiasi_copy_default_template();
         }
     }
+    */
 
     /**
      * Migration untuk menambahkan status 'activated' ke enum

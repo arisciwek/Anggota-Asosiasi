@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class untuk mengelola sertifikat anggota
  *
@@ -16,7 +17,13 @@
  * 1.0.0 - Initial release
  */
 
-class Asosiasi_Certificate {
+// Check if WP DocGen is active
+if (!function_exists('wp_docgen')) {
+    return;
+}
+
+
+class Asosiasi_Certificate implements WP_DocGen_Provider {
     
     private $template_id = 'asosiasi-member-certificate';
     private $upload_dir;
@@ -374,6 +381,11 @@ class Asosiasi_Certificate {
             }
         }
     }
+
+    /*
+     *
+     *
+     */
 
 
     /**

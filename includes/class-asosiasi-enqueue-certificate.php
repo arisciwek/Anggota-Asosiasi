@@ -50,6 +50,48 @@ class Asosiasi_Enqueue_Certificate {
             true
         );
 
+
+        /**
+         * Register and enqueue assets
+         */
+        //function asosiasi_register_certificate_assets() {
+            // Only load on certificate settings tab
+            //$current_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'general';
+            //if ($current_tab !== 'certificate') {
+            //    return;
+            //}
+
+            // Register and enqueue CSS
+            wp_register_style(
+                'asosiasi-certificate-style',
+                ASOSIASI_URL . 'admin/css/certificate-style.css',
+                [],
+                ASOSIASI_VERSION
+            );
+
+            // Register and enqueue JavaScript
+            wp_register_script(
+                'asosiasi-certificate-script',
+                ASOSIASI_URL . 'admin/js/certificate-script.js',
+                ['jquery'],
+                ASOSIASI_VERSION,
+                true
+            );
+
+            // Localize script
+            wp_localize_script(
+                'asosiasi-certificate-script',
+                'asosiasi_certificate', [
+                'nonce' => wp_create_nonce('asosiasi_certificate_settings'),
+                'test_error' => __('Terjadi kesalahan saat mengecek direktori.', 'asosiasi'),
+                'cleanup_error' => __('Terjadi kesalahan saat membersihkan file.', 'asosiasi'
+                )
+            ]);
+        //}
+        //add_action('admin_enqueue_scripts', 'asosiasi_register_certificate_assets');
+
+
+
         // Localize script
         wp_localize_script(
             'asosiasi-certificate',
@@ -64,7 +106,7 @@ class Asosiasi_Enqueue_Certificate {
                     'success' => __('Certificate generated successfully', 'asosiasi'),
                     'downloading' => __('Downloading certificate...', 'asosiasi'),
                     'retry' => __('Try again', 'asosiasi'),
-                    'preparingDownload' => __('Preparing download...', 'asosiasi')
+                    'preparingDownload' => __('Preparing download...', 'asosiasi'),
                 )
             )
         );

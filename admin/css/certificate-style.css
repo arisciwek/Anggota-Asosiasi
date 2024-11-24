@@ -1,0 +1,43 @@
+certificate-style.css
+
+
+
+/**
+ * Certificate tab styles
+ * Path: admin/css/certificate-style.css
+ */
+
+.directory-input {
+    display: flex;
+    align-items: stretch;
+    max-width: 800px;
+}
+
+.base-path {
+    display: inline-flex;
+    align-items: center;
+    background: #f0f0f1;
+    padding: 4px 8px;
+    border: 1px solid #8c8f94;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    color: #646970;
+    font-family: monospace;
+    white-space: nowrap;
+    min-height: 30px;
+}
+
+.folder-input {
+    width: 120px !important;
+    border-radius: 0 4px 4px 0 !important;
+    margin: 0 !important;
+    border-left: none !important;
+}
+
+.button-group {
+    margin-top: 10px;
+}
+
+.button-group .button {
+    margin-right: 5px;
+}

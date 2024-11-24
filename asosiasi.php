@@ -182,7 +182,7 @@ if (empty(asosiasi_check_requirements())) {
         new Asosiasi_Enqueue_Certificate(ASOSIASI_VERSION);
 
         // Initialize certificate handler
-        new Asosiasi_Certificate();
+        //new Asosiasi_Certificate();
         
         // Run the plugin
         $plugin->run();

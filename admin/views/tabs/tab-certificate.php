@@ -1,185 +1,137 @@
 <?php
 /**
- * Template tab sertifikat di halaman settings
- *
- * @package Asosiasi
- * @version 1.0.0
- * Path: admin/views/tabs/tab-certificate.php
+ * Tab pengaturan sertifikat
  * 
- * Changelog:
- * 1.0.0 - 2024-11-21 17:55 WIB
- * - Initial release
- * - Added template upload form
- * - Added current template info
- * - Added template preview
+ * @package Asosiasi
+ * @version 2.2.0
+ * Path: admin/views/tabs/tab-certificate.php
  */
 
-defined('ABSPATH') || exit;
-
-// Load helper if not loaded
-if (!function_exists('asosiasi_get_template_path')) {
-    require_once ASOSIASI_DIR . 'helpers/member-certificate-templates.php';
+if (!defined('ABSPATH')) {
+    die;
 }
 
-// Handle template upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'upload_template') {
-    if (!wp_verify_nonce($_POST['_wpnonce'], 'upload_certificate_template')) {
-        wp_die(__('Invalid security token', 'asosiasi'));
+// Get WordPress upload directory info
+$upload_dir = wp_upload_dir();
+$base_path = $upload_dir['basedir'];
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_certificate_settings') {
+    if (!check_admin_referer('asosiasi_certificate_settings')) {
+        wp_die(__('Invalid security token sent.', 'asosiasi'));
     }
 
-    if (!current_user_can('manage_options')) {
-        wp_die(__('Insufficient permissions', 'asosiasi'));
-    }
+    // Update temporary directory folder name only
+    $temp_folder = sanitize_text_field(trim($_POST['temp_folder'], '/'));
+    update_option('asosiasi_temp_folder', $temp_folder);
 
-    // Check file upload
-    if (!isset($_FILES['template_file']) || empty($_FILES['template_file']['tmp_name'])) {
-        add_settings_error(
-            'certificate_template',
-            'no_file',
-            __('Please select a template file to upload', 'asosiasi'),
-            'error'
-        );
-    } else {
-        $file = $_FILES['template_file'];
-        
-        // Validate file type
-        $allowed_types = array('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        if (!in_array($file['type'], $allowed_types)) {
-            add_settings_error(
-                'certificate_template',
-                'invalid_type',
-                __('Only DOCX files are allowed', 'asosiasi'),
-                'error'
-            );
-        } else {
-            // Move file to template directory
-            $template_path = asosiasi_get_template_path();
+    // Update template directory folder name only
+    $template_folder = sanitize_text_field(trim($_POST['template_folder'], '/'));
+    update_option('asosiasi_template_folder', $template_folder);
 
-            if (move_uploaded_file($file['tmp_name'], $template_path)) {
-                add_settings_error(
-                    'certificate_template',
-                    'upload_success',
-                    __('Certificate template updated successfully', 'asosiasi'),
-                    'success'
-                );
-            } else {
-                add_settings_error(
-                    'certificate_template',
-                    'upload_failed',
-                    __('Failed to upload template file', 'asosiasi'),
-                    'error'
-                );
-            }
-        }
-    }
+    // Update output format
+    $output_format = sanitize_text_field($_POST['output_format']);
+    update_option('asosiasi_output_format', $output_format);
+
+    // Update debug mode
+    $debug_mode = isset($_POST['debug_mode']) ? 1 : 0;
+    update_option('asosiasi_debug_mode', $debug_mode);
+
+    add_settings_error(
+        'asosiasi_messages', 
+        'settings_updated', 
+        __('Pengaturan sertifikat berhasil diperbarui.', 'asosiasi'), 
+        'success'
+    );
 }
+
+// Get current settings
+$temp_folder = get_option('asosiasi_temp_folder', 'tmp');
+$template_folder = get_option('asosiasi_template_folder', 'uploads');
+$output_format = get_option('asosiasi_output_format', 'DOCX');
+$debug_mode = get_option('asosiasi_debug_mode', 0);
+
+// Enqueue scripts and styles
+wp_enqueue_style('asosiasi-certificate-style');
+wp_enqueue_script('asosiasi-certificate-script');
 ?>
 
-<div class="wrap certificate-settings">
-    <?php settings_errors('certificate_template'); ?>
+<div class="wrap">
+    <form method="post" action="<?php echo add_query_arg('tab', 'certificate'); ?>">
+        <?php wp_nonce_field('asosiasi_certificate_settings'); ?>
+        <input type="hidden" name="action" value="update_certificate_settings">
 
-    <div class="card">
-        <h3 class="title"><?php _e('Certificate Template', 'asosiasi'); ?></h3>
-        
-        <div class="inside">
-            <!-- Current Template Info -->
-            <div class="current-template">
-                <h4><?php _e('Current Template', 'asosiasi'); ?></h4>
-                <?php if (asosiasi_template_exists()): ?>
-                    <p>
-                        <span class="dashicons dashicons-media-document"></span>
-                        <?php 
-                        $template_path = asosiasi_get_template_path();
-                        $template_size = size_format(filesize($template_path));
-                        $template_date = date_i18n(
-                            get_option('date_format') . ' ' . get_option('time_format'),
-                            filemtime($template_path)
-                        );
-                        
-                        printf(
-                            /* translators: 1: File size 2: Modified date */
-                            __('Template file exists (%1$s, last modified: %2$s)', 'asosiasi'),
-                            $template_size,
-                            $template_date
-                        );
-                        ?>
-                    </p>
-                <?php else: ?>
+        <table class="form-table">
+            <tr>
+                <th scope="row">
+                    <label for="temp_folder"><?php _e('Temporary Directory', 'asosiasi'); ?></label>
+                </th>
+                <td>
+                    <div class="directory-input">
+                        <span class="base-path"><?php echo esc_html($base_path); ?>/</span>
+                        <input type="text" id="temp_folder" name="temp_folder" 
+                               value="<?php echo esc_attr($temp_folder); ?>" 
+                               placeholder="tmp"
+                               class="folder-input">
+                    </div>
                     <p class="description">
-                        <span class="dashicons dashicons-warning"></span>
-                        <?php _e('No custom template uploaded. Using default template.', 'asosiasi'); ?>
+                        <?php _e('Folder for temporary files. Must be writable.', 'asosiasi'); ?>
                     </p>
-                <?php endif; ?>
-            </div>
+                    <div class="button-group">
+                        <button type="button" class="button test-directory" 
+                                data-folder="<?php echo esc_attr($temp_folder); ?>">
+                            <?php _e('Test Directory', 'asosiasi'); ?>
+                        </button>
+                        <button type="button" class="button cleanup-temp-files">
+                            <?php _e('Cleanup Temp Files', 'asosiasi'); ?>
+                        </button>
+                    </div>
+                </td>
+            </tr>
 
-            <!-- Upload Form -->
-            <form method="post" enctype="multipart/form-data" class="template-upload-form">
-                <?php wp_nonce_field('upload_certificate_template'); ?>
-                <input type="hidden" name="action" value="upload_template">
-                
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="template_file"><?php _e('Upload Template', 'asosiasi'); ?></label>
-                        </th>
-                        <td>
-                            <input type="file" 
-                                   name="template_file" 
-                                   id="template_file"
-                                   accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                   required>
-                            <p class="description">
-                                <?php _e('Select DOCX file for the certificate template.', 'asosiasi'); ?>
-                            </p>
-                            <p class="description">
-                                <?php _e('Make sure your template includes required fields marked with ${field_name}', 'asosiasi'); ?>
-                            </p>
-                        </td>
-                    </tr>
-                </table>
+            <tr>
+                <th scope="row">
+                    <label for="template_folder"><?php _e('Template Directory', 'asosiasi'); ?></label>
+                </th>
+                <td>
+                    <div class="directory-input">
+                        <span class="base-path"><?php echo esc_html($base_path); ?>/</span>
+                        <input type="text" id="template_folder" name="template_folder" 
+                               value="<?php echo esc_attr($template_folder); ?>" 
+                               placeholder="uploads"
+                               class="folder-input">
+                    </div>
+                    <p class="description">
+                        <?php _e('Folder for template files (DOCX/ODT).', 'asosiasi'); ?>
+                    </p>
+                </td>
+            </tr>
 
-                <p class="submit">
-                    <button type="submit" class="button button-primary">
-                        <?php _e('Upload Template', 'asosiasi'); ?>
-                    </button>
-                </p>
-            </form>
+            <tr>
+                <th scope="row">
+                    <label for="output_format"><?php _e('Default Output Format', 'asosiasi'); ?></label>
+                </th>
+                <td>
+                    <select name="output_format" id="output_format">
+                        <option value="DOCX" <?php selected($output_format, 'DOCX'); ?>>DOCX</option>
+                        <option value="ODT" <?php selected($output_format, 'ODT'); ?>>ODT</option>
+                        <option value="PDF" <?php selected($output_format, 'PDF'); ?>>PDF</option>
+                    </select>
+                </td>
+            </tr>
 
-            <!-- Template Fields Guide -->
-            <div class="template-fields-guide">
-                <h4><?php _e('Available Template Fields', 'asosiasi'); ?></h4>
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th><?php _e('Field', 'asosiasi'); ?></th>
-                            <th><?php _e('Description', 'asosiasi'); ?></th>
-                            <th><?php _e('Example', 'asosiasi'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>${cert_number}</code></td>
-                            <td><?php _e('Certificate Number', 'asosiasi'); ?></td>
-                            <td>CERT/2024/01/0001/001</td>
-                        </tr>
-                        <tr>
-                            <td><code>${company_name}</code></td>
-                            <td><?php _e('Company Name', 'asosiasi'); ?></td>
-                            <td>PT Example Corporation</td>
-                        </tr>
-                        <tr>
-                            <td><code>${tanggal:date:format}</code></td>
-                            <td><?php _e('Date in Indonesian format', 'asosiasi'); ?></td>
-                            <td>21 November 2024</td>
-                        </tr>
-                        <tr>
-                            <td><code>${qr_data}</code></td>
-                            <td><?php _e('Certificate QR Code', 'asosiasi'); ?></td>
-                            <td>[QR Code Image]</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+            <tr>
+                <th scope="row"><?php _e('Debug Mode', 'asosiasi'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="debug_mode" value="1" 
+                               <?php checked($debug_mode, 1); ?>>
+                        <?php _e('Enable debug mode', 'asosiasi'); ?>
+                    </label>
+                </td>
+            </tr>
+        </table>
+
+        <?php submit_button(__('Simpan Perubahan', 'asosiasi')); ?>
+    </form>
 </div>
