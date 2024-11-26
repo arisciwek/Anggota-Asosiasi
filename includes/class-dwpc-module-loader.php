@@ -2,11 +2,11 @@
 /**
  * Module Loader
  *
- * @package     DocGen_WPClass
+ * @package     Asosiasi
  * @version     1.0.0
  * @author      arisciwek
  * 
- * Path: includes/class-dwpc-module-loader.php
+ * Path: includes/class-asosiasi-module-loader.php
  * 
  * Changelog:
  * 1.0.0 - 2024-11-24
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
-class DocGen_WPClass_Module_Loader {
+class Asosiasi_Module_Loader {
     /**
      * Registered modules
      * @var array
@@ -94,7 +94,7 @@ class DocGen_WPClass_Module_Loader {
             }
 
             // Look for main module file
-            $module_file = $module_dir . '/class-dwpc-module.php';
+            $module_file = $module_dir . '/class-asosiasi-module.php';
             if (file_exists($module_file)) {
                 $this->register_module($module_file);
             }
