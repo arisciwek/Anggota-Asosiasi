@@ -101,9 +101,6 @@ add_action('admin_notices', 'asosiasi_display_requirement_errors');
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
 
-    // Load helpers first
-    require_once ASOSIASI_DIR . 'helpers/member-certificate-templates.php';
-
     // Core classes
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-activator.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-upload-directories.php';
@@ -131,20 +128,6 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-status-skp-perusahaan.php';
 
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-settings.php';
-
-    // Generate Sertifikat
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-certificate.php';
-
-    // Certificate class
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-certificate.php'; // Add this line
-
-    // DocGen Implementation
-    require_once ASOSIASI_DIR . 'includes/class-dwpc.php';
-    require_once ASOSIASI_DIR . 'admin/class-dwpc-admin-menu.php';
-    require_once ASOSIASI_DIR . 'admin/class-dwpc-admin-page.php';
-    require_once ASOSIASI_DIR . 'admin/class-dwpc-settings-page.php';
-    require_once ASOSIASI_DIR . 'admin/class-dwpc-directory-handler.php';
-    require_once ASOSIASI_DIR . 'admin/class-dwpc-directory-migration.php';
 
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
@@ -175,9 +158,6 @@ if (empty(asosiasi_check_requirements())) {
         
         // Initialize settings handler
         new Asosiasi_Settings();
-
-        // Initialize DocGen WPClass Admin Menu
-        DocGen_WPClass_Admin_Menu::get_instance();
         
         // Initialize context-specific enqueuers 
         new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
@@ -187,13 +167,7 @@ if (empty(asosiasi_check_requirements())) {
         // Initialize AJAX handlers
         new Asosiasi_Ajax_Perusahaan();
         new Asosiasi_Ajax_Status_Skp_Perusahaan();
-
-        // Generate Sertifikat 
-        new Asosiasi_Enqueue_Certificate(ASOSIASI_VERSION);
-
-        // Initialize certificate handler
-        //new Asosiasi_Certificate();
-        
+    
         // Run the plugin
         $plugin->run();
 

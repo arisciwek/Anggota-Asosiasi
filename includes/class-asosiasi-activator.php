@@ -22,16 +22,6 @@ class Asosiasi_Activator {
     public static function activate() {
         global $wpdb;
 
-        // Setup DocGen dengan konfigurasi untuk Asosiasi
-        try {
-            docgen_wpclass()->setup([
-                'temp_dir' => 'asosiasi-temp',
-                'template_dir' => 'asosiasi-templates'
-            ]);
-        } catch (Exception $e) {
-            error_log('DocGen setup failed: ' . $e->getMessage());
-        }
-
         $current_db_version = get_option('asosiasi_db_version', '0');
 
         // Create tables
@@ -62,9 +52,6 @@ class Asosiasi_Activator {
         if (class_exists('Asosiasi_SKP_Cron')) {
             Asosiasi_SKP_Cron::schedule_events();
         }
-
-        // Di method activate(), tambahkan:
-        //self::setup_certificate_template();
 
         flush_rewrite_rules();
     }
