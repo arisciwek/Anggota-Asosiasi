@@ -138,6 +138,13 @@ if (empty(asosiasi_check_requirements())) {
     // Certificate class
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-certificate.php'; // Add this line
 
+    // DocGen Implementation
+    require_once ASOSIASI_DIR . 'includes/class-dwpc.php';
+    require_once ASOSIASI_DIR . 'admin/class-dwpc-admin-menu.php';
+    require_once ASOSIASI_DIR . 'admin/class-dwpc-admin-page.php';
+    require_once ASOSIASI_DIR . 'admin/class-dwpc-settings-page.php';
+    require_once ASOSIASI_DIR . 'admin/class-dwpc-directory-handler.php';
+    require_once ASOSIASI_DIR . 'admin/class-dwpc-directory-migration.php';
 
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
@@ -168,6 +175,9 @@ if (empty(asosiasi_check_requirements())) {
         
         // Initialize settings handler
         new Asosiasi_Settings();
+
+        // Initialize DocGen WPClass Admin Menu
+        DocGen_WPClass_Admin_Menu::get_instance();
         
         // Initialize context-specific enqueuers 
         new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
