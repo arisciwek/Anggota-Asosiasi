@@ -31,65 +31,84 @@
  * @license    GPL-2.0+
  */
 
-    if (!defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
 class Host_DocGen_Checker {
     /**
+     * Flag to track if we've already checked
+     */
+    private static $is_checked = false;
+    
+    /**
+     * Cache the check result
+     */
+    private static $check_result = false;
+
+    /**
      * Check DocGen Implementation dependencies
-     * 
-     * @param string $plugin_name Plugin name untuk ditampilkan di error message
-     * @return bool True jika semua dependencies terpenuhi
      */
     public static function check_dependencies($plugin_name) {
-        if (!did_action('docgen_implementation_loaded')) {
+        // Return cached result if already checked
+        if (self::$is_checked) {
+            return self::$check_result;
+        }
+
+        self::$is_checked = true;
+
+        // Check if DocGen Implementation is loaded
+        if (!class_exists('DocGen_Adapter')) {
             add_action('admin_notices', function() use ($plugin_name) {
-                // Tampilkan notice
+                $message = sprintf(
+                    __('%s: DocGen Implementation Plugin is required but not properly loaded.', 'asosiasi'),
+                    '<strong>' . esc_html($plugin_name) . '</strong>'
+                );
+                echo '<div class="notice notice-error is-dismissible"><p>' . wp_kses_post($message) . '</p></div>';
             });
+            
+            self::$check_result = false;
             return false;
         }
 
-        $required_classes = [
-            'DocGen_Implementation_Adapter' => 'Core adapter class',
-            'DocGen_Implementation_Module' => 'Base module class',
-            'DocGen_Implementation_Settings_Manager' => 'Settings management system',
-            'DocGen_Implementation_Module_Loader' => 'Module loading system'
+        // Check required directories
+        $upload_dir = wp_upload_dir();
+        $base_dir = $upload_dir['basedir'];
+        
+        $required_dirs = [
+            'docgen-temp' => trailingslashit($base_dir) . 'docgen-temp',
+            'docgen-templates' => trailingslashit($base_dir) . 'docgen-templates'
         ];
-        
-        $missing_classes = [];
-        
-        foreach ($required_classes as $class => $description) {
-            if (!class_exists($class)) {
-                $missing_classes[$class] = $description;
+
+        $missing_dirs = [];
+        foreach ($required_dirs as $name => $dir) {
+            if (!file_exists($dir)) {
+                $missing_dirs[] = $name;
+            } elseif (!wp_is_writable($dir)) {
+                $missing_dirs[] = "{$name} (not writable)";
             }
         }
-        
-        if (!empty($missing_classes)) {
-            add_action('admin_notices', function() use ($missing_classes, $plugin_name) {
+
+        if (!empty($missing_dirs)) {
+            add_action('admin_notices', function() use ($plugin_name, $missing_dirs) {
                 $message = sprintf(
-                    __('%s requires DocGen Implementation Plugin to be installed and activated.', 'host-docgen'),
+                    __('%s: The following DocGen directories are required:', 'asosiasi'),
                     '<strong>' . esc_html($plugin_name) . '</strong>'
                 );
                 
-                $message .= '<br/><br/>' . __('Missing components:', 'host-docgen');
                 $message .= '<ul style="list-style-type: disc; margin-left: 20px;">';
-                
-                foreach ($missing_classes as $class => $description) {
-                    $message .= sprintf(
-                        '<li>%s (%s)</li>',
-                        esc_html($class),
-                        esc_html($description)
-                    );
+                foreach ($missing_dirs as $dir) {
+                    $message .= '<li>' . esc_html($dir) . '</li>';
                 }
-                
                 $message .= '</ul>';
                 
-                echo '<div class="notice notice-error"><p>' . wp_kses_post($message) . '</p></div>';
+                echo '<div class="notice notice-warning is-dismissible"><p>' . wp_kses_post($message) . '</p></div>';
             });
+            self::$check_result = false;
             return false;
         }
-        
+
+        self::$check_result = true;
         return true;
     }
 }

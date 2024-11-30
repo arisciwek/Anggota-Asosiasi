@@ -40,15 +40,13 @@ $tabs = array(
     'general' => __('Pengaturan Umum', 'asosiasi'),
     'services' => __('Kelola Layanan', 'asosiasi'),
     'permissions' => __('Hak Akses Role', 'asosiasi'),
-    'certificate' => __('Template Sertifikat', 'asosiasi') 
 );
 
 // Define file paths for tab content
 $tab_paths = array(
     'general' => '', // General settings rendered below
     'services' => ASOSIASI_DIR . 'admin/views/tabs/tab-services.php',
-    'permissions' => ASOSIASI_DIR . 'admin/views/tabs/tab-permissions.php',
-    'certificate' => ASOSIASI_DIR . 'admin/views/tabs/tab-certificate.php'
+    'permissions' => ASOSIASI_DIR . 'admin/views/tabs/tab-permissions.php'
 );
 
 ?>
@@ -118,6 +116,8 @@ $tab_paths = array(
                         </td>
                     </tr>
                 </table>
+
+                
                 <?php submit_button(); ?>
             </form>
 

@@ -19,9 +19,10 @@ class Asosiasi {
     }
 
     private function define_admin_hooks() {
-        $plugin_admin = new Asosiasi_Admin($this->version);
-        add_action('admin_menu', array($plugin_admin, 'add_plugin_admin_menu'));
-        add_action('admin_init', array($plugin_admin, 'register_settings'));
+        //$plugin_admin = new Asosiasi_Admin($this->version);
+        //add_action('admin_menu', array($plugin_admin, 'add_plugin_admin_menu'));
+        //add_action('admin_init', array($plugin_admin, 'register_settings'));
+        $plugin_admin = Asosiasi_Admin::get_instance($this->version);
     }
     
     /*

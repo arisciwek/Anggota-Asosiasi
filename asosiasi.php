@@ -82,21 +82,6 @@ function asosiasi_check_requirements() {
     return $errors;
 }
 
-/**
- * Display admin notices for requirement errors
- */
-function asosiasi_display_requirement_errors() {
-    $errors = asosiasi_check_requirements();
-    
-    if (!empty($errors)) {
-        foreach ($errors as $error) {
-            echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
-        }
-        // Deactivate plugin
-        deactivate_plugins(plugin_basename(__FILE__));
-    }
-}
-add_action('admin_notices', 'asosiasi_display_requirement_errors');
 
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
@@ -146,37 +131,36 @@ if (empty(asosiasi_check_requirements())) {
             dirname(ASOSIASI_BASENAME) . '/languages/'
         );
     }
+
     add_action('plugins_loaded', 'asosiasi_load_textdomain');
-
-    /**
-     * Initialize plugin
-     */
-
-    function run_asosiasi() {
-        // Initialize main plugin class
-        $plugin = new Asosiasi();
-        
-        // Initialize settings handler
-        new Asosiasi_Settings();
-        
-        // Initialize context-specific enqueuers 
-        new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
-        new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
-        new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
-        
-        // Initialize AJAX handlers
-        new Asosiasi_Ajax_Perusahaan();
-        new Asosiasi_Ajax_Status_Skp_Perusahaan();
     
-        // Run the plugin
-        $plugin->run();
-
-        // Load SKP functionality if needed
-        if (is_admin() && class_exists('Asosiasi_SKP_Cron')) {
-            Asosiasi_SKP_Cron::schedule_events();
+    function run_asosiasi() {
+    $plugin = new Asosiasi();
+    
+    add_action('plugins_loaded', function() {
+        // Include admin functions
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        
+        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
+            require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
+            
+            if (!Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+                error_log('DocGen Implementation not properly initialized');
+            }
         }
-    }
-
+    }, 15);
+    
+    // Continue with regular plugin initialization...
+    new Asosiasi_Settings();
+    new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
+    new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
+    new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
+    
+    new Asosiasi_Ajax_Perusahaan();
+    new Asosiasi_Ajax_Status_Skp_Perusahaan();
+    
+    $plugin->run();
+}
     // Start the plugin
     run_asosiasi();
 }

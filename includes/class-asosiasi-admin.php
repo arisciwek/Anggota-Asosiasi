@@ -20,6 +20,8 @@
  */
 
 class Asosiasi_Admin {
+
+    private static $instance = null;
     /**
      * The current version of the plugin.
      *
@@ -34,9 +36,17 @@ class Asosiasi_Admin {
      */
     private $settings;
 
+    public static function get_instance($version) {
+        if (null === self::$instance) {
+            self::$instance = new self($version);
+        }
+        return self::$instance;
+    }
+
     public function __construct($version) {
         $this->version = $version;
         $this->settings = new Asosiasi_Settings();
+        $this->init();
     }
 
     public function init() {
