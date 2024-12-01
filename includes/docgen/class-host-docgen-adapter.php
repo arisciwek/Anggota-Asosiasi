@@ -40,12 +40,33 @@
  * @link       https://example.com/host-docgen
  * @since      1.0.0
  */
-
+    
 if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
 class Host_DocGen_Adapter extends DocGen_Adapter {
+
+    private $hooks;
+
+    public function __construct() {
+        // Initialize hooks instance
+        require_once dirname(__FILE__) . '/class-host-docgen-hooks.php';
+        $this->hooks = Host_DocGen_Hooks::get_instance();
+
+        parent::__construct();
+    }
+
+    /**
+     * Get DocGen Implementation directory path
+     *
+     * @since 1.0.0
+     * @return string Full path to DocGen Implementation plugin directory
+     */
+    public function get_docgen_implementation_dir() {
+        return DOCGEN_IMPLEMENTATION_DIR;
+    }
+
     /**
      * Get plugin info
      * @return array Plugin information
