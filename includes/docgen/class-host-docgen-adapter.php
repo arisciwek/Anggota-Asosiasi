@@ -56,7 +56,7 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
 
         parent::__construct();
     }
-
+    
     /**
      * Get DocGen Implementation directory path
      *
@@ -64,7 +64,7 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
      * @return string Full path to DocGen Implementation plugin directory
      */
     public function get_docgen_implementation_dir() {
-        return DOCGEN_IMPLEMENTATION_DIR;
+        return $this->get_docgen_dir();
     }
 
     /**
