@@ -135,32 +135,38 @@ if (empty(asosiasi_check_requirements())) {
     add_action('plugins_loaded', 'asosiasi_load_textdomain');
     
     function run_asosiasi() {
-    $plugin = new Asosiasi();
-    
-    add_action('plugins_loaded', function() {
-        // Include admin functions
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        $plugin = new Asosiasi();
         
-        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
-            require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
+        add_action('plugins_loaded', function() {
+            // Include admin functions
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
             
-            if (!Host_DocGen_Checker::check_dependencies('Asosiasi')) {
-                error_log('DocGen Implementation not properly initialized');
+            if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
+                require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
+                
+                if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+                    // Initialize DocGen integration after main plugin loads
+                    add_action('docgen_implementation_loaded', function() {
+                        require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
+                        $docgen_adapter = new Host_DocGen_Adapter();
+                    });
+                } else {
+                    error_log('DocGen Implementation not properly initialized');
+                }
             }
-        }
-    }, 15);
-    
-    // Continue with regular plugin initialization...
-    new Asosiasi_Settings();
-    new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
-    new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
-    new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
-    
-    new Asosiasi_Ajax_Perusahaan();
-    new Asosiasi_Ajax_Status_Skp_Perusahaan();
-    
-    $plugin->run();
-}
+        }, 15);
+        
+        // Continue with regular plugin initialization...
+        new Asosiasi_Settings();
+        new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
+        new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
+        new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
+        
+        new Asosiasi_Ajax_Perusahaan();
+        new Asosiasi_Ajax_Status_Skp_Perusahaan();
+        
+        $plugin->run();
+    }
     // Start the plugin
     run_asosiasi();
 }

@@ -48,11 +48,16 @@ if (!defined('ABSPATH')) {
 class Host_DocGen_Adapter extends DocGen_Adapter {
 
     private $hooks;
+    private $tab_handler;
 
     public function __construct() {
         // Initialize hooks instance
         require_once dirname(__FILE__) . '/class-host-docgen-hooks.php';
         $this->hooks = Host_DocGen_Hooks::get_instance();
+
+        // Initialize tab handler
+        require_once dirname(__FILE__) . '/class-host-docgen-tab-handler.php';
+        $this->tab_handler = new Host_DocGen_Tab_Handler();
 
         parent::__construct();
     }
