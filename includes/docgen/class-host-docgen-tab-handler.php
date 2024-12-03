@@ -57,14 +57,13 @@ class Host_DocGen_Tab_Handler {
         // Use passed adapter instance
         $this->adapter = $adapter;
         
-        // Get settings manager jika DocGen Implementation aktif
+        // Get settings manager if DocGen Implementation active
         if (class_exists('DocGen_Implementation_Settings_Manager')) {
             $this->settings = DocGen_Implementation_Settings_Manager::get_instance();
             error_log('DocGen Tab Handler constructed');
             $this->init_hooks();
         }
     }
-
 
     /**
      * Initialize hooks
@@ -80,7 +79,11 @@ class Host_DocGen_Tab_Handler {
         add_action('host_render_settings_tab_docgen_directory', array($this, 'render_directory_tab')); 
         add_action('host_render_settings_tab_docgen_templates', array($this, 'render_templates_tab'));
 
+        // Add filter for dashboard cards
+        add_filter('docgen_implementation_dashboard_cards', array($this, 'modify_dashboard_cards'));
+
         error_log('DocGen Tab Handler: Hooks initialized with settings tab handlers');
+
     }
 
     /**
@@ -100,28 +103,20 @@ class Host_DocGen_Tab_Handler {
         return $new_tabs;
     }
 
-
     /**
      * Render dashboard tab content
      */
     public function render_dashboard_tab() {
         error_log('DocGen: Starting dashboard tab render');
         
-        $modules = $this->get_modules();
-        $system_info = $this->get_system_info();
-
-        do_action('docgen_implementation_before_dashboard_content');
+        //$modules = $this->get_modules();
+        //$system_info = $this->get_system_info();
         
-        // Get dashboard view path from adapter
-        $view_path = $this->adapter->get_docgen_implementation_dir() . 'admin/views/dashboard-page.php';
-        error_log('Checking view path: ' . $view_path);
-        
-        if (file_exists($view_path)) {
-            error_log('Loading dashboard view');
-            include $view_path;
+        if (class_exists('DocGen_Implementation_Dashboard_Page')) {
+            $dashboard_page = new DocGen_Implementation_Dashboard_Page();
+            $dashboard_page->render();
         } else {
-            error_log('Dashboard view not found at: ' . $view_path);
-            $this->render_error(__('Dashboard view not found', 'host-docgen'));
+            $this->render_error(__('DocGen Dashboard not available', 'host-docgen'));
         }
         
         do_action('docgen_implementation_after_dashboard_content');
@@ -136,11 +131,11 @@ class Host_DocGen_Tab_Handler {
         
         do_action('docgen_implementation_before_directory_settings');
         
-        $view_path = $this->adapter->get_docgen_implementation_dir() . 'admin/views/directory-settings.php';
-        if (file_exists($view_path)) {
-            include $view_path;
+        if (class_exists('DocGen_Implementation_Settings_Page')) {
+            $settings_page = new DocGen_Implementation_Settings_Page();
+            $settings_page->render_directory_settings($settings);
         } else {
-            $this->render_error(__('Directory settings view not found', 'host-docgen'));
+            $this->render_error(__('Directory settings not available', 'host-docgen'));
         }
         
         do_action('docgen_implementation_after_directory_settings');
@@ -191,7 +186,6 @@ class Host_DocGen_Tab_Handler {
         include $view_path;
     }
 
-
     /**
      * Render error message
      * @param string $message Error message to display
@@ -241,14 +235,46 @@ class Host_DocGen_Tab_Handler {
      */
     private function get_system_info() {
         $upload_dir = wp_upload_dir();
+        $core_settings = $this->settings->get_core_settings();
+        
+        // Dapatkan plugin slug melalui method public
+        $plugin_slug = $this->adapter->get_current_plugin_slug();
+        
+        // Tambahkan plugin slug sebagai subdirektori
+        $temp_dir = isset($core_settings['temp_dir']) ? 
+            trailingslashit($core_settings['temp_dir']) . $plugin_slug :
+            '';
+
         return array(
             'php_version' => PHP_VERSION,
             'wp_version' => get_bloginfo('version'),
-            'docgen_version' => defined('DOCGEN_IMPLEMENTATION_VERSION') ? DOCGEN_IMPLEMENTATION_VERSION : 'N/A',
-            'temp_dir' => $this->settings->get_core_settings()['temp_dir'] ?? '',
-            'template_dir' => $this->settings->get_core_settings()['template_dir'] ?? '',
+            'docgen_version' => defined('DOCGEN_IMPLEMENTATION_VERSION') ? DOCGEN_IMPLEMENTATION_VERSION : 'N/A', 
+            'temp_dir' => $temp_dir,
+            'template_dir' => $core_settings['template_dir'] ?? '',
             'upload_dir' => $upload_dir['basedir']
         );
-    }    
-}
+    }
 
+    public function get_plugin_info_public() {
+        return $this->get_plugin_info();
+    }
+
+    public function modify_dashboard_cards($cards) {
+        if (isset($cards['system_info']['data'])) {
+            $plugin_slug = dirname(plugin_basename(ASOSIASI_FILE));
+
+            if (isset($cards['system_info']['data'])) {
+                $system_info = $cards['system_info']['data'];
+                $cards['system_info']['data'] = array(
+                    'php_version' => $system_info['php_version'], 
+                    'wp_version' => $system_info['wp_version'],
+                    'docgen_version' => $system_info['docgen_version'],
+                    'implementation_version' => DOCGEN_IMPLEMENTATION_VERSION,
+                    'temp_dir' => trailingslashit($system_info['temp_dir']) . $plugin_slug,
+                    'template_dir' => trailingslashit($system_info['template_dir']) . $plugin_slug
+                );
+            }
+        }
+        return $cards;
+    }
+}

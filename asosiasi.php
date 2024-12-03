@@ -148,12 +148,10 @@ if (empty(asosiasi_check_requirements())) {
                 
                 if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
                     require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
-                    //require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-tab-handler.php';
+                    require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-hooks.php';
                     
                     $docgen_adapter = new Host_DocGen_Adapter();
-                    //$docgen_tab_handler = new Host_DocGen_Tab_Handler($docgen_adapter);
-
-                    //error_log('Tab handler initialized: ' . ($docgen_tab_handler ? 'yes' : 'no'));
+                    Host_DocGen_Hooks::get_instance(); // Initialize hooks
                 }
             }
 

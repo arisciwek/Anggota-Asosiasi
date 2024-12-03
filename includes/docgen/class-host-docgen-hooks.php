@@ -49,7 +49,7 @@ class Host_DocGen_Hooks {
     }
 
     public function __construct() {
-        $this->init_hooks();
+        
     }
 
     private function init_hooks() {
@@ -67,7 +67,14 @@ class Host_DocGen_Hooks {
         add_filter('docgen_implementation_template_fields', array($this, 'add_template_fields'));
     }
 
-    // metfod related
+    // Add adapter setter
+    public function set_adapter($adapter) {
+        $this->adapter = $adapter;
+        if (!$this->hooks_initialized) {
+            $this->init_hooks();
+            $this->hooks_initialized = true;
+        }
+    }
 
     /**
      * Add dashboard header content
@@ -77,19 +84,6 @@ class Host_DocGen_Hooks {
         echo '<h2>' . esc_html__('Document Generation', 'host-docgen') . '</h2>';
         echo '<p>' . esc_html__('Generate and manage documents using DocGen Implementation.', 'host-docgen') . '</p>';
         echo '</div>';
-    }
-
-    /**
-     * Add custom cards to dashboard
-     * @param array $cards Existing dashboard cards
-     * @return array Modified cards array
-     */
-    public function add_host_cards($cards) {
-        $cards['host_templates'] = array(
-            'callback' => array($this, 'render_templates_card'),
-            'templates' => $this->get_templates()  
-        );
-        return $cards;
     }
 
     /**
@@ -321,7 +315,41 @@ class Host_DocGen_Hooks {
         echo '</div>';
     }
 
+    /**
+     * Add custom cards to dashboard
+     * @param array $cards Existing dashboard cards
+     * @return array Modified cards array
+     */ 
+    public function add_host_cards($cards) {
+        error_log('DocGen: add_host_cards is called');
+        error_log('DocGen: Original cards: ' . print_r($cards, true));
+        
+        if (isset($cards['system_info']) && isset($cards['system_info']['data'])) {
+            error_log('DocGen: Found system_info card');
+            $system_info = $cards['system_info']['data'];
+            $plugin_slug = $this->adapter->get_current_plugin_slug();
+            error_log('DocGen: Plugin slug: ' . $plugin_slug);
+            
+            // Pastikan strukturnya sama dengan aslinya
+            $cards['system_info'] = array(
+                'callback' => $cards['system_info']['callback'],
+                'data' => array(
+                    'php_version' => $system_info['php_version'],
+                    'wp_version' => $system_info['wp_version'],
+                    'docgen_version' => $system_info['docgen_version'],
+                    'temp_dir' => trailingslashit($system_info['temp_dir']) . $plugin_slug,
+                    'template_dir' => $system_info['template_dir'] . $plugin_slug,
+                    'upload_dir' => $system_info['upload_dir']
+                )
+            );
+            error_log('DocGen: Modified system_info card - new temp_dir: ' . trailingslashit($system_info['temp_dir']) . $plugin_slug);
+        } else {
+            error_log('DocGen: system_info card not found in cards array');
+        }
 
+        error_log('DocGen: Final modified cards: ' . print_r($cards, true));
+        return $cards;
+    }
 
     // ...
 }

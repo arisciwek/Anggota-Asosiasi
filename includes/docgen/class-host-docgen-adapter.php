@@ -134,4 +134,14 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
             ];
         }, $modules);
     }
+
+    /**
+     * Get current plugin slug
+     * @return string Plugin slug
+     */
+    public function get_current_plugin_slug() {
+        $plugin_info = $this->get_plugin_info();
+        return $plugin_info['slug'];
+    }
+
 }
