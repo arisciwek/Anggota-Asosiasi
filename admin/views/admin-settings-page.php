@@ -1,31 +1,17 @@
 <?php
-
 /**
  * Tampilan halaman pengaturan utama
  * 
  * @package Asosiasi
- * @version 2.1.3
+ * @version 2.1.4
  * 
  * Changelog:
- * 2.1.3 - 2024-11-19
- * - Added Ketua Umum field
- * - Added Sekretaris Umum field
- * - Maintained existing organization settings functionality
+ * 2.1.4 - 2024-12-01 10:30:00
+ * - Added hook host_settings_tabs for tab registration
+ * - Added hook host_settings_tab_paths for tab content paths
+ * - Added hook host_render_settings_tab_{$current_tab}
+ * - Maintained existing structure and functionality
  * 
- * 2.1.2 - 2024-03-13
- * - Added permissions management tab
- * - Updated tab labels for better context
- * - Reorganized tab order for better UX
- * 
- * 2.1.1 - 2024-03-13
- * - Added roles management tab
- * - Updated tab paths configuration
- * 
- * 2.1.0 - 2024-03-13
- * - Restructured settings into modular tab system
- * - Separated services management into its own file
- * - Added tab interface for settings
- * - Improved code organization for future tab additions
  */
 
 if (!defined('ABSPATH')) {
@@ -37,10 +23,15 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'genera
 
 // Define tabs - tambahkan tab baru di sini
 $tabs = array(
-    'general' => __('Pengaturan Umum', 'asosiasi'),
-    'services' => __('Kelola Layanan', 'asosiasi'),
-    'permissions' => __('Hak Akses Role', 'asosiasi'),
+    'general' => __('Pengaturan Umum', 'host'),
+    'services' => __('Kelola Layanan', 'host'),
+    'permissions' => __('Hak Akses Role', 'host'),
 );
+
+// Tambahkan debug
+error_log('Before filter tabs: ' . print_r($tabs, true));
+$tabs = apply_filters('host_settings_tabs', $tabs);
+error_log('After filter tabs: ' . print_r($tabs, true));
 
 // Define file paths for tab content
 $tab_paths = array(
@@ -48,6 +39,16 @@ $tab_paths = array(
     'services' => ASOSIASI_DIR . 'admin/views/tabs/tab-services.php',
     'permissions' => ASOSIASI_DIR . 'admin/views/tabs/tab-permissions.php'
 );
+
+// Di atas apply_filters
+error_log('About to apply host_settings_tabs filter');
+error_log('Available filters: ' . print_r(isset($wp_filter['host_settings_tabs']) ? $wp_filter['host_settings_tabs'] : 'none', true));
+
+$tabs = apply_filters('host_settings_tabs', $tabs);
+
+// Filter untuk extensibility
+$tabs = apply_filters('host_settings_tabs', $tabs);
+$tab_paths = apply_filters('host_settings_tab_paths', $tab_paths);
 
 ?>
 
@@ -79,7 +80,7 @@ $tab_paths = array(
                 <table class="form-table">
                     <tr valign="top">
                         <th scope="row">
-                            <label for="asosiasi_organization_name"><?php _e('Nama Organisasi', 'asosiasi'); ?></label>
+                            <label for="asosiasi_organization_name"><?php _e('Nama Organisasi', 'host'); ?></label>
                         </th>
                         <td>
                             <input type="text" id="asosiasi_organization_name" name="asosiasi_organization_name" 
@@ -88,27 +89,27 @@ $tab_paths = array(
                     </tr>
                     <tr valign="top">
                         <th scope="row">
-                            <label for="asosiasi_ketua_umum"><?php _e('Ketua Umum', 'asosiasi'); ?></label>
+                            <label for="asosiasi_ketua_umum"><?php _e('Ketua Umum', 'host'); ?></label>
                         </th>
                         <td>
                             <input type="text" id="asosiasi_ketua_umum" name="asosiasi_ketua_umum" 
                                 value="<?php echo esc_attr(get_option('asosiasi_ketua_umum')); ?>" class="regular-text">
-                            <p class="description"><?php _e('Nama lengkap ketua umum organisasi', 'asosiasi'); ?></p>
+                            <p class="description"><?php _e('Nama lengkap ketua umum organisasi', 'host'); ?></p>
                         </td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">
-                            <label for="asosiasi_sekretaris_umum"><?php _e('Sekretaris Umum', 'asosiasi'); ?></label>
+                            <label for="asosiasi_sekretaris_umum"><?php _e('Sekretaris Umum', 'host'); ?></label>
                         </th>
                         <td>
                             <input type="text" id="asosiasi_sekretaris_umum" name="asosiasi_sekretaris_umum" 
                                 value="<?php echo esc_attr(get_option('asosiasi_sekretaris_umum')); ?>" class="regular-text">
-                            <p class="description"><?php _e('Nama lengkap sekretaris umum organisasi', 'asosiasi'); ?></p>
+                            <p class="description"><?php _e('Nama lengkap sekretaris umum organisasi', 'host'); ?></p>
                         </td>
                     </tr>
                     <tr valign="top">
                         <th scope="row">
-                            <label for="asosiasi_contact_email"><?php _e('Email Kontak', 'asosiasi'); ?></label>
+                            <label for="asosiasi_contact_email"><?php _e('Email Kontak', 'host'); ?></label>
                         </th>
                         <td>
                             <input type="email" id="asosiasi_contact_email" name="asosiasi_contact_email" 
@@ -117,17 +118,43 @@ $tab_paths = array(
                     </tr>
                 </table>
 
-                
                 <?php submit_button(); ?>
             </form>
 
         <?php 
         else:
-            // Load other tab content from separate files
-            if (!empty($tab_paths[$current_tab]) && file_exists($tab_paths[$current_tab])) {
-                require_once $tab_paths[$current_tab];
+            // Check for custom tab content via action
+            ob_start();
+            do_action('host_render_settings_tab_' . $current_tab);
+            //do_action('host_render_tab_' . $current_tab);
+
+            $custom_content = ob_get_clean();
+            
+            if (!empty($custom_content)) {
+                // Display custom tab content from action
+                echo $custom_content;
+            } 
+            else{
+                error_log('Attempting to render tab: ' . $current_tab);
+
+                // Check for custom tab content via action hook
+                ob_start();
+                do_action('host_render_settings_tab_' . $current_tab);
+                $custom_content = ob_get_clean();
+                
+                if (!empty($custom_content)) {
+                    // Display custom tab content from action
+                    echo $custom_content;
+                    error_log('Custom content rendered for tab: ' . $current_tab);
+                } else {
+                    error_log('No custom content, checking tab path for: ' . $current_tab);
+                    // Load default tab content if exists
+                    if (!empty($tab_paths[$current_tab]) && file_exists($tab_paths[$current_tab])) {
+                        require_once $tab_paths[$current_tab];
+                    }
+                }
             }
-        endif; 
+            endif;
         ?>
     </div>
 </div>

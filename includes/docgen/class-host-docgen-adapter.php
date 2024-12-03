@@ -57,7 +57,7 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
 
         // Initialize tab handler
         require_once dirname(__FILE__) . '/class-host-docgen-tab-handler.php';
-        $this->tab_handler = new Host_DocGen_Tab_Handler();
+        $this->tab_handler = new Host_DocGen_Tab_Handler($this);
 
         parent::__construct();
     }

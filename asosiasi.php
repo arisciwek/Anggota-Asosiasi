@@ -141,19 +141,22 @@ if (empty(asosiasi_check_requirements())) {
             // Include admin functions
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
             
+            global $docgen_tab_handler;
+            
             if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
                 require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
                 
                 if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
-                    // Initialize DocGen integration after main plugin loads
-                    add_action('docgen_implementation_loaded', function() {
-                        require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
-                        $docgen_adapter = new Host_DocGen_Adapter();
-                    });
-                } else {
-                    error_log('DocGen Implementation not properly initialized');
+                    require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
+                    require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-tab-handler.php';
+                    
+                    $docgen_adapter = new Host_DocGen_Adapter();
+                    $docgen_tab_handler = new Host_DocGen_Tab_Handler($docgen_adapter);
+
+                    error_log('Tab handler initialized: ' . ($docgen_tab_handler ? 'yes' : 'no'));
                 }
             }
+
         }, 15);
         
         // Continue with regular plugin initialization...
