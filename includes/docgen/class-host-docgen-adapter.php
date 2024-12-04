@@ -54,6 +54,7 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
         // Initialize hooks instance
         require_once dirname(__FILE__) . '/class-host-docgen-hooks.php';
         $this->hooks = Host_DocGen_Hooks::get_instance();
+        $this->hooks->set_adapter($this); // Tambahkan ini
 
         // Initialize tab handler
         require_once dirname(__FILE__) . '/class-host-docgen-tab-handler.php';

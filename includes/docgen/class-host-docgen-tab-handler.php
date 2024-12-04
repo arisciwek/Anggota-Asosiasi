@@ -106,9 +106,9 @@ class Host_DocGen_Tab_Handler {
     /**
      * Render dashboard tab content
      */
+    
+
     public function render_dashboard_tab() {
-        error_log('DocGen: Starting dashboard tab render');
-        
         //$modules = $this->get_modules();
         //$system_info = $this->get_system_info();
         
@@ -120,27 +120,28 @@ class Host_DocGen_Tab_Handler {
         }
         
         do_action('docgen_implementation_after_dashboard_content');
-        error_log('DocGen: Finished dashboard tab render');
     }
 
     /**
      * Render directory settings tab content
      */
     public function render_directory_tab() {
-        $settings = $this->get_directory_settings();
-        
-        do_action('docgen_implementation_before_directory_settings');
+        if (!$this->settings) {
+            $this->render_error(__('DocGen settings not available', 'host-docgen'));
+            return;
+        }
+
+        $settings = $this->settings->get_core_settings();
         
         if (class_exists('DocGen_Implementation_Settings_Page')) {
             $settings_page = new DocGen_Implementation_Settings_Page();
-            $settings_page->render_directory_settings($settings);
+            // Gunakan method render() yang public
+            $settings_page->render(); 
         } else {
-            $this->render_error(__('Directory settings not available', 'host-docgen'));
+            $this->render_error(__('DocGen Settings Page not available', 'host-docgen'));
         }
-        
-        do_action('docgen_implementation_after_directory_settings');
     }
-
+    
     /**
      * Render template settings tab content
      */

@@ -41,6 +41,10 @@ if (!defined('ABSPATH')) {
 class Host_DocGen_Hooks {
     private static $instance = null;
 
+    // Declare these properties
+    private $adapter;
+    private $hooks_initialized = false; // Initialize with default value
+    
     public static function get_instance() {
         if (null === self::$instance) {
             self::$instance = new self();
