@@ -144,5 +144,26 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
         $plugin_info = $this->get_plugin_info();
         return $plugin_info['slug'];
     }
+    
+    public function get_docgen_temp_path() {
+        // Get DocGen settings untuk ambil nama folder temp
+        $docgen_settings = get_option('docgen_implementation_settings', array());
+        $temp_folder = basename($docgen_settings['temp_dir'] ?? 'docgen-temp');
+        
+        $upload_dir = wp_upload_dir();
+        $plugin_slug = $this->get_current_plugin_slug(); // akan return 'asosiasi'
+        
+        return trailingslashit($upload_dir['basedir']) . $temp_folder . '/' . $plugin_slug;
+    }
 
+    public function get_docgen_template_path() {
+        // Get DocGen settings untuk ambil nama folder template
+        $docgen_settings = get_option('docgen_implementation_settings', array());
+        $template_folder = basename($docgen_settings['template_dir'] ?? 'docgen-templates');
+        
+        $upload_dir = wp_upload_dir();
+        $plugin_slug = $this->get_current_plugin_slug();
+        
+        return trailingslashit($upload_dir['basedir']) . $template_folder . '/' . $plugin_slug;
+    }
 }

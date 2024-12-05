@@ -28,10 +28,7 @@ $tabs = array(
     'permissions' => __('Hak Akses Role', 'host'),
 );
 
-// Tambahkan debug
-error_log('Before filter tabs: ' . print_r($tabs, true));
 $tabs = apply_filters('host_settings_tabs', $tabs);
-error_log('After filter tabs: ' . print_r($tabs, true));
 
 // Define file paths for tab content
 $tab_paths = array(
@@ -41,8 +38,6 @@ $tab_paths = array(
 );
 
 // Di atas apply_filters
-error_log('About to apply host_settings_tabs filter');
-error_log('Available filters: ' . print_r(isset($wp_filter['host_settings_tabs']) ? $wp_filter['host_settings_tabs'] : 'none', true));
 
 $tabs = apply_filters('host_settings_tabs', $tabs);
 

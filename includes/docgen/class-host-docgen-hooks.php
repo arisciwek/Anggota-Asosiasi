@@ -69,6 +69,60 @@ class Host_DocGen_Hooks {
         add_filter('docgen_implementation_template_validators', array($this, 'add_template_validators'));
         add_action('docgen_implementation_before_template_upload', array($this, 'prepare_template_upload'));
         add_filter('docgen_implementation_template_fields', array($this, 'add_template_fields'));
+    
+        // Directory settings hooks
+        add_action('docgen_implementation_before_directory_settings', array($this, 'before_directory_settings'));
+        add_action('docgen_implementation_after_directory_settings', array($this, 'after_directory_settings'));
+
+        // Tambahkan filter untuk modifikasi paths
+        add_filter('docgen_implementation_directory_settings', array($this, 'modify_directory_paths'));
+
+        // Filter untuk base directory sebenarnya
+        add_filter('docgen_implementation_base_directory', function($base_path) {
+            //return trailingslashit($base_path) . 'my-plugin-slug';
+            return $base_path;
+        });
+
+            // Filter untuk modifikasi display path
+        add_filter('docgen_implementation_display_path', array($this, 'modify_display_path'));
+
+
+    }
+    
+    public function modify_directory_paths($settings) {
+        if (isset($settings['temp_dir'])) {
+            $settings['temp_dir'] = $this->adapter->get_docgen_temp_path() . $plugin_slug;
+        }
+        if (isset($settings['template_dir'])) {
+            $settings['template_dir'] = $this->adapter->get_docgen_template_path()  . $plugin_slug; 
+        }
+        return $settings;
+    }
+
+
+    // Method baru untuk handle filter
+    public function modify_display_path($path) {
+        $docgen_base = $this->adapter->get_docgen_implementation_dir();
+        $plugin_slug = $this->adapter->get_current_plugin_slug();
+        
+        return trailingslashit($docgen_base) . $plugin_slug;
+    }
+    
+
+    /**
+     * Action sebelum render directory settings
+     * @param array $settings Settings data
+     */
+    public function before_directory_settings($settings) {
+        echo '<div class="host-docgen-directory-settings">';
+    }
+
+    /**
+     * Action setelah render directory settings
+     * @param array $settings Settings data
+     */
+    public function after_directory_settings($settings) {
+        echo '</div>';
     }
 
     // Add adapter setter
@@ -325,15 +379,9 @@ class Host_DocGen_Hooks {
      * @return array Modified cards array
      */ 
     public function add_host_cards($cards) {
-        error_log('DocGen: add_host_cards is called');
-        error_log('DocGen: Original cards: ' . print_r($cards, true));
-        
-        if (isset($cards['system_info']) && isset($cards['system_info']['data'])) {
-            error_log('DocGen: Found system_info card');
+        if (isset($cards['system_info']) && isset($cards['system_info']['data'])) {    
             $system_info = $cards['system_info']['data'];
-            $plugin_slug = $this->adapter->get_current_plugin_slug();
-            error_log('DocGen: Plugin slug: ' . $plugin_slug);
-            
+            $plugin_slug = $this->adapter->get_current_plugin_slug();    
             // Pastikan strukturnya sama dengan aslinya
             $cards['system_info'] = array(
                 'callback' => $cards['system_info']['callback'],
@@ -351,7 +399,6 @@ class Host_DocGen_Hooks {
             error_log('DocGen: system_info card not found in cards array');
         }
 
-        error_log('DocGen: Final modified cards: ' . print_r($cards, true));
         return $cards;
     }
 

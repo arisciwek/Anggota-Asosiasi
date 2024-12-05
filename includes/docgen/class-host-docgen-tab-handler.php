@@ -82,6 +82,9 @@ class Host_DocGen_Tab_Handler {
         // Add filter for dashboard cards
         add_filter('docgen_implementation_dashboard_cards', array($this, 'modify_dashboard_cards'));
 
+        // Tambahkan filter untuk modifikasi directory paths
+        add_filter('docgen_implementation_directory_settings', array($this, 'modify_directory_paths'));
+
         error_log('DocGen Tab Handler: Hooks initialized with settings tab handlers');
 
     }
@@ -124,50 +127,55 @@ class Host_DocGen_Tab_Handler {
 
     /**
      * Render directory settings tab content
-     */
+     *
     public function render_directory_tab() {
-        if (!$this->settings) {
-            $this->render_error(__('DocGen settings not available', 'host-docgen'));
+        if (!$this->adapter) {
+            $this->render_error(__('DocGen adapter not available', 'host-docgen'));
             return;
         }
 
-        $settings = $this->settings->get_core_settings();
+        // Load required classes
+        $docgen_dir = $this->adapter->get_docgen_implementation_dir();
+        require_once $docgen_dir . 'admin/class-admin-page.php';
+        require_once $docgen_dir . 'admin/class-settings-page.php';
         
-        if (class_exists('DocGen_Implementation_Settings_Page')) {
-            $settings_page = new DocGen_Implementation_Settings_Page();
-            // Gunakan method render() yang public
-            $settings_page->render(); 
-        } else {
-            $this->render_error(__('DocGen Settings Page not available', 'host-docgen'));
-        }
+        $settings_page = new DocGen_Implementation_Settings_Page();
+        
+        // Dapatkan settings dan modifikasi path
+        $settings = $this->settings->get_core_settings();
+        $plugin_slug = $this->adapter->get_current_plugin_slug();
+        
+        $settings['temp_dir'] = trailingslashit($settings['temp_dir']) . $plugin_slug;
+        $settings['template_dir'] = trailingslashit($settings['template_dir']) . $plugin_slug;
+        
+        $settings_page->render_directory_settings_public($settings);
     }
+    */
     
-    /**
-     * Render template settings tab content
-     */
-    public function render_templates_tab() {
-        // Pastikan settings tersedia
-        if (!$this->settings) {
-            $this->render_error(__('DocGen settings not available', 'host-docgen'));
+
+    public function render_directory_tab() {
+        if (!$this->adapter) {
+            $this->render_error(__('DocGen adapter not available', 'host-docgen'));
             return;
         }
 
-        // Get settings dari DocGen Implementation
+        // Load required classes
+        $docgen_dir = $this->adapter->get_docgen_implementation_dir();
+        require_once $docgen_dir . 'admin/class-admin-page.php';
+        require_once $docgen_dir . 'admin/class-settings-page.php';
+        
+        $settings_page = new DocGen_Implementation_Settings_Page();
+        
+        // Dapatkan settings dan modifikasi path
         $settings = $this->settings->get_core_settings();
         
-        // Dapatkan instance DocGen Implementation settings page
-        if (class_exists('DocGen_Implementation_Settings_Page')) {
-            $settings_page = new DocGen_Implementation_Settings_Page();
-            
-            // Load view dengan passing settings page instance 
-            $this->load_docgen_view('template-settings.php', array(
-                'settings' => $settings,
-                'settings_page' => $settings_page
-            ));
-        } else {
-            $this->render_error(__('DocGen Settings Page not available', 'host-docgen'));
-        }
+        // Pastikan adapter diteruskan saat render
+        $settings_page->render_directory_settings_public([
+            'settings' => $settings,
+            'adapter' => $this->adapter  // Pastikan ini diteruskan
+        ]);
     }
+
 
     /**
      * Helper untuk load DocGen view dengan data
@@ -180,11 +188,17 @@ class Host_DocGen_Tab_Handler {
             return;
         }
 
-        // Extract data ke variables
-        extract($data);
+        // Extract data ke variables tapi tidak include $this
+        foreach ($data as $key => $value) {
+            if ($key !== 'this') {
+                $$key = $value;
+            }
+        }
         
-        // Load view
-        include $view_path;
+        // Load view dengan $this dari settings_page
+        if (isset($data['settings_page'])) {
+            $data['settings_page']->render_directory_settings($settings);
+        }
     }
 
     /**
@@ -260,22 +274,37 @@ class Host_DocGen_Tab_Handler {
         return $this->get_plugin_info();
     }
 
+    /**
+     * Modifikasi path direktori untuk include plugin subdirektori
+     */
     public function modify_dashboard_cards($cards) {
         if (isset($cards['system_info']['data'])) {
-            $plugin_slug = dirname(plugin_basename(ASOSIASI_FILE));
-
-            if (isset($cards['system_info']['data'])) {
-                $system_info = $cards['system_info']['data'];
-                $cards['system_info']['data'] = array(
-                    'php_version' => $system_info['php_version'], 
-                    'wp_version' => $system_info['wp_version'],
-                    'docgen_version' => $system_info['docgen_version'],
-                    'implementation_version' => DOCGEN_IMPLEMENTATION_VERSION,
-                    'temp_dir' => trailingslashit($system_info['temp_dir']) . $plugin_slug,
-                    'template_dir' => trailingslashit($system_info['template_dir']) . $plugin_slug
-                );
-            }
+            $system_info = $cards['system_info']['data'];
+            $cards['system_info']['data'] = array(
+                'php_version' => $system_info['php_version'],
+                'wp_version' => $system_info['wp_version'], 
+                'docgen_version' => $system_info['docgen_version'],
+                'implementation_version' => DOCGEN_IMPLEMENTATION_VERSION,
+                'temp_dir' => $this->adapter->get_docgen_temp_path(),
+                'template_dir' => $this->adapter->get_docgen_template_path()
+            );
         }
         return $cards;
     }
+
+    public function modify_directory_paths($settings) {
+        if (!$this->adapter) {
+            return $settings;
+        }
+        
+        if (isset($settings['temp_dir'])) {
+            $settings['temp_dir'] = $this->adapter->get_docgen_temp_path();
+        }
+        if (isset($settings['template_dir'])) {
+            $settings['template_dir'] = $this->adapter->get_docgen_template_path();
+        }
+        
+        return $settings;
+    }
+
 }
