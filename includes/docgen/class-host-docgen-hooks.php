@@ -88,17 +88,20 @@ class Host_DocGen_Hooks {
 
 
     }
-    
     public function modify_directory_paths($settings) {
+        if (!$this->adapter) {
+            return $settings;
+        }
+        
         if (isset($settings['temp_dir'])) {
-            $settings['temp_dir'] = $this->adapter->get_docgen_temp_path() . $plugin_slug;
+            $settings['temp_dir'] = $this->adapter->get_docgen_temp_path();
         }
         if (isset($settings['template_dir'])) {
-            $settings['template_dir'] = $this->adapter->get_docgen_template_path()  . $plugin_slug; 
+            $settings['template_dir'] = $this->adapter->get_docgen_template_path();
         }
+        
         return $settings;
     }
-
 
     // Method baru untuk handle filter
     public function modify_display_path($path) {

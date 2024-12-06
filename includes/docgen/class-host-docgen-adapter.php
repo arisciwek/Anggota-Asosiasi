@@ -49,8 +49,9 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
 
     private $hooks;
     private $tab_handler;
+    private $plugin_file; // Tambahkan property
 
-    public function __construct() {
+    public function __construct($plugin_file = null) {
         // Initialize hooks instance
         require_once dirname(__FILE__) . '/class-host-docgen-hooks.php';
         $this->hooks = Host_DocGen_Hooks::get_instance();
@@ -73,13 +74,31 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
         return $this->get_docgen_dir();
     }
 
+
+// Mendapatkan slug plugin tertentu berdasarkan path file
+function get_plugin_slug($file) {
+    $path = dirname($file);
+    $path = str_replace(WP_PLUGIN_DIR . '/', '', $path);
+
+    // Pecah berdasarkan separator direktori '/'
+    $path_parts = explode('/', $path);
+
+    // Ambil bagian awal (direktori pertama)
+    $plugin_dir = $path_parts[0]; 
+
+    return $plugin_dir;
+}
     /**
      * Get plugin info
      * @return array Plugin information
      */
     protected function get_plugin_info() {
+
+        $plugin_slug = $this->get_plugin_slug(__FILE__);
+
         return [
-            'slug' => 'host-docgen',
+            'slug' => $plugin_slug,
+            //'slug' => 'host-docgen',
             'name' => 'Host DocGen',
             'version' => '1.0.0',
             'author' => 'Host Developer',
@@ -145,6 +164,22 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
         return $plugin_info['slug'];
     }
     
+    /*
+    public function get_current_plugin_slug() {
+        if ($this->plugin_file) {
+            return dirname(plugin_basename($this->plugin_file)); 
+        }
+        // Fallback jika tidak ada plugin_file
+        return dirname(plugin_basename(__FILE__));
+    }
+    */
+
+    // Di class-host-docgen-adapter.php
+    //public function get_current_plugin_slug() {
+    //    return dirname(plugin_basename(__FILE__));  
+    //}
+
+    /*
     public function get_docgen_temp_path() {
         // Get DocGen settings untuk ambil nama folder temp
         $docgen_settings = get_option('docgen_implementation_settings', array());
@@ -155,6 +190,23 @@ class Host_DocGen_Adapter extends DocGen_Adapter {
         
         return trailingslashit($upload_dir['basedir']) . $temp_folder . '/' . $plugin_slug;
     }
+    */
+
+    public function get_docgen_temp_path() {
+        $docgen_settings = get_option('docgen_implementation_settings', array());
+        $temp_folder = basename($docgen_settings['temp_dir'] ?? 'docgen-temp');
+
+        $upload_dir = wp_upload_dir();
+
+        $plugin_slug = $this->get_current_plugin_slug();
+
+        // Saat ini path yang terbentuk masih termasuk /includes/docgen/
+        // Perlu dibersihkan agar hanya sampai /plugin-slug/ saja
+        $path = trailingslashit($upload_dir['basedir']) . $temp_folder . '/' . $plugin_slug;
+        error_log('$path = ' . $path);
+        return $path;
+    }
+
 
     public function get_docgen_template_path() {
         // Get DocGen settings untuk ambil nama folder template

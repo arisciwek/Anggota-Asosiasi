@@ -149,8 +149,8 @@ if (empty(asosiasi_check_requirements())) {
                 if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
                     require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
                     require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-hooks.php';
-                    
-                    $docgen_adapter = new Host_DocGen_Adapter();
+
+                    $docgen_adapter = new Host_DocGen_Adapter(); // Pass plugin file path
                     Host_DocGen_Hooks::get_instance(); // Initialize hooks
                 }
             }

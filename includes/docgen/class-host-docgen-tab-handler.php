@@ -152,7 +152,7 @@ class Host_DocGen_Tab_Handler {
     }
     */
     
-
+/*
     public function render_directory_tab() {
         if (!$this->adapter) {
             $this->render_error(__('DocGen adapter not available', 'host-docgen'));
@@ -170,11 +170,48 @@ class Host_DocGen_Tab_Handler {
         $settings = $this->settings->get_core_settings();
         
         // Pastikan adapter diteruskan saat render
+        
         $settings_page->render_directory_settings_public([
             'settings' => $settings,
             'adapter' => $this->adapter  // Pastikan ini diteruskan
         ]);
+        
+
+        // Panggil render lengkap, bukan hanya render_directory_settings
+        //$settings_page->render();
     }
+
+*/  public function render_directory_tab() {
+        if (!$this->adapter) {
+            return;
+        }
+
+        $docgen_dir = $this->adapter->get_docgen_implementation_dir();
+        require_once $docgen_dir . 'admin/class-admin-page.php';
+        require_once $docgen_dir . 'admin/class-settings-page.php';
+
+        // Buat settings page instance 
+        $settings_page = new DocGen_Implementation_Settings_Page();
+        
+        // Get current settings 
+        $settings = $this->settings->get_core_settings();
+
+        // Modify paths to include plugin slug
+        $plugin_slug = $this->adapter->get_current_plugin_slug();
+        $upload_dir = wp_upload_dir();
+        $base_dir = $upload_dir['basedir'];
+        
+        // Ensure paths include plugin subdirectory
+        $settings['temp_dir'] = trailingslashit($base_dir) . 'docgen-temp/' . $plugin_slug;
+        $settings['template_dir'] = trailingslashit($base_dir) . 'docgen-templates/' . $plugin_slug;
+
+        // Pass modified settings and adapter
+        $settings_page->render_directory_settings_public([
+            'settings' => $settings,
+            'adapter' => $this->adapter
+        ]);
+    }
+
 
 
     /**
