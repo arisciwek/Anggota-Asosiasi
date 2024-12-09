@@ -1,0 +1,179 @@
+/**
+ * Global DocGen Styles
+ *
+ * @package     Asosiasi
+ * @subpackage  DocGen
+ * @version     1.0.0
+ * @author      arisciwek
+ * 
+ * Path: docgen/assets/css/asosiasi-docgen-style.css
+ * 
+ * Description: Global styles untuk semua DocGen modules.
+ *              Mendefinisikan common patterns dan base styling
+ *              yang bisa digunakan dan di-extend oleh modul.
+ * 
+ * Changelog:
+ * 1.0.0 - 2024-11-27 17:10:25
+ * - Initial release
+ * - Added base document layout styles
+ * - Added common components styling
+ * - Added utility classes
+ */
+
+/* ------------------------------------
+   1. Document Generator Layout
+   ------------------------------------ */
+.docgen-container {
+    margin: 20px 0;
+}
+
+.docgen-panels {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.docgen-panel {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.docgen-panel-left {
+    flex: 0 0 40%;
+}
+
+.docgen-panel-right {
+    flex: 0 0 60%;
+}
+
+/* ------------------------------------
+   2. Common Components
+   ------------------------------------ */
+.docgen-data-display {
+    background: #f8f9fa;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.docgen-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.docgen-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* ------------------------------------
+   3. Form Elements
+   ------------------------------------ */
+.docgen-form-group {
+    margin-bottom: 15px;
+}
+
+.docgen-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.docgen-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* ------------------------------------
+   4. Generation Controls
+   ------------------------------------ */
+.docgen-controls {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.docgen-generate-button {
+    position: relative;
+    padding-right: 30px !important;
+}
+
+.docgen-generate-button .spinner {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    margin-top: -10px;
+}
+
+/* ------------------------------------
+   5. Status & Feedback
+   ------------------------------------ */
+.docgen-status {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.docgen-status.success {
+    background: #f0f6e9;
+    border: 1px solid #7ad03a;
+}
+
+.docgen-status.error {
+    background: #fbeaea;
+    border: 1px solid #dc3232;
+}
+
+/* ------------------------------------
+   6. Document Preview
+   ------------------------------------ */
+.docgen-preview {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* ------------------------------------
+   7. Responsive Adjustments
+   ------------------------------------ */
+@media screen and (max-width: 782px) {
+    .docgen-panels {
+        flex-direction: column;
+    }
+    
+    .docgen-panel-left,
+    .docgen-panel-right {
+        flex: 0 0 100%;
+    }
+}
+
+/* ------------------------------------
+   8. Utility Classes
+   ------------------------------------ */
+.docgen-hidden {
+    display: none;
+}
+
+.docgen-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.docgen-text-center {
+    text-align: center;
+}
+
+.docgen-mb-0 { margin-bottom: 0 !important; }
+.docgen-mb-1 { margin-bottom: 0.5rem !important; }
+.docgen-mb-2 { margin-bottom: 1rem !important; }
+.docgen-mb-3 { margin-bottom: 1.5rem !important; }

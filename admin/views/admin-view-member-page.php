@@ -215,16 +215,20 @@ if ($member) {
 
     <div class="wrap">
         <?php 
-        $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-perusahaan.php';
-        if (file_exists($skp_template)) {
-            include $skp_template;
+        $skp_perusahaan = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-perusahaan.php';
+        if (file_exists($skp_perusahaan)) {
+            echo '<div id="skp-perusahaan-container">';
+            include $skp_perusahaan;
+            echo '</div>';
         }
         ?>
         <hr />
         <?php 
-        $skp_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-tenaga-ahli.php';
-        if (file_exists($skp_template)) {
-            include $skp_template;
+        $skp_tenaga_ahli = ASOSIASI_DIR . 'admin/views/skp-tenaga-ahli/admin-view-member-skp-tenaga-ahli.php';
+        if (file_exists($skp_tenaga_ahli)) {
+            echo '<div id="skp-tenaga-ahli-container">';
+            include $skp_tenaga_ahli;
+            echo '</div>';
         }
         ?>
     </div>

@@ -80,7 +80,10 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
            return;
        }
 
-       const targetId = status === 'active' ? '#active-skp-list' : '#inactive-skp-list';
+       const targetId = status === 'active' ? 
+            '#active-skp-tenaga-ahli-list' : 
+            '#inactive-skp-tenaga-ahli-list';
+
        const $target = $(targetId);
        
        // Show loading state

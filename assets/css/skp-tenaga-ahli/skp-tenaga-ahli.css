@@ -1,0 +1,261 @@
+/**
+ * Style untuk SKP Tenaga Ahli
+ *
+ * @package     Asosiasi
+ * @subpackage  Admin/CSS/SKP_Tenaga_Ahli
+ * @version     1.0.0
+ * @author      arisciwek
+ *
+ * Path: /asosiasi/admin/css/skp-tenaga-ahli/skp-tenaga-ahli.css
+ * 
+ * Description: Menangani tampilan untuk semua komponen SKP Tenaga Ahli
+ *              termasuk list, form, modal dan status indicators
+ *
+ * Changelog:
+ * 1.0.0 - 2024-11-22
+ * - Initial creation
+ * - Added list view styles
+ * - Added modal form styles
+ * - Added status indicators
+ */
+
+/* Container Layout */
+.skp-container {
+    margin: 20px 0;
+}
+
+/* Card Layout */
+.skp-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.skp-section {
+    padding: 0;
+}
+
+.skp-section legend {
+    padding: 0 10px;
+    margin-left: 10px;
+}
+
+.skp-section legend h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.skp-content {
+    padding: 15px;
+}
+
+/* Action Buttons */
+.skp-actions {
+    margin-bottom: 15px;
+}
+
+.add-skp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.add-skp-btn .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    margin-top: 2px;
+}
+
+/* Table Styles */
+.skp-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.skp-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.skp-table th {
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 10px;
+}
+
+.skp-table td {
+    padding: 12px 10px;
+    vertical-align: middle;
+}
+
+/* Table Column Widths */
+.skp-column-number { width: 50px; }
+.skp-column-service { width: 120px; }
+.skp-column-nama-ahli { width: 150px; }
+.skp-column-jabatan { width: 100px; }
+.skp-column-pdf { width: 60px; text-align: center; }
+.skp-column-status { width: 120px; }
+.skp-column-actions { width: 150px; }
+.skp-column-date { width: 120px; }
+
+/* Status Styles */
+.status-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.skp-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-change-trigger {
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    color: #757575;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status-change-trigger:hover {
+    color: #2271b1;
+}
+
+.status-select {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1;
+    min-width: 150px;
+    background: white;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+}
+
+.skp-status-active {
+    background-color: #edfaef;
+    color: #0a7d1a;
+}
+
+.skp-status-expired {
+    background-color: #fbeae9;
+    color: #d63638;
+}
+
+.skp-status-inactive {
+    background-color: #f0f0f1;
+    color: #50575e;
+}
+
+/* PDF Icon Styles */
+.skp-pdf-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.skp-pdf-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Loading State */
+.skp-loading {
+    text-align: center;
+    color: #757575;
+    padding: 20px !important;
+    font-style: italic;
+}
+
+.skp-loading .spinner {
+    float: none;
+    margin: 0 10px 0 0;
+}
+
+/* Tab Navigation */
+.skp-tabs {
+    margin-top: 20px;
+}
+
+.skp-tabs .nav-tab-wrapper {
+    margin-bottom: 0;
+    border-bottom: 1px solid #c3c4c7;
+    padding-bottom: 0;
+}
+
+.skp-tabs .nav-tab {
+    margin-bottom: -1px;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-bottom: none;
+}
+
+.skp-tabs .nav-tab-active {
+    border-bottom: 1px solid #f0f0f1;
+    background: #f0f0f1;
+    color: #000;
+}
+
+.skp-tabs .tab-content {
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+.skp-tabs .tab-pane {
+    display: none;
+}
+
+.skp-tabs .tab-pane.active {
+    display: block;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .skp-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .skp-column-actions {
+        width: auto;
+    }
+    
+    .skp-actions-group {
+        flex-wrap: wrap;
+    }
+    
+    .skp-actions-group .button {
+        flex: 1;
+        text-align: center;
+        min-width: 70px;
+    }
+    
+    .skp-tabs .nav-tab {
+        margin: 0 2px -1px;
+        padding: 6px 10px;
+    }
+    
+    .skp-tabs .tab-content {
+        padding: 15px;
+    }
+}

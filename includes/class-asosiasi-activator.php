@@ -7,6 +7,13 @@
  * Path: includes/class-asosiasi-activator.php
  * 
  * Changelog:
+ * 
+ * 2.0.0* 2024-12-08
+ * Added 'code' column to provinces table
+ * Added database upgrade mechanism
+ * Added unique constraint for province code
+ * Updated table creation structure
+ *
  * 2.3.0 - 2024-11-17 10:10:08
  * - Moved all SQL to separate files
  * - Added SQL file loader
@@ -24,27 +31,10 @@ class Asosiasi_Activator {
 
         $current_db_version = get_option('asosiasi_db_version', '0');
 
-        // Create tables
         self::create_initial_tables();
-
-        // Run specific migrations if needed
-        if (version_compare($current_db_version, '2.3.0', '<')) {
-            self::migrate_to_2_3_0();
-            update_option('asosiasi_db_version', '2.3.0');
-        }
-
-        // Run newer migrations here...
-        if (version_compare($current_db_version, '2.3.1', '<')) {
-            self::migrate_skp_status_enum();
-            update_option('asosiasi_db_version', '2.3.1');
-        }
-
-        // Add new member fields migration
-        if (version_compare($current_db_version, '2.4.0', '<')) {
-            self::migrate_member_fields();
-            update_option('asosiasi_db_version', '2.4.0');
-        }
-
+        self::upgradeDatabase(); // Tambahkan ini
+        //self::addVersion();
+        
         // Set default options
         self::setup_default_options();
 
@@ -150,6 +140,7 @@ class Asosiasi_Activator {
             '{table_services}' => $wpdb->prefix . 'asosiasi_services',
             '{table_member_services}' => $wpdb->prefix . 'asosiasi_member_services',
             '{table_skp_perusahaan}' => $wpdb->prefix . 'asosiasi_skp_perusahaan',
+            '{table_skp_tenaga_ahli}' => $wpdb->prefix . 'asosiasi_skp_tenaga_ahli',
             '{table_member_images}' => $wpdb->prefix . 'asosiasi_member_images',
             '{table_status_history}' => $wpdb->prefix . 'asosiasi_skp_status_history',
             '{table_certificate_log}' => $wpdb->prefix . 'asosiasi_certificate_log',
@@ -172,6 +163,7 @@ class Asosiasi_Activator {
             'services',       // Contains both services and member_services
             'member-images',  // Depends on members
             'skp-perusahaan', // Depends on members and services
+            'skp-tenaga-ahli', // Depends on members and services
             'status-history',  // Depends on skp_perusahaan
             'certificate-log'    // Depends on members and users
         );
@@ -224,22 +216,6 @@ class Asosiasi_Activator {
             }
         }
     }
-    /**
-     * Setup certificate template
-     *
-    private static function setup_certificate_template() {
-        // Load helper
-        require_once ASOSIASI_DIR . 'helpers/certificate-templates.php';
-        
-        // Create template directories
-        asosiasi_create_template_directories();
-            
-        // Copy default template if not exists
-        if (!asosiasi_template_exists()) {
-            asosiasi_copy_default_template();
-        }
-    }
-    */
 
     /**
      * Migration untuk menambahkan status 'activated' ke enum
@@ -296,4 +272,84 @@ class Asosiasi_Activator {
         add_option('asosiasi_organization_name', '');
         add_option('asosiasi_contact_email', '');
     }
+
+    /**
+     * Handle database upgrades between versions
+     * Called during plugin activation
+     */
+    private static function upgradeDatabase() {
+        $current_db_version = get_option('asosiasi_db_version', '0');
+
+        // Run specific migrations based on version
+        if (version_compare($current_db_version, '2.3.0', '<')) {
+            self::migrate_to_2_3_0();
+            update_option('asosiasi_db_version', '2.3.0');
+        }
+
+        // Add 'activated' status to SKP enum
+        if (version_compare($current_db_version, '2.3.1', '<')) {
+            self::migrate_skp_status_enum();
+            update_option('asosiasi_db_version', '2.3.1');
+        }
+
+        // Add new member fields
+        if (version_compare($current_db_version, '2.4.0', '<')) {
+            self::migrate_member_fields();
+            update_option('asosiasi_db_version', '2.4.0');
+        }
+
+        // Create SKP Tenaga Ahli table
+        if (version_compare($current_db_version, '2.5.0', '<')) {
+            self::create_skp_tenaga_ahli_table();
+            update_option('asosiasi_db_version', '2.5.0');
+        }
+
+        // Log upgrade completion if debugging
+        if (WP_DEBUG) {
+            error_log(sprintf(
+                'Asosiasi database upgraded from version %s to %s',
+                $current_db_version,
+                '2.5.0'
+            ));
+        }
+    }
+
+    /**
+     * Create SKP Tenaga Ahli table
+     *
+    private static function create_skp_tenaga_ahli_table() {
+        global $wpdb;
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+        $sql = self::load_sql_file('skp-tenaga-ahli');
+        if (is_wp_error($sql)) {
+            if (WP_DEBUG) {
+                error_log('Failed to create SKP Tenaga Ahli table: ' . $sql->get_error_message());
+            }
+            return;
+        }
+
+        dbDelta($sql);
+
+        // Verify table creation
+        $table_name = $wpdb->prefix . 'asosiasi_skp_tenaga_ahli';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+            if (WP_DEBUG) {
+                error_log('SKP Tenaga Ahli table creation failed');
+            }
+            return;
+        }
+
+        // Update status history table to support tenaga_ahli type 
+        $history_table = $wpdb->prefix . 'asosiasi_skp_status_history';
+        $wpdb->query("ALTER TABLE $history_table MODIFY COLUMN skp_type 
+                     ENUM('company', 'tenaga_ahli') NOT NULL DEFAULT 'company'");
+
+        if (WP_DEBUG) {
+            error_log('SKP Tenaga Ahli table created successfully');
+        }
+    }
+    */
+
+
 }

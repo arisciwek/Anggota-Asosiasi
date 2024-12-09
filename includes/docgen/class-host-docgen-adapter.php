@@ -40,65 +40,19 @@
  * @link       https://example.com/host-docgen
  * @since      1.0.0
  */
-    
+
 if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
 class Host_DocGen_Adapter extends DocGen_Adapter {
-
-    private $hooks;
-    private $tab_handler;
-    private $plugin_file; // Tambahkan property
-
-    public function __construct($plugin_file = null) {
-        // Initialize hooks instance
-        require_once dirname(__FILE__) . '/class-host-docgen-hooks.php';
-        $this->hooks = Host_DocGen_Hooks::get_instance();
-        $this->hooks->set_adapter($this); // Tambahkan ini
-
-        // Initialize tab handler
-        require_once dirname(__FILE__) . '/class-host-docgen-tab-handler.php';
-        $this->tab_handler = new Host_DocGen_Tab_Handler($this);
-
-        parent::__construct();
-    }
-    
-    /**
-     * Get DocGen Implementation directory path
-     *
-     * @since 1.0.0
-     * @return string Full path to DocGen Implementation plugin directory
-     */
-    public function get_docgen_implementation_dir() {
-        return $this->get_docgen_dir();
-    }
-
-
-// Mendapatkan slug plugin tertentu berdasarkan path file
-function get_plugin_slug($file) {
-    $path = dirname($file);
-    $path = str_replace(WP_PLUGIN_DIR . '/', '', $path);
-
-    // Pecah berdasarkan separator direktori '/'
-    $path_parts = explode('/', $path);
-
-    // Ambil bagian awal (direktori pertama)
-    $plugin_dir = $path_parts[0]; 
-
-    return $plugin_dir;
-}
     /**
      * Get plugin info
      * @return array Plugin information
      */
     protected function get_plugin_info() {
-
-        $plugin_slug = $this->get_plugin_slug(__FILE__);
-
         return [
-            'slug' => $plugin_slug,
-            //'slug' => 'host-docgen',
+            'slug' => 'host-docgen',
             'name' => 'Host DocGen',
             'version' => '1.0.0',
             'author' => 'Host Developer',
@@ -153,69 +107,5 @@ function get_plugin_slug($file) {
                 'instance' => $module
             ];
         }, $modules);
-    }
-
-    /**
-     * Get current plugin slug
-     * @return string Plugin slug
-     */
-    public function get_current_plugin_slug() {
-        $plugin_info = $this->get_plugin_info();
-        return $plugin_info['slug'];
-    }
-    
-    /*
-    public function get_current_plugin_slug() {
-        if ($this->plugin_file) {
-            return dirname(plugin_basename($this->plugin_file)); 
-        }
-        // Fallback jika tidak ada plugin_file
-        return dirname(plugin_basename(__FILE__));
-    }
-    */
-
-    // Di class-host-docgen-adapter.php
-    //public function get_current_plugin_slug() {
-    //    return dirname(plugin_basename(__FILE__));  
-    //}
-
-    /*
-    public function get_docgen_temp_path() {
-        // Get DocGen settings untuk ambil nama folder temp
-        $docgen_settings = get_option('docgen_implementation_settings', array());
-        $temp_folder = basename($docgen_settings['temp_dir'] ?? 'docgen-temp');
-        
-        $upload_dir = wp_upload_dir();
-        $plugin_slug = $this->get_current_plugin_slug(); // akan return 'asosiasi'
-        
-        return trailingslashit($upload_dir['basedir']) . $temp_folder . '/' . $plugin_slug;
-    }
-    */
-
-    public function get_docgen_temp_path() {
-        $docgen_settings = get_option('docgen_implementation_settings', array());
-        $temp_folder = basename($docgen_settings['temp_dir'] ?? 'docgen-temp');
-
-        $upload_dir = wp_upload_dir();
-
-        $plugin_slug = $this->get_current_plugin_slug();
-
-        // Saat ini path yang terbentuk masih termasuk /includes/docgen/
-        // Perlu dibersihkan agar hanya sampai /plugin-slug/ saja
-        $path = trailingslashit($upload_dir['basedir']) . $temp_folder . '/' . $plugin_slug;
-        error_log('$path = ' . $path);
-        return $path;
-    }
-
-
-    public function get_docgen_template_path() {
-        // Get DocGen settings untuk ambil nama folder template
-        $docgen_settings = get_option('docgen_implementation_settings', array());
-        $template_folder = basename($docgen_settings['template_dir'] ?? 'docgen-templates');
-        
-        $upload_dir = wp_upload_dir();
-        $plugin_slug = $this->get_current_plugin_slug();
-        
-        return trailingslashit($upload_dir['basedir']) . $template_folder . '/' . $plugin_slug;
     }
 }

@@ -94,7 +94,6 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-member.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-settings.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-perusahaan.php';
 
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-crud.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-services.php';
@@ -107,6 +106,15 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-perusahaan.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-cron.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-skp-perusahaan.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-perusahaan.php';
+
+    // SKP Tenaga Ahli related classes
+    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-skp-tenaga-ahli.php';
+    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-ajax-skp-tenaga-ahli.php';
+    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-status-skp-tenaga-ahli.php';
+    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-ajax-status-skp-tenaga-ahli.php';
+    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-tenaga-ahli.php';
+
 
     // SKP Status management classes - New
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-status-skp-perusahaan.php';
@@ -135,39 +143,38 @@ if (empty(asosiasi_check_requirements())) {
     add_action('plugins_loaded', 'asosiasi_load_textdomain');
     
     function run_asosiasi() {
-        $plugin = new Asosiasi();
+    $plugin = new Asosiasi();
+    
+    add_action('plugins_loaded', function() {
+        // Include admin functions
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
         
-        add_action('plugins_loaded', function() {
-            // Include admin functions
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
+            require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
             
-            global $docgen_tab_handler;
-            
-            if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
-                require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
-                
-                if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
-                    require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-adapter.php';
-                    require_once ASOSIASI_DIR . 'includes/docgen/class-host-docgen-hooks.php';
-
-                    $docgen_adapter = new Host_DocGen_Adapter(); // Pass plugin file path
-                    Host_DocGen_Hooks::get_instance(); // Initialize hooks
-                }
+            if (!Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+                error_log('DocGen Implementation not properly initialized');
             }
+        }
+    }, 15);
+    
+    // Continue with regular plugin initialization...
+    new Asosiasi_Settings();
+    new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
+    new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
 
-        }, 15);
-        
-        // Continue with regular plugin initialization...
-        new Asosiasi_Settings();
-        new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
-        new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
-        new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
-        
-        new Asosiasi_Ajax_Perusahaan();
-        new Asosiasi_Ajax_Status_Skp_Perusahaan();
-        
-        $plugin->run();
-    }
+    new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
+    new Asosiasi_Enqueue_SKP_Tenaga_Ahli(ASOSIASI_VERSION);
+
+    // Initialize SKP Perusahaan handlers    
+    new Asosiasi_Ajax_Perusahaan();
+    new Asosiasi_Ajax_Status_Skp_Perusahaan();
+
+    // Initialize SKP Tenaga Ahli handlers
+    new Asosiasi_Ajax_Tenaga_Ahli();
+    new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();    
+    $plugin->run();
+}
     // Start the plugin
     run_asosiasi();
 }

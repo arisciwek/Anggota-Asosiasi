@@ -82,8 +82,8 @@ class Asosiasi_Enqueue_SKP_Perusahaan {
            array('jquery', 'asosiasi-skp-utils', 'asosiasi-skp-perusahaan'),
            $this->version,
            true
-       );// ... kode sebelumnya tetap sama ...
-
+       );
+       
        wp_localize_script(
            'asosiasi-skp-perusahaan',
            'asosiasiSKPPerusahaan',
