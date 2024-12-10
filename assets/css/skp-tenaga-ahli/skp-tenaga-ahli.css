@@ -1,261 +1,173 @@
 /**
- * Style untuk SKP Tenaga Ahli
- *
- * @package     Asosiasi
- * @subpackage  Admin/CSS/SKP_Tenaga_Ahli
- * @version     1.0.0
- * @author      arisciwek
- *
- * Path: /asosiasi/admin/css/skp-tenaga-ahli/skp-tenaga-ahli.css
+ * Enhanced styles for SKP Tenaga Ahli 
  * 
- * Description: Menangani tampilan untuk semua komponen SKP Tenaga Ahli
- *              termasuk list, form, modal dan status indicators
- *
+ * @package Asosiasi
+ * @version 1.0.0
+ * Path: assets/css/skp-tenaga-ahli/skp-tenaga-ahli.css
+ * 
  * Changelog:
  * 1.0.0 - 2024-11-22
- * - Initial creation
- * - Added list view styles
- * - Added modal form styles
- * - Added status indicators
+ * - Initial creation 
+ * - Added tenaga ahli specific styles
+ * - Added responsive layouts
  */
 
-/* Container Layout */
-.skp-container {
+/* Container and Basic Layout */
+.skp-tenaga-ahli-container {
     margin: 20px 0;
-}
-
-/* Card Layout */
-.skp-card {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-.skp-section {
-    padding: 0;
-}
-
-.skp-section legend {
-    padding: 0 10px;
-    margin-left: 10px;
-}
-
-.skp-section legend h3 {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.skp-content {
-    padding: 15px;
-}
-
-/* Action Buttons */
-.skp-actions {
-    margin-bottom: 15px;
-}
-
-.add-skp-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.add-skp-btn .dashicons {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    margin-top: 2px;
-}
-
-/* Table Styles */
-.skp-table-container {
-    margin-top: 20px;
-    overflow-x: auto;
-}
-
-.skp-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.skp-table th {
-    font-weight: 600;
-    text-align: left;
-    padding: 8px 10px;
-}
-
-.skp-table td {
-    padding: 12px 10px;
-    vertical-align: middle;
-}
-
-/* Table Column Widths */
-.skp-column-number { width: 50px; }
-.skp-column-service { width: 120px; }
-.skp-column-nama-ahli { width: 150px; }
-.skp-column-jabatan { width: 100px; }
-.skp-column-pdf { width: 60px; text-align: center; }
-.skp-column-status { width: 120px; }
-.skp-column-actions { width: 150px; }
-.skp-column-date { width: 120px; }
-
-/* Status Styles */
-.status-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-}
-
-.skp-status {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    line-height: 1.4;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.status-change-trigger {
-    background: none;
-    border: none;
-    padding: 2px;
-    cursor: pointer;
-    color: #757575;
-    display: inline-flex;
-    align-items: center;
-}
-
-.status-change-trigger:hover {
-    color: #2271b1;
-}
-
-.status-select {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    z-index: 1;
-    min-width: 150px;
-    background: white;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    margin-top: 4px;
-}
-
-.skp-status-active {
-    background-color: #edfaef;
-    color: #0a7d1a;
-}
-
-.skp-status-expired {
-    background-color: #fbeae9;
-    color: #d63638;
-}
-
-.skp-status-inactive {
-    background-color: #f0f0f1;
-    color: #50575e;
-}
-
-/* PDF Icon Styles */
-.skp-pdf-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.skp-pdf-link:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Loading State */
-.skp-loading {
-    text-align: center;
-    color: #757575;
-    padding: 20px !important;
-    font-style: italic;
-}
-
-.skp-loading .spinner {
-    float: none;
-    margin: 0 10px 0 0;
-}
-
-/* Tab Navigation */
-.skp-tabs {
-    margin-top: 20px;
-}
-
-.skp-tabs .nav-tab-wrapper {
-    margin-bottom: 0;
-    border-bottom: 1px solid #c3c4c7;
-    padding-bottom: 0;
-}
-
-.skp-tabs .nav-tab {
-    margin-bottom: -1px;
-    font-size: 14px;
-    padding: 8px 15px;
-    border-bottom: none;
-}
-
-.skp-tabs .nav-tab-active {
-    border-bottom: 1px solid #f0f0f1;
-    background: #f0f0f1;
-    color: #000;
-}
-
-.skp-tabs .tab-content {
-    background: #f0f0f1;
-    border: 1px solid #c3c4c7;
-    border-top: none;
+    background: #f0f2f5;
+    border-radius: 8px;
     padding: 20px;
 }
 
-.skp-tabs .tab-pane {
-    display: none;
+/* Enhanced Tab Navigation */
+.skp-tenaga-ahli-nav-tab-wrapper {
+    display: flex;
+    gap: 2px;
+    padding: 5px 5px 0;
+    border-bottom: none;
+    background: #e2e8f0;
+    border-radius: 8px 8px 0 0;
 }
 
-.skp-tabs .tab-pane.active {
+.skp-tenaga-ahli-nav-tab {
+    padding: 12px 24px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px 8px 0 0;
+    color: #64748b;
+    transition: all 0.2s ease;
+    position: relative;
+    margin-right: 4px;
+}
+
+.skp-tenaga-ahli-nav-tab:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.skp-tenaga-ahli-nav-tab-active {
+    background: #ffffff;
+    color: #2563eb;
+    font-weight: 600;
+    border-bottom: none;
+}
+
+.skp-tenaga-ahli-nav-tab-active:hover {
+    background: #ffffff;
+    color: #2563eb;
+}
+
+/* Tab Content Area */
+.skp-tenaga-ahli-tab-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 24px;
+}
+
+/* Table Column Widths */
+.skp-tenaga-ahli-table-container .skp-table .column-number { width: 50px; }
+.skp-tenaga-ahli-table-container .skp-table .column-nomor { width: 12%; }
+.skp-tenaga-ahli-table-container .skp-table .column-service { width: 12%; }
+.skp-tenaga-ahli-table-container .skp-table .column-nama { width: 15%; }
+.skp-tenaga-ahli-table-container .skp-table .column-pj { width: 12%; }
+.skp-tenaga-ahli-table-container .skp-table .column-date { width: 10%; }
+.skp-tenaga-ahli-table-container .skp-table .column-status { width: 12%; }
+.skp-tenaga-ahli-table-container .skp-table .column-pdf { 
+    width: 60px;
+    text-align: center; 
+}
+.skp-tenaga-ahli-table-container .skp-table .column-actions { 
+    width: 150px;
+    text-align: right; 
+}
+
+/* Loading State */
+#skp-tenaga-ahli-section .skp-loading {
+    padding: 40px !important;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+#skp-tenaga-ahli-section .skp-loading .spinner {
+    float: none;
+    margin: 0 10px 0 0;
+    margin-bottom: 8px;
+}
+
+#skp-tenaga-ahli-section .skp-loading .loading-text {
     display: block;
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 8px;
 }
 
 /* Responsive Design */
 @media screen and (max-width: 782px) {
-    .skp-table {
-        display: block;
-        overflow-x: auto;
-    }
-    
-    .skp-column-actions {
-        width: auto;
-    }
-    
-    .skp-actions-group {
+    .skp-tenaga-ahli-nav-tab-wrapper {
         flex-wrap: wrap;
+        gap: 4px;
+        padding: 4px;
     }
-    
-    .skp-actions-group .button {
-        flex: 1;
+
+    .skp-tenaga-ahli-nav-tab {
+        flex: 1 1 auto;
         text-align: center;
-        min-width: 70px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .skp-tenaga-ahli-table-container .skp-table {
+        border: none;
     }
     
-    .skp-tabs .nav-tab {
-        margin: 0 2px -1px;
-        padding: 6px 10px;
+    .skp-tenaga-ahli-table-container .skp-table tbody tr {
+        display: block;
+        margin-bottom: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
     }
     
-    .skp-tabs .tab-content {
-        padding: 15px;
+    .skp-tenaga-ahli-table-container .skp-table td {
+        display: block;
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .skp-tenaga-ahli-table-container .skp-table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: block;
+        color: #6b7280;
+    }
+    
+    .skp-tenaga-ahli-table-container .column-actions {
+        border-bottom: none !important;
+        text-align: left !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .skp-tenaga-ahli-container {
+        margin: 0;
+        padding: 0;
+        background: none;
+    }
+    
+    .skp-tenaga-ahli-nav-tab-wrapper {
+        display: none;
+    }
+    
+    .skp-tenaga-ahli-tab-content {
+        padding: 0;
+        border: none;
+        background: none;
     }
 }
