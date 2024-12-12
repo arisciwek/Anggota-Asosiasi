@@ -417,3 +417,16 @@
 .skp-modal[aria-hidden="false"] {
     display: block;
 }
+
+/* Tambahkan di file CSS yang relevan */
+#skp-perusahaan-section .status-select {
+    position: absolute;
+    z-index: 100;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+#skp-tenaga-ahli-section .status-select {
+    /* Style terpisah untuk SKP Tenaga Ahli jika diperlukan */
+}

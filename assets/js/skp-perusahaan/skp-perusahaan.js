@@ -125,9 +125,10 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
            return;
        }
 
+       // Fixed: Use correct target IDs for SKP Perusahaan
        const targetId = status === 'active' ? 
-            '#active-skp-tenaga-ahli-list' : 
-            '#inactive-skp-tenaga-ahli-list';
+             '#active-skp-list' : 
+             '#inactive-skp-list';
 
        const $target = $(targetId);
        

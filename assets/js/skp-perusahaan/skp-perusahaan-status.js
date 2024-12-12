@@ -24,20 +24,20 @@ var AsosiasiSKPPerusahaanStatus = {};
         },
 
         initStatusChangeHandlers: function() {
-            // Toggle status select dropdown
-            $(document).on('click', '.status-change-trigger', function(e) {
+            // Tambahkan scope ke #skp-perusahaan-section
+            $('#skp-perusahaan-section').on('click', '.status-change-trigger', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const $wrapper = $(this).closest('.status-wrapper');
                 const $select = $wrapper.find('.status-select');
                 
-                // Hide other open selects
-                $('.status-select').not($select).hide();
+                // Hide other open selects within SKP Perusahaan section only
+                $('#skp-perusahaan-section .status-select').not($select).hide();
                 $select.toggle();
             });
 
-            // Handle status selection - FIXED
-            $(document).on('change', '.status-select select', function() {
+            // Scope status selection ke SKP Perusahaan
+            $('#skp-perusahaan-section').on('change', '.status-select select', function() {
                 const $select = $(this);
                 const skpId = $select.data('id');
                 const oldStatus = $select.data('current');
@@ -62,10 +62,10 @@ var AsosiasiSKPPerusahaanStatus = {};
                 $select.val('');
             });
 
-            // Close dropdowns when clicking outside
+            // Close dropdowns when clicking outside - scope ke SKP Perusahaan
             $(window).on('click', function(e) {
-                if (!$(e.target).closest('.status-wrapper').length) {
-                    $('.status-select').hide();
+                if (!$(e.target).closest('#skp-perusahaan-section .status-wrapper').length) {
+                    $('#skp-perusahaan-section .status-select').hide();
                 }
             });
         },
@@ -76,8 +76,8 @@ var AsosiasiSKPPerusahaanStatus = {};
                 e.preventDefault();
 
                 if (!AsosiasiSKPUtils.validateForm($(this))) {
-                    return;
-                }
+            return;
+        }
 
                 const formData = new FormData(this);
                 formData.append('action', 'update_skp_status');
