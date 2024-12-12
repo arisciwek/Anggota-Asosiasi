@@ -25,6 +25,51 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
    function initSKPPerusahaan() {
        loadSKPList('active'); // Load active tab by default
        initTabHandlers();
+
+        // Add delete handler
+        $('#skp-perusahaan-section').on('click', '.delete-skp', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const skpId = $(this).data('id');
+            
+            if (!confirm(asosiasiSKPPerusahaan.strings.confirmDelete || 'Yakin ingin menghapus SKP ini?')) {
+                return;
+            }
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'delete_skp_perusahaan',
+                    id: skpId,
+                    nonce: $('#skp_nonce').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        AsosiasiSKPUtils.showNotice('success', response.data.message);
+                        // Reload tabel sesuai tab yang aktif
+                        const currentStatus = $('.nav-tab-active').data('tab') || 'active';
+                        loadSKPList(currentStatus);
+                   
+                        // Reload tabel Tenaga Ahli dengan delay
+                        setTimeout(function() {
+                           AsosiasiSKPTenagaAhli.reloadTable(null, 'active');
+                        }, 150);
+
+                    } else {
+                        AsosiasiSKPUtils.showNotice('error', response.data.message);
+                    }
+                },
+                error: function() {
+                    AsosiasiSKPUtils.showNotice('error', 
+                        asosiasiSKPPerusahaan.strings.deleteError || 'Gagal menghapus SKP'
+                    );
+                }
+            });
+        });
+
+
    }
    
    // Expose public API for table reload
