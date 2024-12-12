@@ -102,8 +102,19 @@ var AsosiasiSKPPerusahaanModal = {};
                 success: function(response) {
                     if (response.success) {
                         AsosiasiSKPUtils.showNotice('success', response.data.message);
-                        AsosiasiSKPUtils.reloadAllTabs();
+                        // Hanya reload tabel SKP Perusahaan, bukan semua tabel
+                        AsosiasiSKPPerusahaan.reloadTable(formData.get('member_id'), 'active');
+
                         AsosiasiSKPPerusahaanModal.closeModal();
+                        
+                        // Reload kedua tabel
+                        setTimeout(function() {
+                            // Reload tabel perusahaan
+                            AsosiasiSKPPerusahaan.reloadTable(formData.get('member_id'));
+                            
+                            // Reload tabel tenaga ahli menggunakan existing function
+                            AsosiasiSKPTenagaAhli.reloadTable(formData.get('member_id'), 'active');
+                        }, 150);
                     } else {
                         AsosiasiSKPUtils.showNotice('error', response.data.message);
                     }

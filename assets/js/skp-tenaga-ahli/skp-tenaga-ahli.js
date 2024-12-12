@@ -77,7 +77,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                 .show();
             
             if (status === 'history') {
-                if (typeof AsosiasiSKPTenagaAhliStatus !== 'undefined') {
+                if (typeof  Status !== 'undefined') {
                     AsosiasiSKPTenagaAhliStatus.loadStatusHistory();
                 }
             } else {

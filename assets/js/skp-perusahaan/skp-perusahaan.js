@@ -202,6 +202,11 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                </tr>
            `);
        });
+
+       // Expose reload method untuk digunakan dari luar
+        window.reloadSKPTenagaAhli = function() {
+            loadSKPTenagaAhliList('active');
+        };
    }
 
    // Initialize when document is ready

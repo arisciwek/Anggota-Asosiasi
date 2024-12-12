@@ -26,12 +26,10 @@ var AsosiasiSKPTenagaAhliModal = {};
 
     AsosiasiSKPTenagaAhliModal = {
         init: function() {
-            console.log('Initializing SKP Tenaga Ahli Modal...');
             this.bindEvents();
         },
 
         bindEvents: function() {
-            console.log('Binding events for SKP Tenaga Ahli...');
             // Add SKP button handler
 
             $('.add-skp-tenaga-ahli-btn').on('click', this.openAddModal.bind(this));
@@ -64,7 +62,6 @@ var AsosiasiSKPTenagaAhliModal = {};
         },
 
         openAddModal: function(e) {
-            console.log('Opening SKP Tenaga Ahli modal...');
             e.preventDefault();
             
             // Cek jika tombol add untuk tenaga ahli
@@ -77,7 +74,6 @@ var AsosiasiSKPTenagaAhliModal = {};
             $('#pdf_file').prop('required', true);
             $('#pdf-required').show();
             $('#skp-tenaga-ahli-modal').show();
-            console.log('Showing SKP Tenaga Ahli modal...');
 
         },
 
@@ -148,13 +144,11 @@ var AsosiasiSKPTenagaAhliModal = {};
                     nonce: $('#skp_tenaga_ahli_nonce').val()
                 },
                 beforeSend: function() {
-                    console.log('Before send - showing modal');
                     $('#modal-title').text(asosiasiSKPTenagaAhli.strings.loading || 'Memuat data...');
                     $('#skp-modal').show();
                     $('#skp-form').find('input, select, button').prop('disabled', true);
                 },
                 success: function(response) {
-                    console.log('Success response:', response);
                     if (response.success) {
                         AsosiasiSKPTenagaAhliModal.fillForm(response.data.skp);
                         $('#modal-title').text(asosiasiSKPTenagaAhli.strings.editTitle || 'Edit SKP');
