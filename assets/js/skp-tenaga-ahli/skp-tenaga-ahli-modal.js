@@ -26,15 +26,18 @@ var AsosiasiSKPTenagaAhliModal = {};
 
     AsosiasiSKPTenagaAhliModal = {
         init: function() {
+            console.log('Initializing SKP Tenaga Ahli Modal...');
             this.bindEvents();
         },
 
         bindEvents: function() {
+            console.log('Binding events for SKP Tenaga Ahli...');
             // Add SKP button handler
-            $('.add-skp-btn').on('click', this.openAddModal);
+
+            $('.add-skp-tenaga-ahli-btn').on('click', this.openAddModal.bind(this));
 
             // Close modal handlers
-            $('.skp-modal-close, .skp-modal-cancel').on('click', this.closeModal);
+            $('#skp-tenaga-ahli-form').on('submit', this.handleSubmit);
 
             // Outside click handler
             $(window).on('click', function(event) {
@@ -61,16 +64,25 @@ var AsosiasiSKPTenagaAhliModal = {};
         },
 
         openAddModal: function(e) {
+            console.log('Opening SKP Tenaga Ahli modal...');
             e.preventDefault();
+            
+            // Cek jika tombol add untuk tenaga ahli
+            //if ($(e.target).data('type') !== 'tenaga-ahli') {
+            //    return;
+            //}
+            
             AsosiasiSKPTenagaAhliModal.resetForm();
             $('#modal-title').text(asosiasiSKPTenagaAhli.strings.addTitle || 'Tambah SKP');
             $('#pdf_file').prop('required', true);
             $('#pdf-required').show();
-            $('#skp-modal').show();
+            $('#skp-tenaga-ahli-modal').show();
+            console.log('Showing SKP Tenaga Ahli modal...');
+
         },
 
         closeModal: function() {
-            $('#skp-modal').hide();
+            $('#skp-tenaga-ahli-modal').hide();
             AsosiasiSKPTenagaAhliModal.resetForm();
         },
 
@@ -92,7 +104,7 @@ var AsosiasiSKPTenagaAhliModal = {};
             const isEdit = formData.get('id') ? true : false;
            
             formData.append('action', isEdit ? 'update_skp_tenaga_ahli' : 'add_skp_tenaga_ahli');
-            formData.append('nonce', $('#skp_nonce').val());
+            formData.append('nonce', $('#skp_tenaga_ahli_nonce').val());
 
             const submitBtn = $(this).find('button[type="submit"]');
             submitBtn.prop('disabled', true).text(isEdit ? 
@@ -108,7 +120,7 @@ var AsosiasiSKPTenagaAhliModal = {};
                 success: function(response) {
                     if (response.success) {
                         AsosiasiSKPUtils.showNotice('success', response.data.message);
-                        AsosiasiSKPUtils.reloadAllTabs();
+                        AsosiasiSKPTenagaAhli.reloadTable(formData.get('member_id'), 'active');
                         AsosiasiSKPTenagaAhliModal.closeModal();
                     } else {
                         AsosiasiSKPUtils.showNotice('error', response.data.message);
@@ -133,25 +145,29 @@ var AsosiasiSKPTenagaAhliModal = {};
                 data: {
                     action: 'get_skp_tenaga_ahli',
                     id: skpId,
-                    nonce: $('#skp_nonce').val()
+                    nonce: $('#skp_tenaga_ahli_nonce').val()
                 },
                 beforeSend: function() {
+                    console.log('Before send - showing modal');
                     $('#modal-title').text(asosiasiSKPTenagaAhli.strings.loading || 'Memuat data...');
                     $('#skp-modal').show();
                     $('#skp-form').find('input, select, button').prop('disabled', true);
                 },
                 success: function(response) {
+                    console.log('Success response:', response);
                     if (response.success) {
                         AsosiasiSKPTenagaAhliModal.fillForm(response.data.skp);
                         $('#modal-title').text(asosiasiSKPTenagaAhli.strings.editTitle || 'Edit SKP');
                         $('#pdf_file').prop('required', false);
                         $('#pdf-required').hide();
                     } else {
+                        console.error('Error response:', response);
                         AsosiasiSKPUtils.showNotice('error', response.data.message);
                         AsosiasiSKPTenagaAhliModal.closeModal();
                     }
                 },
                 error: function() {
+                    console.error('Ajax error:', error);
                     AsosiasiSKPUtils.showNotice('error', asosiasiSKPTenagaAhli.strings.loadError || 'Gagal memuat data SKP');
                     AsosiasiSKPTenagaAhliModal.closeModal();
                 },
@@ -166,7 +182,7 @@ var AsosiasiSKPTenagaAhliModal = {};
             $('#service_id').val(data.service_id);
             $('#nomor_skp').val(data.nomor_skp);
             $('#nama_tenaga_ahli').val(data.nama_tenaga_ahli);
-            $('#jabatan').val(data.jabatan);
+            $('#penanggung_jawab').val(data.penanggung_jawab);
             $('#tanggal_terbit').val(data.tanggal_terbit);
             $('#masa_berlaku').val(data.masa_berlaku);
             

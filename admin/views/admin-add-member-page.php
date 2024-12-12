@@ -310,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
                             </tr>
                             <tr valign="top">
                                 <th scope="row">
-                                    <label for="leader_position"><?php _e('Jabatan', 'asosiasi'); ?></label>
+                                    <label for="leader_position"><?php _e('Penanggung jawab', 'asosiasi'); ?></label>
                                 </th>
                                 <td>
                                     <input type="text" 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS {table_skp_tenaga_ahli} (
     service_id mediumint(9) NOT NULL,
     nomor_skp varchar(100) NOT NULL,
     nama_tenaga_ahli varchar(255) NOT NULL,
-    jabatan varchar(100) NOT NULL,
+    penanggung_jawab varchar(100) NOT NULL,
     tanggal_terbit date NOT NULL,
     masa_berlaku date NOT NULL,
     file_path varchar(255) NOT NULL,

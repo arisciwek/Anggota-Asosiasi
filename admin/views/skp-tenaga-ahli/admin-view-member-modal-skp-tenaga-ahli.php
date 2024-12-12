@@ -30,7 +30,7 @@ $services = new Asosiasi_Services();
 $member_services = $services->get_member_services($member_id);
 ?>
 
-<div id="skp-modal" class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display:none;">
+<div id="skp-tenaga-ahli-modal" class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="skp-tenaga-ahli-modal-title" style="display:none;">
     <div class="skp-modal-content">
         <div class="skp-modal-header">
             <h2 id="modal-title" class="skp-modal-title"></h2>
@@ -39,7 +39,7 @@ $member_services = $services->get_member_services($member_id);
             </button>
         </div>
 
-        <form id="skp-form" method="post" enctype="multipart/form-data" class="skp-form">
+        <form id="skp-tenaga-ahli-form" method="post" enctype="multipart/form-data" class="skp-form">
             <?php wp_nonce_field('asosiasi_skp_tenaga_ahli_nonce', 'skp_nonce'); ?>
             
             <!-- Hidden Fields -->
@@ -91,7 +91,8 @@ $member_services = $services->get_member_services($member_id);
                                autocomplete="off">
                     </div>
                 </div>
-
+                
+                <!-- START NAMA TENAGA AHLI FIELD -->
                 <!-- Nama Tenaga Ahli -->
                 <div class="skp-form-row">
                     <label for="nama_tenaga_ahli" class="skp-form-label">
@@ -107,17 +108,19 @@ $member_services = $services->get_member_services($member_id);
                                autocomplete="off">
                     </div>
                 </div>
+                <!-- END NAMA TENAGA AHLI FIELD -->
 
-                <!-- Jabatan -->
+
+                <!-- Penanggung jawab -->
                 <div class="skp-form-row">
-                    <label for="jabatan" class="skp-form-label">
-                        <?php _e('Jabatan', 'asosiasi'); ?>
+                    <label for="penanggung_jawab" class="skp-form-label">
+                        <?php _e('Penanggung jawab', 'asosiasi'); ?>
                         <span class="required">*</span>
                     </label>
                     <div class="skp-form-field">
                         <input type="text" 
-                               id="jabatan" 
-                               name="jabatan" 
+                               id="penanggung_jawab" 
+                               name="penanggung_jawab" 
                                class="regular-text" 
                                required
                                autocomplete="off">

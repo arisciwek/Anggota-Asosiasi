@@ -65,7 +65,7 @@ if (!defined('ABSPATH')) {
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row" style="padding: 10px 0;"><?php _e('Jabatan', 'asosiasi'); ?></th>
+                    <th scope="row" style="padding: 10px 0;"><?php _e('Penanggung jawab', 'asosiasi'); ?></th>
                     <td style="padding: 10px 0;">
                         <?php echo !empty($member['leader_position']) ? esc_html($member['leader_position']) : '<em>' . __('Belum diisi', 'asosiasi') . '</em>'; ?>
                     </td>

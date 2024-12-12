@@ -144,7 +144,7 @@ class Asosiasi_SKP_Cron {
             $message = sprintf(
                 __('SKP Tenaga Ahli %s (%s) untuk %s dengan nomor %s akan berakhir pada %s.', 'asosiasi'),
                 $skp->nama_tenaga_ahli,
-                $skp->jabatan,
+                $skp->penanggung_jawab,
                 $skp->company_name,
                 $skp->nomor_skp,
                 date_i18n(get_option('date_format'), strtotime($skp->masa_berlaku))

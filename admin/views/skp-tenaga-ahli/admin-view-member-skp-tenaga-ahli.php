@@ -38,11 +38,11 @@ if ($member) {
                     <?php if (!empty($member_services)): ?>
                         <div class="skp-actions">
                             <button type="button" 
-                                    class="button add-skp-btn" 
+                                    class="button add-skp-tenaga-ahli-btn"
                                     data-type="tenaga-ahli" 
                                     data-member-id="<?php echo esc_attr($member_id); ?>">
                                 <span class="dashicons dashicons-plus-alt"></span>
-                                <?php _e('Tambah SKP', 'asosiasi'); ?>
+                                <?php _e('Tambah SKP TA', 'asosiasi'); ?>
                             </button>
                         </div>
 
@@ -80,7 +80,7 @@ if ($member) {
                                                     <th class="column-nomor"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
                                                     <th class="column-service"><?php _e('Layanan', 'asosiasi'); ?></th>
                                                     <th class="column-name"><?php _e('Nama Tenaga Ahli', 'asosiasi'); ?></th>
-                                                    <th class="column-position"><?php _e('Jabatan', 'asosiasi'); ?></th>
+                                                    <th class="column-position"><?php _e('Penanggung jawab', 'asosiasi'); ?></th>
                                                     <th class="column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
                                                     <th class="column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
                                                     <th class="column-status"><?php _e('Status', 'asosiasi'); ?></th>
@@ -114,7 +114,7 @@ if ($member) {
                                                     <th class="column-nomor"><?php _e('Nomor SKP', 'asosiasi'); ?></th>
                                                     <th class="column-service"><?php _e('Layanan', 'asosiasi'); ?></th>
                                                     <th class="column-name"><?php _e('Nama Tenaga Ahli', 'asosiasi'); ?></th>
-                                                    <th class="column-position"><?php _e('Jabatan', 'asosiasi'); ?></th>
+                                                    <th class="column-position"><?php _e('Penanggung jawab', 'asosiasi'); ?></th>
                                                     <th class="column-date"><?php _e('Tanggal Terbit', 'asosiasi'); ?></th>
                                                     <th class="column-date"><?php _e('Masa Berlaku', 'asosiasi'); ?></th>
                                                     <th class="column-status"><?php _e('Status', 'asosiasi'); ?></th>
@@ -157,5 +157,19 @@ if ($member) {
             </fieldset>
         </div>
     </div>
-    <?php
+       <?php 
+       // Include modal templates if member has services
+       if (!empty($member_services)) {
+           // Include status change modal if user has permissions
+           if ($can_change_status) {
+               require_once ASOSIASI_DIR . 'admin/views/skp-tenaga-ahli/admin-view-member-modal-status-skp-tenaga-ahli.php';
+           }
+
+           // Include SKP form modal
+           require_once ASOSIASI_DIR . 'admin/views/skp-tenaga-ahli/admin-view-member-modal-skp-tenaga-ahli.php';
+       }
+       ?>
+   </div>
+   <?php
 }
+?>

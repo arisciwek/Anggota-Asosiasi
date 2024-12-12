@@ -96,7 +96,7 @@ class Member_Certificate_Provider extends Asosiasi_DocGen_Provider {
             'kota' => $this->data['city'],
             'tanggal_bergabung' => strftime('%d %B %Y', $join_date->getTimestamp()),
             'pimpinan' => $this->data['company_leader'],
-            'jabatan' => $this->data['leader_position'],
+            'penanggung_jawab' => $this->data['leader_position'],
             'npwp' => $this->data['npwp'],
             'bidang_usaha' => $this->data['business_field'],
             

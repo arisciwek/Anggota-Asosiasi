@@ -108,6 +108,11 @@ if (empty(asosiasi_check_requirements())) {
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-skp-perusahaan.php';
     require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-perusahaan.php';
 
+
+    //require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-tenaga-ahli.php';
+
+
+
     // SKP Tenaga Ahli related classes
     require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-skp-tenaga-ahli.php';
     require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-ajax-skp-tenaga-ahli.php';

@@ -195,7 +195,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.nomor_skp)}</td>
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.service_short_name)}</td>
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.nama_tenaga_ahli)}</td>
-                    <td>${AsosiasiSKPUtils.escapeHtml(skp.jabatan)}</td>
+                    <td>${AsosiasiSKPUtils.escapeHtml(skp.penanggung_jawab)}</td>
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.tanggal_terbit)}</td>
                     <td>${AsosiasiSKPUtils.escapeHtml(skp.masa_berlaku)}</td>
                     <td>

@@ -39,17 +39,18 @@ class Asosiasi_Ajax_Tenaga_Ahli {
         add_action('wp_ajax_get_skp_tenaga_ahli', array($this, 'get_skp_tenaga_ahli'));
         add_action('wp_ajax_get_skp_pdf', array($this, 'get_skp_pdf'));
     }
-
+    
     private function verify_request() {
-        // Check nonce from various possible sources
+        // Check nonce dari parameter yang konsisten
         $nonce = '';
-        if (isset($_REQUEST['nonce'])) {
+        if (isset($_REQUEST['skp_tenaga_ahli_nonce'])) {
+            $nonce = $_REQUEST['skp_tenaga_ahli_nonce'];
+        } elseif (isset($_REQUEST['nonce'])) {
             $nonce = $_REQUEST['nonce'];
-        } elseif (isset($_REQUEST['skp_nonce'])) {
-            $nonce = $_REQUEST['skp_nonce'];
         }
 
         if (empty($nonce)) {
+            error_log('Missing nonce in request');
             wp_send_json_error(array(
                 'message' => __('Token keamanan tidak ditemukan', 'asosiasi'),
                 'code' => 'missing_nonce'
@@ -57,6 +58,8 @@ class Asosiasi_Ajax_Tenaga_Ahli {
         }
 
         if (!wp_verify_nonce($nonce, $this->nonce_action)) {
+            error_log('Invalid nonce: ' . $nonce);
+            error_log('Nonce action: ' . $this->nonce_action);
             wp_send_json_error(array(
                 'message' => __('Token keamanan tidak valid', 'asosiasi'),
                 'code' => 'invalid_nonce'
@@ -168,49 +171,61 @@ class Asosiasi_Ajax_Tenaga_Ahli {
      * Add new SKP
      */
     public function add_skp_tenaga_ahli() {
-        $this->verify_request();
+        try {
+            error_log('Received add_skp_tenaga_ahli request');
+            error_log('POST data: ' . print_r($_POST, true));
+            error_log('Files: ' . print_r($_FILES, true));
+            
+            $this->verify_request();
 
-        // Validate required fields
-        $required_fields = array(
-            'member_id' => __('ID Anggota', 'asosiasi'),
-            'nomor_skp' => __('Nomor SKP', 'asosiasi'),
-            'nama_tenaga_ahli' => __('Nama Tenaga Ahli', 'asosiasi'),
-            'jabatan' => __('Jabatan', 'asosiasi'),
-            'tanggal_terbit' => __('Tanggal Terbit', 'asosiasi'),
-            'masa_berlaku' => __('Masa Berlaku', 'asosiasi')
-        );
+            // Validate required fields
+            $required_fields = array(
+                'member_id' => __('ID Anggota', 'asosiasi'),
+                'nomor_skp' => __('Nomor SKP', 'asosiasi'),
+                'nama_tenaga_ahli' => __('Nama Tenaga Ahli', 'asosiasi'),
+                'penanggung_jawab' => __('Penanggung jawab', 'asosiasi'),
+                'tanggal_terbit' => __('Tanggal Terbit', 'asosiasi'),
+                'masa_berlaku' => __('Masa Berlaku', 'asosiasi')
+            );
 
-        foreach ($required_fields as $field => $label) {
-            if (empty($_POST[$field])) {
+            foreach ($required_fields as $field => $label) {
+                if (empty($_POST[$field])) {
+                    wp_send_json_error(array(
+                        'message' => sprintf(__('Field %s wajib diisi', 'asosiasi'), $label),
+                        'field' => $field
+                    ));
+                }
+            }
+
+            // Validate file upload
+            if (empty($_FILES['pdf_file'])) {
                 wp_send_json_error(array(
-                    'message' => sprintf(__('Field %s wajib diisi', 'asosiasi'), $label),
-                    'field' => $field
+                    'message' => __('File PDF wajib diunggah', 'asosiasi'),
+                    'field' => 'pdf_file'
                 ));
             }
-        }
 
-        // Validate file upload
-        if (empty($_FILES['pdf_file'])) {
+            $skp = new Asosiasi_SKP_Tenaga_Ahli();
+            $result = $skp->add_skp($_POST, $_FILES['pdf_file']);
+
+            if (is_wp_error($result)) {
+                wp_send_json_error(array(
+                    'message' => $result->get_error_message(),
+                    'code' => $result->get_error_code()
+                ));
+            }
+
+            wp_send_json_success(array(
+                'message' => __('SKP berhasil ditambahkan', 'asosiasi'),
+                'skp_id' => $result
+            ));
+        } catch (Exception $e) {
+            error_log('Error in add_skp_tenaga_ahli: ' . $e->getMessage());
             wp_send_json_error(array(
-                'message' => __('File PDF wajib diunggah', 'asosiasi'),
-                'field' => 'pdf_file'
+                'message' => $e->getMessage(),
+                'code' => 'add_error'
             ));
         }
-
-        $skp = new Asosiasi_SKP_Tenaga_Ahli();
-        $result = $skp->add_skp($_POST, $_FILES['pdf_file']);
-
-        if (is_wp_error($result)) {
-            wp_send_json_error(array(
-                'message' => $result->get_error_message(),
-                'code' => $result->get_error_code()
-            ));
-        }
-
-        wp_send_json_success(array(
-            'message' => __('SKP berhasil ditambahkan', 'asosiasi'),
-            'skp_id' => $result
-        ));
     }
 
     /**
@@ -288,7 +303,7 @@ class Asosiasi_Ajax_Tenaga_Ahli {
                 'service_full_name' => isset($item['service_full_name']) ? $item['service_full_name'] : '',
                 'nomor_skp' => $item['nomor_skp'],
                 'nama_tenaga_ahli' => $item['nama_tenaga_ahli'],
-                'jabatan' => $item['jabatan'],
+                'penanggung_jawab' => $item['penanggung_jawab'],
                 'status' => $item['status'],
             );
 

@@ -107,7 +107,7 @@ class Asosiasi_SKP_Tenaga_Ahli {
                 'service_id' => $data['service_id'],
                 'nomor_skp' => $data['nomor_skp'],
                 'nama_tenaga_ahli' => $data['nama_tenaga_ahli'],
-                'jabatan' => $data['jabatan'],
+                'penanggung_jawab' => $data['penanggung_jawab'],
                 'tanggal_terbit' => $data['tanggal_terbit'],
                 'masa_berlaku' => $data['masa_berlaku'],
                 'file_path' => $file_path,
@@ -176,7 +176,7 @@ class Asosiasi_SKP_Tenaga_Ahli {
             'nomor_skp' => $data['nomor_skp'],
             'service_id' => $data['service_id'],
             'nama_tenaga_ahli' => $data['nama_tenaga_ahli'],
-            'jabatan' => $data['jabatan'],
+            'penanggung_jawab' => $data['penanggung_jawab'],
             'tanggal_terbit' => $data['tanggal_terbit'],
             'masa_berlaku' => $data['masa_berlaku']
         );
@@ -292,7 +292,7 @@ class Asosiasi_SKP_Tenaga_Ahli {
             'service_id' => absint($data['service_id']),
             'nomor_skp' => sanitize_text_field($data['nomor_skp']),
             'nama_tenaga_ahli' => sanitize_text_field($data['nama_tenaga_ahli']),
-            'jabatan' => sanitize_text_field($data['jabatan']),
+            'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
             'tanggal_terbit' => sanitize_text_field($data['tanggal_terbit']),
             'masa_berlaku' => sanitize_text_field($data['masa_berlaku'])
         );
