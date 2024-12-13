@@ -138,7 +138,7 @@ if ($member) {
 
                                 <!-- History Tab Content -->
                                 <?php 
-                                $history_template = ASOSIASI_DIR . 'admin/views/admin-view-member-skp-tenaga-ahli-history.php';
+                                $history_template = ASOSIASI_DIR . 'admin/views/skp-tenaga-ahli/admin-view-member-skp-tenaga-ahli-history.php';
                                 if (file_exists($history_template)) {
                                     include $history_template;
                                 }

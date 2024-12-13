@@ -70,121 +70,134 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
    /**
     * Handle SKP status update
     */
-   public function update_skp_status() {
-       try {
-           if (WP_DEBUG) {
-               error_log('Attempting SKP tenaga ahli status update');
-               error_log('POST data: ' . print_r($_POST, true));
-           }
+    public function update_skp_status() {
+        try {
+            error_log('=== Starting SKP Tenaga Ahli Status Update ===');
+            error_log('Raw POST data: ' . print_r($_POST, true));
 
-           $this->verify_request();
+            $this->verify_request();
 
-           // Validate required fields
-           $required = array('skp_id', 'old_status', 'new_status', 'reason');
-           foreach ($required as $field) {
-               if (empty($_POST[$field])) {
-                   throw new Exception(
-                       sprintf(__('Field %s wajib diisi', 'asosiasi'), $field)
-                   );
-               }
-           }
+            // Validate required fields
+            $required = array('skp_id', 'old_status', 'new_status', 'reason');
+            foreach ($required as $field) {
+                if (empty($_POST[$field])) {
+                    error_log("Missing required field: {$field}");
+                    throw new Exception(
+                        sprintf(__('Field %s wajib diisi', 'asosiasi'), $field)
+                    );
+                }
+            }
 
-           // Validate reason
-           $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
-           if (empty($reason)) {
-               throw new Exception(__('Alasan perubahan status wajib diisi', 'asosiasi'));
-           }
-           
-           if (strlen($reason) > 1000) {
-               throw new Exception(__('Alasan terlalu panjang (maksimal 1000 karakter)', 'asosiasi')); 
-           }
+            // Log sanitized data before processing
+            $skp_id = intval($_POST['skp_id']);
+            $new_status = sanitize_text_field($_POST['new_status']);
+            $reason = sanitize_textarea_field($_POST['reason']);
+            
+            error_log('Sanitized data for update:');
+            error_log("SKP ID: {$skp_id}");
+            error_log("New Status: {$new_status}");
+            error_log("Reason: {$reason}");
+            error_log("SKP Type: " . (isset($_POST['skp_type']) ? $_POST['skp_type'] : 'not set'));
 
-           if (WP_DEBUG) {
-               error_log('Calling update_status with params:');
-               error_log('SKP ID: ' . intval($_POST['skp_id']));
-               error_log('New Status: ' . sanitize_text_field($_POST['new_status']));
-               error_log('Reason: ' . $reason);
-           }
+            // Debug before calling update_status
+            error_log('Calling status handler update_status method');
+            
+            $result = $this->status_handler->update_status(
+                $skp_id,
+                $new_status,
+                $reason
+            );
 
-           $result = $this->status_handler->update_status(
-               intval($_POST['skp_id']),
-               sanitize_text_field($_POST['new_status']),
-               $reason
-           );
+            // Debug result
+            if (is_wp_error($result)) {
+                error_log('Update failed with error: ' . $result->get_error_message());
+                throw new Exception($result->get_error_message());
+            } else {
+                error_log('Update successful. Result: ' . print_r($result, true));
+            }
 
-           if (is_wp_error($result)) {
-               throw new Exception($result->get_error_message());
-           }
+            wp_send_json_success(array(
+                'message' => __('Status SKP berhasil diperbarui', 'asosiasi'),
+                'status' => $new_status
+            ));
 
-           wp_send_json_success(array(
-               'message' => __('Status SKP berhasil diperbarui', 'asosiasi'),
-               'status' => $_POST['new_status']
-           ));
-
-       } catch (Exception $e) {
-           if (WP_DEBUG) {
-               error_log('SKP Tenaga Ahli Status update error: ' . $e->getMessage());
-           }
-           wp_send_json_error(array(
-               'message' => $e->getMessage(),
-               'code' => 'status_update_error'
-           ));
-       }
-   }
+        } catch (Exception $e) {
+            error_log('SKP Tenaga Ahli Status update error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            wp_send_json_error(array(
+                'message' => $e->getMessage(),
+                'code' => 'status_update_error'
+            ));
+        }
+    }
 
    /**
     * Get SKP status history
     */
    public function get_skp_status_history() {
-       try {
-           $this->verify_request();
+        try {
+            error_log('=== Starting SKP Tenaga Ahli Status History Request ===');
+            error_log('GET params: ' . print_r($_GET, true));
+            $this->verify_request();
 
-           $skp_id = isset($_GET['skp_id']) ? intval($_GET['skp_id']) : 0;
-           if (!$skp_id) {
-               throw new Exception(__('ID SKP tidak valid', 'asosiasi'));
-           }
+            $member_id = isset($_GET['member_id']) ? intval($_GET['member_id']) : 0;
+            if (!$member_id) {
+                throw new Exception(__('ID Member tidak valid', 'asosiasi'));
+            }
 
-           if (WP_DEBUG) {
-               error_log('Getting history for tenaga ahli SKP ID: ' . $skp_id);
-           }
+            if (WP_DEBUG) {
+                error_log('Mengambil history untuk member ID: ' . $member_id);
+            }
 
-           $history = $this->status_handler->get_status_history($skp_id);
+            global $wpdb;
+            $history = $wpdb->get_results($wpdb->prepare(
+                "SELECT h.*, s.nomor_skp, s.nama_tenaga_ahli 
+                 FROM {$wpdb->prefix}asosiasi_skp_status_history h
+                 JOIN {$wpdb->prefix}asosiasi_skp_tenaga_ahli s ON h.skp_id = s.id
+                 JOIN {$wpdb->prefix}asosiasi_members m ON s.member_id = m.id
+                 WHERE m.id = %d
+                 ORDER BY h.changed_at DESC",
+                $member_id
+            ), ARRAY_A);
 
-           if (WP_DEBUG) {
-               error_log('Found history records: ' . count($history));
-               error_log('History data: ' . print_r($history, true));
-           }
+            if (WP_DEBUG) {
+                error_log('Jumlah record history: ' . count($history));
+                error_log('Data history: ' . print_r($history, true));
 
-           wp_send_json_success(array(
-               'history' => array_map(array($this, 'get_formatted_history'), $history)
-           ));
+            }
 
-       } catch (Exception $e) {
-           if (WP_DEBUG) {
-               error_log('Get history error: ' . $e->getMessage());
-           }
-           wp_send_json_error(array(
-               'message' => $e->getMessage(),
-               'code' => 'get_history_error'
-           ));
-       }
-   }
+            wp_send_json_success(array(
+                'history' => array_map(array($this, 'get_formatted_history'), $history)
+            ));
+
+        } catch (Exception $e) {
+            if (WP_DEBUG) {
+                error_log('Error mengambil history: ' . $e->getMessage());
+            }
+            wp_send_json_error(array(
+                'message' => $e->getMessage(),
+                'code' => 'get_history_error'
+            ));
+        }
+    }
 
    /**
     * Format history record for display
     */
    private function get_formatted_history($item) {
-       $user_info = get_userdata($item['changed_by']);
-       return array(
-           'id' => isset($item['id']) ? $item['id'] : 0,
-           'old_status' => $this->status_handler->get_status_label($item['old_status']),
-           'new_status' => $this->status_handler->get_status_label($item['new_status']),
-           'reason' => $item['reason'],
-           'changed_by' => $user_info ? $user_info->display_name : __('User tidak ditemukan', 'asosiasi'),
-           'changed_at' => mysql2date(
-               get_option('date_format') . ' ' . get_option('time_format'), 
-               $item['changed_at']
-           )
-       );
-   }
+        $user_info = get_userdata($item['changed_by']);
+        return array(
+            'id' => isset($item['id']) ? $item['id'] : 0,
+            'nomor_skp' => $item['nomor_skp'],
+            'nama_tenaga_ahli' => $item['nama_tenaga_ahli'], // Tambahkan ini
+            'old_status' => $this->status_handler->get_status_label($item['old_status']),
+            'new_status' => $this->status_handler->get_status_label($item['new_status']),
+            'reason' => $item['reason'],
+            'changed_by' => $user_info ? $user_info->display_name : __('User tidak ditemukan', 'asosiasi'),
+            'changed_at' => mysql2date(
+                get_option('date_format') . ' ' . get_option('time_format'), 
+                $item['changed_at']
+            )
+        );
+    }
 }

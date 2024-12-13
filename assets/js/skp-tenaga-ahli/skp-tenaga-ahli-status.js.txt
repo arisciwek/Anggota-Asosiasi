@@ -3,45 +3,56 @@
  *
  * @package     Asosiasi
  * @subpackage  Assets/JS/SKP_Tenaga_Ahli
- * @version     1.0.2
+ * @version     1.0.1
  * @author      arisciwek
  *
  * Description: Menangani semua interaksi terkait perubahan status
  *              dan riwayat status SKP Tenaga Ahli
+ *
+ * Changelog:
+ * 1.0.1 - 2024-12-12
+ * - Added detailed logging
+ * - Fixed history loading
+ * - Improved error handling
  */
+
 var AsosiasiSKPTenagaAhliStatus = {};
 
 (function($) {
     'use strict';
 
-    AsosiasiSKPTenagaAhliStatus = {
+    // Private methods container
+    const methods = {
         init: function() {
-            console.log('Initializing SKP Tenaga Ahli Status...');
+            console.log('AsosiasiSKPTenagaAhliStatus.init called');
             this.initStatusChangeHandlers();
             this.initModalHandlers();
         },
 
         initStatusChangeHandlers: function() {
+            console.log('Initializing SKP Tenaga Ahli status handlers');
+            
             // Toggle status select dropdown
-            $(document).on('click', '.status-change-trigger', function(e) {
+            $('#skp-tenaga-ahli-section').on('click', '.status-change-trigger', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const $wrapper = $(this).closest('.status-wrapper');
                 const $select = $wrapper.find('.status-select');
                 
-                // Hide other open selects
-                $('.status-select').not($select).hide();
+                $('#skp-tenaga-ahli-section .status-select').not($select).hide();
                 $select.toggle();
             });
 
             // Handle status selection
-            $(document).on('change', '.status-select select', function() {
+            $('#skp-tenaga-ahli-section').on('change', '.status-select select', function() {
                 const $select = $(this);
                 const skpId = $select.data('id');
                 const oldStatus = $select.data('current');
                 const newStatus = $select.val();
 
                 if (!newStatus) return;
+
+                console.log('Status change selected:', {skpId, oldStatus, newStatus});
 
                 // Hide select wrapper
                 $select.closest('.status-select').hide();
@@ -51,62 +62,47 @@ var AsosiasiSKPTenagaAhliStatus = {};
                 $('#status_old_status').val(oldStatus);
                 $('#status_new_status').val(newStatus);
                 $('#status_reason').val('');
-
-                // Show modal
-                $('#status-change-modal').show();
+                $('#status-change-modal-tenaga-ahli').show();
                 $('#status_reason').focus();
                 
                 // Reset select
                 $select.val('');
-
-                console.log('Status change initiated:', {
-                    skpId: skpId,
-                    oldStatus: oldStatus,
-                    newStatus: newStatus
-                });
             });
 
             // Close dropdowns when clicking outside
             $(window).on('click', function(e) {
-                if (!$(e.target).closest('.status-wrapper').length) {
-                    $('.status-select').hide();
+                if (!$(e.target).closest('#skp-tenaga-ahli-section .status-wrapper').length) {
+                    $('#skp-tenaga-ahli-section .status-select').hide();
                 }
             });
         },
 
         initModalHandlers: function() {
+            console.log('Initializing modal handlers');
+            
             // Handle form submission
-            $('#status-change-form').on('submit', function(e) {
+            $('#status-change-form-tenaga-ahli').on('submit', function(e) {
                 e.preventDefault();
+                console.log('Status change form submitted');
 
                 if (!AsosiasiSKPUtils.validateForm($(this))) {
+                    console.log('Form validation failed');
                     return;
                 }
-
-                const skpId = $('#status_skp_id').val();
-                const oldStatus = $('#status_old_status').val();
-                const newStatus = $('#status_new_status').val();
-                const reason = $('#status_reason').val();
-
-                console.log('Submitting status change:', {
-                    skpId: skpId,
-                    oldStatus: oldStatus,
-                    newStatus: newStatus,
-                    reason: reason
-                });
 
                 const formData = new FormData(this);
                 formData.append('action', 'update_skp_tenaga_ahli_status');
                 formData.append('nonce', $('#skp_tenaga_ahli_nonce').val());
-                formData.append('skp_id', skpId);
-                formData.append('old_status', oldStatus);
-                formData.append('new_status', newStatus);
-                formData.append('reason', reason);
-                formData.append('skp_type', 'tenaga_ahli');
 
                 const $submitBtn = $(this).find('button[type="submit"]');
                 const originalText = $submitBtn.text();
                 
+                console.log('Sending status update request:', {
+                    skpId: formData.get('skp_id'),
+                    oldStatus: formData.get('old_status'),
+                    newStatus: formData.get('new_status')
+                });
+
                 $submitBtn.prop('disabled', true)
                          .text(asosiasiSKPTenagaAhli.strings.saving || 'Menyimpan...');
 
@@ -121,17 +117,14 @@ var AsosiasiSKPTenagaAhliStatus = {};
                         if (response.success) {
                             AsosiasiSKPUtils.showNotice('success', response.data.message);
                             AsosiasiSKPTenagaAhli.reloadTable(null, 'active');
-                            setTimeout(() => {
-                                AsosiasiSKPTenagaAhli.reloadTable(null, 'inactive');
-                            }, 300);
-                            AsosiasiSKPTenagaAhliStatus.loadStatusHistory();
+                            methods.loadStatusHistory();
                         } else {
                             AsosiasiSKPUtils.showNotice('error', response.data.message);
                         }
-                        $('#status-change-modal').hide();
+                        $('#status-change-modal-tenaga-ahli').hide();
                     },
                     error: function(xhr, status, error) {
-                        console.error('AJAX error:', error);
+                        console.error('Status update error:', {xhr, status, error});
                         AsosiasiSKPUtils.showNotice('error', 
                             asosiasiSKPTenagaAhli.strings.statusChangeError || 
                             'Gagal mengubah status SKP'
@@ -144,28 +137,33 @@ var AsosiasiSKPTenagaAhliStatus = {};
             });
 
             // Modal close handlers
-            $('.skp-modal-close, .skp-modal-cancel').on('click', function() {
-                $('#status-change-modal').hide();
+            $('.status-modal-close-tenaga-ahli, .status-modal-cancel-tenaga-ahli').on('click', function() {
+                $('#status-change-modal-tenaga-ahli').hide();
             });
 
             // Close modal on outside click
             $(window).on('click', function(e) {
-                if ($(e.target).is('#status-change-modal')) {
-                    $('#status-change-modal').hide();
+                if ($(e.target).is('#status-change-modal-tenaga-ahli')) {
+                    $('#status-change-modal-tenaga-ahli').hide();
                 }
-            });
-
-            // Prevent modal close on content click
-            $('#status-change-modal .skp-modal-content').on('click', function(e) {
-                e.stopPropagation();
             });
         },
 
         loadStatusHistory: function() {
+            console.log('Loading status history');
             const $historyList = $('#tenaga-ahli-status-history-list');
             const memberId = AsosiasiSKPUtils.getMemberId();
 
-            if (!$historyList.length || !memberId) return;
+            console.log('History elements:', {
+                historyListFound: $historyList.length > 0,
+                memberId: memberId,
+                nonce: $('#skp_tenaga_ahli_nonce').val()
+            });
+
+            if (!$historyList.length || !memberId) {
+                console.error('Required elements missing for history load');
+                return;
+            }
 
             $historyList.html(`
                 <tr class="skp-loading">
@@ -187,15 +185,16 @@ var AsosiasiSKPTenagaAhliStatus = {};
                     nonce: $('#skp_tenaga_ahli_nonce').val()
                 },
                 success: function(response) {
+                    console.log('History response:', response);
                     if (response.success) {
-                        AsosiasiSKPTenagaAhliStatus.renderStatusHistory(response.data.history);
+                        methods.renderStatusHistory(response.data.history);
                     } else {
                         AsosiasiSKPUtils.showNotice('error', response.data.message);
                         $historyList.empty();
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('History load error:', error);
+                    console.error('History load error:', {xhr, status, error});
                     AsosiasiSKPUtils.showNotice('error', 
                         asosiasiSKPTenagaAhli.strings.loadHistoryError || 
                         'Gagal memuat riwayat status'
@@ -206,6 +205,7 @@ var AsosiasiSKPTenagaAhliStatus = {};
         },
 
         renderStatusHistory: function(history) {
+            console.log('Rendering history:', history);
             const $historyList = $('#tenaga-ahli-status-history-list');
             $historyList.empty();
 
@@ -221,8 +221,8 @@ var AsosiasiSKPTenagaAhliStatus = {};
             }
 
             history.forEach((item, index) => {
-                const oldStatusClass = this.getStatusClassFromLabel(item.old_status);
-                const newStatusClass = this.getStatusClassFromLabel(item.new_status);
+                const oldStatusClass = methods.getStatusClassFromLabel(item.old_status);
+                const newStatusClass = methods.getStatusClassFromLabel(item.new_status);
                 
                 $historyList.append(`
                     <tr>
@@ -263,10 +263,20 @@ var AsosiasiSKPTenagaAhliStatus = {};
         }
     };
 
+    // Expose public methods
+    AsosiasiSKPTenagaAhliStatus = {
+        init: methods.init.bind(methods),
+        loadStatusHistory: methods.loadStatusHistory.bind(methods)
+    };
+
     // Initialize when document is ready
     $(document).ready(function() {
+        console.log('Document ready in status.js');
         if ($('#skp-tenaga-ahli-section').length) {
-            AsosiasiSKPTenagaAhliStatus.init();
+            console.log('SKP section found, initializing status handler');
+            methods.init();
+        } else {
+            console.log('SKP section not found');
         }
     });
 

@@ -17,7 +17,6 @@ if (!defined('ABSPATH')) {
    exit;
 }
 ?>
-
 <!-- History Tab Content -->
 <div id="skp-tenaga-ahli-history" class="tab-pane-tenaga-ahli">
    <div class="skp-table-container">
@@ -33,7 +32,7 @@ if (!defined('ABSPATH')) {
                    <th class="column-date"><?php _e('Waktu', 'asosiasi'); ?></th>
                </tr>
            </thead>
-           <tbody id="status-history-list">
+           <tbody id="tenaga-ahli-status-history-list">
                <tr class="skp-loading">
                    <td colspan="7" class="text-center">
                        <span class="spinner is-active"></span>

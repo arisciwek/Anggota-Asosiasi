@@ -3,18 +3,16 @@
  *
  * @package     Asosiasi
  * @subpackage  Assets/JS/SKP_Tenaga_Ahli
- * @version     1.0.3
+ * @version     1.0.4
  * @author      arisciwek
- *
- * Path: /asosiasi/assets/js/skp-tenaga-ahli/skp-tenaga-ahli.js
  *
  * Description: Menangani semua interaksi utama SKP Tenaga Ahli dengan isolasi penuh
  *
  * Changelog:
- * 1.0.3 - 2024-12-12
- * - Added complete namespace isolation
- * - Removed localStorage dependency
- * - Fixed tab handling with namespaced classes
+ * 1.0.4 - 2024-12-12
+ * - Added detailed logging
+ * - Fixed history tab handling 
+ * - Improved tab isolation
  */
 
 var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
@@ -42,16 +40,21 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     };
 
     function initSKPTenagaAhli() {
-        if (!$(SELECTORS.SECTION).length) return;
+        console.log('Initializing SKP Tenaga Ahli');
+        if (!$(SELECTORS.SECTION).length) {
+            console.log('SKP Tenaga Ahli section not found');
+            return;
+        }
 
         initTabHandlers();
         preventExternalTabInterference();
         
-        // Initial load B1 saat pertama kali
+        // Initial load saat pertama kali
         loadSKPTenagaAhliList('active');
     }
 
     function initTabHandlers() {
+        console.log('Initializing tab handlers');
         // Event delegation dengan scope yang ketat
         $(SELECTORS.SECTION).on('click', `${SELECTORS.TAB}`, function(e) {
             e.preventDefault();
@@ -60,27 +63,28 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             const $this = $(this);
             const status = $this.data('tab');
             
+            console.log('Tab clicked:', status);
+            
             // Update state
             _state.currentTab = status;
             
-            // Update UI dengan scope spesifik
-            $(`${SELECTORS.SECTION} ${SELECTORS.TAB}`)
-                .removeClass(SELECTORS.TAB_ACTIVE);
+            // Update UI
+            $(`${SELECTORS.SECTION} ${SELECTORS.TAB}`).removeClass(SELECTORS.TAB_ACTIVE);
             $this.addClass(SELECTORS.TAB_ACTIVE);
             
-            // Update content visibility dengan scope spesifik
-            $(`${SELECTORS.SECTION} ${SELECTORS.CONTENT}`)
-                .removeClass(SELECTORS.ACTIVE_CONTENT)
-                .hide();
-            $(`#skp-tenaga-ahli-${status}`)
-                .addClass(SELECTORS.ACTIVE_CONTENT)
-                .show();
+            // Update content visibility
+            $(`${SELECTORS.SECTION} ${SELECTORS.CONTENT}`).removeClass(SELECTORS.ACTIVE_CONTENT).hide();
+            $(`#skp-tenaga-ahli-${status}`).addClass(SELECTORS.ACTIVE_CONTENT).show();
             
             if (status === 'history') {
-                if (typeof  Status !== 'undefined') {
+                console.log('History tab selected, loading history...');
+                if (typeof AsosiasiSKPTenagaAhliStatus !== 'undefined') {
                     AsosiasiSKPTenagaAhliStatus.loadStatusHistory();
+                } else {
+                    console.error('AsosiasiSKPTenagaAhliStatus not defined');
                 }
             } else {
+                console.log('Loading SKP list for status:', status);
                 loadSKPTenagaAhliList(status);
             }
         });
@@ -89,14 +93,11 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     function preventExternalTabInterference() {
         // Handle external tab clicks
         $(document).on('click', '.nav-tab', function(e) {
-            // Jika klik dari luar section SKP Tenaga Ahli
             if (!$(e.target).closest(SELECTORS.SECTION).length) {
-                // Jaga state tab Tenaga Ahli tetap sesuai yang aktif
                 const $activeTab = $(`${SELECTORS.SECTION} ${SELECTORS.TAB}.${SELECTORS.TAB_ACTIVE}`);
                 if ($activeTab.length) {
                     const currentStatus = $activeTab.data('tab');
                     if (currentStatus && currentStatus !== 'history') {
-                        // Refresh data jika perlu
                         loadSKPTenagaAhliList(currentStatus);
                     }
                 }
@@ -105,6 +106,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     }
 
     function loadSKPTenagaAhliList(status = 'active') {
+        console.log('Loading SKP list for status:', status);
         const memberId = getMemberId();
         if (!memberId) {
             console.warn('Member ID not found for SKP Tenaga Ahli');
@@ -132,6 +134,12 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             </tr>
         `);
 
+        console.log('Sending AJAX request with:', {
+            memberId,
+            status,
+            nonce: $('#skp_tenaga_ahli_nonce').val()
+        });
+
         $.ajax({
             url: ajaxurl,
             type: 'GET',
@@ -142,30 +150,34 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                 nonce: $('#skp_tenaga_ahli_nonce').val()
             },
             success: function(response) {
+                console.log('AJAX response received:', response);
                 if (response.success) {
-                    // Update state
                     _state.currentData = response.data.skp_list;
                     renderSKPTenagaAhliList(response.data.skp_list, status);
                 } else {
-                    console.error('Error loading SKP Tenaga Ahli list:', response.data);
+                    console.error('Error loading SKP list:', response.data);
                     AsosiasiSKPUtils.showNotice('error', 
                         response.data.message || asosiasiSKPTenagaAhli.strings.loadError
                     );
                 }
             },
             error: function(xhr, status, error) {
-                console.error('AJAX error loading SKP Tenaga Ahli:', error);
+                console.error('AJAX error:', {xhr, status, error});
                 AsosiasiSKPUtils.showNotice('error', asosiasiSKPTenagaAhli.strings.loadError);
             }
         });
     }
 
     function renderSKPTenagaAhliList(skpList, status) {
+        console.log('Rendering SKP list:', {skpList, status});
         const targetId = status === 'active' ? 
             'active-skp-tenaga-ahli-list' : 'inactive-skp-tenaga-ahli-list';
         const $target = $(`#${targetId}`);
         
-        if (!$target.length) return;
+        if (!$target.length) {
+            console.warn(`Target element #${targetId} not found`);
+            return;
+        }
 
         $target.empty();
 
@@ -183,7 +195,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
         }
 
         skpList.forEach((skp, index) => {
-            // Existing render code tetap sama
+            console.log('Rendering SKP item:', skp);
             const availableStatuses = AsosiasiSKPUtils.getAvailableStatuses(skp.status);
             const statusOptions = availableStatuses.map(status => 
                 `<option value="${status.value}">${status.label}</option>`
@@ -253,8 +265,9 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                new URLSearchParams(window.location.search).get('id');
     }
 
-    // Public API dengan namespace spesifik
+    // Public API
     AsosiasiSKPTenagaAhli.reloadTable = function(memberId, status = 'active') {
+        console.log('Reloading table:', {memberId, status});
         if (!memberId) {
             memberId = getMemberId();
         }
@@ -263,10 +276,13 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
         }
     };
 
-    // Initialize
+    // Initialize when document is ready
     $(document).ready(function() {
+        console.log('Document ready in SKP Tenaga Ahli main script');
         if ($(SELECTORS.SECTION).length) {
             initSKPTenagaAhli();
+        } else {
+            console.log('SKP Tenaga Ahli section not found in document');
         }
     });
 

@@ -35,6 +35,7 @@ class Asosiasi_Enqueue_SKP_Tenaga_Ahli {
     }
 
     public function enqueue_assets($hook) {
+        error_log('Enqueuing SKP Tenaga Ahli assets on hook: ' . $hook);
         if (!isset($_GET['page']) || !in_array($_GET['page'], $this->allowed_pages)) {
             return;
         }

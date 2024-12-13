@@ -43,6 +43,7 @@ if ($can_change_status):
         <form id="status-change-form" method="post" class="skp-form">
             <?php wp_nonce_field('asosiasi_skp_tenaga_ahli_nonce', 'status_nonce'); ?>
             
+            <!-- Hidden fields with matching IDs -->
             <input type="hidden" id="status_skp_id" name="skp_id" value="">
             <input type="hidden" id="status_skp_type" name="skp_type" value="tenaga_ahli">
             <input type="hidden" id="status_old_status" name="old_status" value="">
