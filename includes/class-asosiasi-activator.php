@@ -53,11 +53,6 @@ class Asosiasi_Activator {
         global $wpdb;
         $table_name = $wpdb->prefix . 'asosiasi_members';
 
-        // Log untuk debugging
-        if (WP_DEBUG) {
-            error_log('Starting member fields migration...');
-        }
-
         try {
             // Array of new columns and their definitions
             $new_columns = array(
@@ -304,52 +299,6 @@ class Asosiasi_Activator {
             update_option('asosiasi_db_version', '2.5.0');
         }
 
-        // Log upgrade completion if debugging
-        if (WP_DEBUG) {
-            error_log(sprintf(
-                'Asosiasi database upgraded from version %s to %s',
-                $current_db_version,
-                '2.5.0'
-            ));
-        }
     }
-
-    /**
-     * Create SKP Tenaga Ahli table
-     *
-    private static function create_skp_tenaga_ahli_table() {
-        global $wpdb;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-        $sql = self::load_sql_file('skp-tenaga-ahli');
-        if (is_wp_error($sql)) {
-            if (WP_DEBUG) {
-                error_log('Failed to create SKP Tenaga Ahli table: ' . $sql->get_error_message());
-            }
-            return;
-        }
-
-        dbDelta($sql);
-
-        // Verify table creation
-        $table_name = $wpdb->prefix . 'asosiasi_skp_tenaga_ahli';
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-            if (WP_DEBUG) {
-                error_log('SKP Tenaga Ahli table creation failed');
-            }
-            return;
-        }
-
-        // Update status history table to support tenaga_ahli type 
-        $history_table = $wpdb->prefix . 'asosiasi_skp_status_history';
-        $wpdb->query("ALTER TABLE $history_table MODIFY COLUMN skp_type 
-                     ENUM('company', 'tenaga_ahli') NOT NULL DEFAULT 'company'");
-
-        if (WP_DEBUG) {
-            error_log('SKP Tenaga Ahli table created successfully');
-        }
-    }
-    */
-
 
 }

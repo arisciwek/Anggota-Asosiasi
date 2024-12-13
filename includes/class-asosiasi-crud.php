@@ -35,10 +35,6 @@ class Asosiasi_CRUD {
     public function get_members() {
         global $wpdb;
 
-        if (WP_DEBUG) {
-            error_log('Fetching all members from table: ' . $this->table_members);
-        }
-
         // Query langsung tanpa prepare karena tidak ada parameter
         $results = $wpdb->get_results(
             "SELECT * FROM {$this->table_members} ORDER BY created_at DESC",
@@ -64,10 +60,6 @@ class Asosiasi_CRUD {
      */
     public function get_member($id) {
         global $wpdb;
-
-        if (WP_DEBUG) {
-            error_log('Fetching member with ID: ' . $id);
-        }
 
         $query = $wpdb->prepare(
             "SELECT * FROM {$this->table_members} WHERE id = %d",
@@ -146,11 +138,6 @@ class Asosiasi_CRUD {
     public function update_member($id, $data) {
         global $wpdb;
 
-        if (WP_DEBUG) {
-            error_log('Updating member ID: ' . $id);
-            error_log('Update data: ' . print_r($data, true));
-        }
-
         $member_data = array(
             // Existing fields
             'company_name' => sanitize_text_field($data['company_name']),
@@ -168,10 +155,6 @@ class Asosiasi_CRUD {
             'city' => sanitize_text_field($data['city']),
             'npwp' => sanitize_text_field($data['npwp'])
         );
-
-        if (WP_DEBUG) {
-            error_log('Sanitized update data: ' . print_r($member_data, true));
-        }
 
         $result = $wpdb->update(
             $this->table_members,
@@ -193,10 +176,6 @@ class Asosiasi_CRUD {
             return false;
         }
 
-        if (WP_DEBUG && $result !== false) {
-            error_log('Member updated successfully');
-        }
-
         return $result !== false;
     }
 
@@ -208,10 +187,6 @@ class Asosiasi_CRUD {
      */
     public function delete_member($id) {
         global $wpdb;
-
-        if (WP_DEBUG) {
-            error_log('Deleting member with ID: ' . $id);
-        }
 
         $result = $wpdb->delete(
             $this->table_members,

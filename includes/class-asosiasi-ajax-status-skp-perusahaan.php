@@ -22,8 +22,19 @@ defined('ABSPATH') || exit;
 
 class Asosiasi_Ajax_Status_Skp_Perusahaan {
 
+   private static $instance = null;
    private $nonce_action = 'asosiasi_skp_perusahaan_nonce';
    private $status_handler;
+
+    public static function get_instance() {
+        if (null === self::$instance) {
+            if (WP_DEBUG && !defined('DOING_AJAX')) {
+                error_log('SKP Perusahaan Status handler initialized');
+            }
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 
    public function __construct() {
        $this->status_handler = new Asosiasi_Status_Skp_Perusahaan();
@@ -33,10 +44,6 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
    private function init_hooks() {
        add_action('wp_ajax_update_skp_status', array($this, 'update_skp_status'));
        add_action('wp_ajax_get_skp_status_history', array($this, 'get_skp_status_history'));
-       
-       if (WP_DEBUG) {
-           error_log('SKP Status handler initialized');
-       }
    }
 
    /**
@@ -71,10 +78,6 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
     */
    public function update_skp_status() {
        try {
-           if (WP_DEBUG) {
-               error_log('Attempting SKP status update');
-               error_log('POST data: ' . print_r($_POST, true));
-           }
 
            $this->verify_request();
 
@@ -98,13 +101,6 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
                throw new Exception(__('Alasan terlalu panjang (maksimal 1000 karakter)', 'asosiasi')); 
            }
 
-           if (WP_DEBUG) {
-               error_log('Calling update_status with params:');
-               error_log('SKP ID: ' . intval($_POST['skp_id']));
-               error_log('New Status: ' . sanitize_text_field($_POST['new_status']));
-               error_log('Reason: ' . $reason);
-           }
-
            $result = $this->status_handler->update_status(
                intval($_POST['skp_id']),
                sanitize_text_field($_POST['new_status']),
@@ -121,9 +117,6 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
            ));
 
        } catch (Exception $e) {
-           if (WP_DEBUG) {
-               error_log('SKP Status update error: ' . $e->getMessage());
-           }
            wp_send_json_error(array(
                'message' => $e->getMessage(),
                'code' => 'status_update_error'
@@ -143,10 +136,6 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
                throw new Exception(__('ID Member tidak valid', 'asosiasi'));
            }
 
-           if (WP_DEBUG) {
-               error_log('Getting history for member ID: ' . $member_id);
-           }
-
            global $wpdb;
            $history = $wpdb->get_results($wpdb->prepare(
                "SELECT h.*, s.nomor_skp 
@@ -158,19 +147,12 @@ class Asosiasi_Ajax_Status_Skp_Perusahaan {
                $member_id
            ), ARRAY_A);
 
-           if (WP_DEBUG) {
-               error_log('Found history records: ' . count($history));
-               error_log('History data: ' . print_r($history, true));
-           }
-
            wp_send_json_success(array(
                'history' => array_map(array($this, 'get_formatted_history'), $history)
            ));
 
        } catch (Exception $e) {
-           if (WP_DEBUG) {
-               error_log('Get history error: ' . $e->getMessage());
-           }
+
            wp_send_json_error(array(
                'message' => $e->getMessage(),
                'code' => 'get_history_error'

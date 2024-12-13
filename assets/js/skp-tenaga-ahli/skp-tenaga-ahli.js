@@ -40,7 +40,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     };
 
     function initSKPTenagaAhli() {
-        console.log('Initializing SKP Tenaga Ahli');
         if (!$(SELECTORS.SECTION).length) {
             console.log('SKP Tenaga Ahli section not found');
             return;
@@ -54,7 +53,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     }
 
     function initTabHandlers() {
-        console.log('Initializing tab handlers');
         // Event delegation dengan scope yang ketat
         $(SELECTORS.SECTION).on('click', `${SELECTORS.TAB}`, function(e) {
             e.preventDefault();
@@ -62,9 +60,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             
             const $this = $(this);
             const status = $this.data('tab');
-            
-            console.log('Tab clicked:', status);
-            
+                        
             // Update state
             _state.currentTab = status;
             
@@ -77,14 +73,12 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             $(`#skp-tenaga-ahli-${status}`).addClass(SELECTORS.ACTIVE_CONTENT).show();
             
             if (status === 'history') {
-                console.log('History tab selected, loading history...');
                 if (typeof AsosiasiSKPTenagaAhliStatus !== 'undefined') {
                     AsosiasiSKPTenagaAhliStatus.loadStatusHistory();
                 } else {
                     console.error('AsosiasiSKPTenagaAhliStatus not defined');
                 }
             } else {
-                console.log('Loading SKP list for status:', status);
                 loadSKPTenagaAhliList(status);
             }
         });
@@ -106,7 +100,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     }
 
     function loadSKPTenagaAhliList(status = 'active') {
-        console.log('Loading SKP list for status:', status);
         const memberId = getMemberId();
         if (!memberId) {
             console.warn('Member ID not found for SKP Tenaga Ahli');
@@ -134,12 +127,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             </tr>
         `);
 
-        console.log('Sending AJAX request with:', {
-            memberId,
-            status,
-            nonce: $('#skp_tenaga_ahli_nonce').val()
-        });
-
         $.ajax({
             url: ajaxurl,
             type: 'GET',
@@ -150,7 +137,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                 nonce: $('#skp_tenaga_ahli_nonce').val()
             },
             success: function(response) {
-                console.log('AJAX response received:', response);
                 if (response.success) {
                     _state.currentData = response.data.skp_list;
                     renderSKPTenagaAhliList(response.data.skp_list, status);
@@ -169,7 +155,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
     }
 
     function renderSKPTenagaAhliList(skpList, status) {
-        console.log('Rendering SKP list:', {skpList, status});
         const targetId = status === 'active' ? 
             'active-skp-tenaga-ahli-list' : 'inactive-skp-tenaga-ahli-list';
         const $target = $(`#${targetId}`);
@@ -195,7 +180,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
         }
 
         skpList.forEach((skp, index) => {
-            console.log('Rendering SKP item:', skp);
             const availableStatuses = AsosiasiSKPUtils.getAvailableStatuses(skp.status);
             const statusOptions = availableStatuses.map(status => 
                 `<option value="${status.value}">${status.label}</option>`
@@ -244,8 +228,11 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                     <td>
                         <div class="button-group">
                             ${skp.can_edit ? `
-                                <button type="button" class="button edit-skp" 
-                                        data-id="${skp.id}">
+                                <button type="button" 
+                                        class="button edit-skp" 
+                                        data-type="tenaga-ahli"
+                                        data-id="${skp.id}"
+                                        onclick="AsosiasiSKPTenagaAhliModal.openEditModal(${skp.id})">
                                     ${asosiasiSKPTenagaAhli.strings.edit || 'Edit'}
                                 </button>
                                 <button type="button" class="button delete-skp" 
@@ -267,7 +254,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
 
     // Public API
     AsosiasiSKPTenagaAhli.reloadTable = function(memberId, status = 'active') {
-        console.log('Reloading table:', {memberId, status});
         if (!memberId) {
             memberId = getMemberId();
         }
@@ -278,7 +264,6 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
 
     // Initialize when document is ready
     $(document).ready(function() {
-        console.log('Document ready in SKP Tenaga Ahli main script');
         if ($(SELECTORS.SECTION).length) {
             initSKPTenagaAhli();
         } else {

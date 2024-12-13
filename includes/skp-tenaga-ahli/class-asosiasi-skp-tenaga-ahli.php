@@ -286,15 +286,18 @@ class Asosiasi_SKP_Tenaga_Ahli {
     /**
      * Sanitize SKP data
      */
+/**
+     * Sanitize SKP data
+     */
     private function sanitize_skp_data($data) {
         $sanitized = array(
-            'member_id' => absint($data['member_id']),
-            'service_id' => absint($data['service_id']),
-            'nomor_skp' => sanitize_text_field($data['nomor_skp']),
-            'nama_tenaga_ahli' => sanitize_text_field($data['nama_tenaga_ahli']),
-            'penanggung_jawab' => sanitize_text_field($data['penanggung_jawab']),
-            'tanggal_terbit' => sanitize_text_field($data['tanggal_terbit']),
-            'masa_berlaku' => sanitize_text_field($data['masa_berlaku'])
+            'member_id' => isset($data['member_id']) ? absint($data['member_id']) : 0,
+            'service_id' => isset($data['service_id']) ? absint($data['service_id']) : 0,
+            'nomor_skp' => isset($data['nomor_skp']) ? sanitize_text_field($data['nomor_skp']) : '',
+            'nama_tenaga_ahli' => isset($data['nama_tenaga_ahli']) ? sanitize_text_field($data['nama_tenaga_ahli']) : '',
+            'penanggung_jawab' => isset($data['penanggung_jawab']) ? sanitize_text_field($data['penanggung_jawab']) : '',
+            'tanggal_terbit' => isset($data['tanggal_terbit']) ? sanitize_text_field($data['tanggal_terbit']) : '',
+            'masa_berlaku' => isset($data['masa_berlaku']) ? sanitize_text_field($data['masa_berlaku']) : ''
         );
 
         // Add status if present and user has capability

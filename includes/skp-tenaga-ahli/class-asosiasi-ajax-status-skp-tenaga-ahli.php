@@ -24,8 +24,19 @@ defined('ABSPATH') || exit;
 
 class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
 
+   private static $instance = null;
    private $nonce_action = 'asosiasi_skp_tenaga_ahli_nonce';
    private $status_handler;
+
+    public static function get_instance() {
+        if (null === self::$instance) {
+            if (WP_DEBUG && !defined('DOING_AJAX')) {
+                error_log('SKP Tenaga Ahli Status handler initialized');
+            }
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 
    public function __construct() {
        $this->status_handler = new Asosiasi_Status_Skp_Tenaga_Ahli();
@@ -35,10 +46,6 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
    private function init_hooks() {
        add_action('wp_ajax_update_skp_tenaga_ahli_status', array($this, 'update_skp_status'));
        add_action('wp_ajax_get_skp_tenaga_ahli_status_history', array($this, 'get_skp_status_history'));
-       
-       if (WP_DEBUG) {
-           error_log('SKP Tenaga Ahli Status handler initialized');
-       }
    }
 
    /**
@@ -72,9 +79,6 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
     */
     public function update_skp_status() {
         try {
-            error_log('=== Starting SKP Tenaga Ahli Status Update ===');
-            error_log('Raw POST data: ' . print_r($_POST, true));
-
             $this->verify_request();
 
             // Validate required fields
@@ -92,29 +96,12 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
             $skp_id = intval($_POST['skp_id']);
             $new_status = sanitize_text_field($_POST['new_status']);
             $reason = sanitize_textarea_field($_POST['reason']);
-            
-            error_log('Sanitized data for update:');
-            error_log("SKP ID: {$skp_id}");
-            error_log("New Status: {$new_status}");
-            error_log("Reason: {$reason}");
-            error_log("SKP Type: " . (isset($_POST['skp_type']) ? $_POST['skp_type'] : 'not set'));
-
-            // Debug before calling update_status
-            error_log('Calling status handler update_status method');
-            
+                        
             $result = $this->status_handler->update_status(
                 $skp_id,
                 $new_status,
                 $reason
             );
-
-            // Debug result
-            if (is_wp_error($result)) {
-                error_log('Update failed with error: ' . $result->get_error_message());
-                throw new Exception($result->get_error_message());
-            } else {
-                error_log('Update successful. Result: ' . print_r($result, true));
-            }
 
             wp_send_json_success(array(
                 'message' => __('Status SKP berhasil diperbarui', 'asosiasi'),
@@ -136,17 +123,11 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
     */
    public function get_skp_status_history() {
         try {
-            error_log('=== Starting SKP Tenaga Ahli Status History Request ===');
-            error_log('GET params: ' . print_r($_GET, true));
             $this->verify_request();
 
             $member_id = isset($_GET['member_id']) ? intval($_GET['member_id']) : 0;
             if (!$member_id) {
                 throw new Exception(__('ID Member tidak valid', 'asosiasi'));
-            }
-
-            if (WP_DEBUG) {
-                error_log('Mengambil history untuk member ID: ' . $member_id);
             }
 
             global $wpdb;
@@ -159,12 +140,6 @@ class Asosiasi_Ajax_Status_Skp_Tenaga_Ahli {
                  ORDER BY h.changed_at DESC",
                 $member_id
             ), ARRAY_A);
-
-            if (WP_DEBUG) {
-                error_log('Jumlah record history: ' . count($history));
-                error_log('Data history: ' . print_r($history, true));
-
-            }
 
             wp_send_json_success(array(
                 'history' => array_map(array($this, 'get_formatted_history'), $history)

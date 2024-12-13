@@ -57,15 +57,6 @@ class Asosiasi_Ajax_Tenaga_Ahli {
             ));
         }
 
-        if (!wp_verify_nonce($nonce, $this->nonce_action)) {
-            error_log('Invalid nonce: ' . $nonce);
-            error_log('Nonce action: ' . $this->nonce_action);
-            wp_send_json_error(array(
-                'message' => __('Token keamanan tidak valid', 'asosiasi'),
-                'code' => 'invalid_nonce'
-            ));
-        }
-
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array(
                 'message' => __('Anda tidak memiliki izin untuk melakukan operasi ini', 'asosiasi'),
@@ -80,15 +71,6 @@ class Asosiasi_Ajax_Tenaga_Ahli {
      * Get SKP list
      */
     public function get_skp_tenaga_ahli_list() {
-
-        if (WP_DEBUG) {
-            error_log('Processing get_skp_tenaga_ahli_list request');
-            error_log('GET data: ' . print_r($_GET, true));
-            error_log('Nonce: ' . $_GET['nonce']);
-            error_log('Member ID: ' . $_GET['member_id']); 
-       }
-        
-        
         try {
             $this->verify_request();
 
@@ -172,10 +154,7 @@ class Asosiasi_Ajax_Tenaga_Ahli {
      */
     public function add_skp_tenaga_ahli() {
         try {
-            error_log('Received add_skp_tenaga_ahli request');
-            error_log('POST data: ' . print_r($_POST, true));
-            error_log('Files: ' . print_r($_FILES, true));
-            
+                    
             $this->verify_request();
 
             // Validate required fields

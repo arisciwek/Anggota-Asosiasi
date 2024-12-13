@@ -177,7 +177,8 @@ if (empty(asosiasi_check_requirements())) {
 
     // Initialize SKP Tenaga Ahli handlers
     new Asosiasi_Ajax_Tenaga_Ahli();
-    new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();    
+    new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();
+    
     $plugin->run();
 }
     // Start the plugin

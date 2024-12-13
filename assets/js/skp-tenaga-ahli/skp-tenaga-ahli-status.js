@@ -13,12 +13,18 @@ var AsosiasiSKPTenagaAhliStatus = {};
 
 (function($) {
     'use strict';
+    let isInitialized = false;
 
     AsosiasiSKPTenagaAhliStatus = {
         init: function() {
+            if (isInitialized) {
+                console.log('SKP Tenaga Ahli Status already initialized');
+                return;
+            }
             console.log('Initializing SKP Tenaga Ahli Status...');
             this.initStatusChangeHandlers();
             this.initModalHandlers();
+            isInitialized = true;
         },
 
         initStatusChangeHandlers: function() {
@@ -58,12 +64,6 @@ var AsosiasiSKPTenagaAhliStatus = {};
                 
                 // Reset select
                 $select.val('');
-
-                console.log('Status change initiated:', {
-                    skpId: skpId,
-                    oldStatus: oldStatus,
-                    newStatus: newStatus
-                });
             });
 
             // Close dropdowns when clicking outside
@@ -87,14 +87,6 @@ var AsosiasiSKPTenagaAhliStatus = {};
                 const oldStatus = $('#status_old_status').val();
                 const newStatus = $('#status_new_status').val();
                 const reason = $('#status_reason').val();
-
-                console.log('Submitting status change:', {
-                    skpId: skpId,
-                    oldStatus: oldStatus,
-                    newStatus: newStatus,
-                    reason: reason
-                });
-
                 const formData = new FormData(this);
                 formData.append('action', 'update_skp_tenaga_ahli_status');
                 formData.append('nonce', $('#skp_tenaga_ahli_nonce').val());
@@ -117,7 +109,6 @@ var AsosiasiSKPTenagaAhliStatus = {};
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        console.log('Status update response:', response);
                         if (response.success) {
                             AsosiasiSKPUtils.showNotice('success', response.data.message);
                             AsosiasiSKPTenagaAhli.reloadTable(null, 'active');

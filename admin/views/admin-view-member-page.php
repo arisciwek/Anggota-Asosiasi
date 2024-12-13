@@ -153,7 +153,6 @@ if ($member) {
                             </form>
 
                             <?php 
-                            error_log('Calling asosiasi_after_member_info with member_id: ' . $member_id);
                             // Add download certificate button through hook
                             do_action('asosiasi_after_member_info', $member_id); 
                             ?>

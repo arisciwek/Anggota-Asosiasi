@@ -99,34 +99,14 @@ $member = null;
 $is_edit = false;
 $member_services = array();
 
-// Enable error reporting for debugging
-if (WP_DEBUG) {
-    error_log("\n=== STARTING MEMBER FORM PROCESSING ===");
-    error_log("Time: " . current_time('mysql'));
-    error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        error_log("POST data: " . print_r($_POST, true));
-    }
-}
-
 if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
     $member_id = intval($_GET['id']);
     $member = $crud->get_member($member_id);
     $member_services = $services->get_member_services($member_id);
     $is_edit = true;
-    if (WP_DEBUG) {
-        error_log("Edit mode - Member ID: $member_id");
-        error_log("Member data: " . print_r($member, true));
-        error_log("Member services: " . print_r($member_services, true));
-    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
-    if (WP_DEBUG) {
-        error_log("Processing form submission");
-        error_log("POST data: " . print_r($_POST, true));
-    }
-
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_member')) {
         error_log("Nonce verification failed");
         wp_die(__('Invalid nonce specified', 'asosiasi'));
@@ -155,10 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         'postal_code' => isset($_POST['postal_code']) ? $_POST['postal_code'] : ''
     );
 
-    if (WP_DEBUG) {
-        error_log("Raw form data: " . print_r($data, true));
-    }
-
     $required_fields = array('company_name', 'contact_person', 'email');
     $errors = array();
     
@@ -174,14 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
 
     $selected_services = isset($_POST['member_services']) ? array_map('intval', $_POST['member_services']) : array();
 
-    if (WP_DEBUG) {
-        error_log("Validation errors: " . print_r($errors, true));
-        error_log("Selected services: " . print_r($selected_services, true));
-    }
-
     if (empty($errors)) {
         if ($is_edit) {
-            error_log("Attempting to update member $member_id");
             if ($crud->update_member($member_id, $data)) {
                 $services->add_member_services($member_id, $selected_services);
                 try_redirect(
