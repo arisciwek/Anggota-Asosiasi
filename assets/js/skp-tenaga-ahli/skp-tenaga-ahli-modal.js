@@ -25,7 +25,7 @@ var AsosiasiSKPTenagaAhliModal = {};
                 e.preventDefault();
                 e.stopPropagation();
                 const skpId = $(this).data('id');
-                AsosiasiSKPTenagaAhliModal.loadSKPData(skpId);
+                AsosiasiSKPTenagaAhliModal.openEditModal(skpId);
             });
 
             // Form submission handler
@@ -44,21 +44,33 @@ var AsosiasiSKPTenagaAhliModal = {};
                 }
             });
 
-            // Prevent modal content clicks from closing
+            // Stop propagation on modal content
             $('#skp-tenaga-ahli-modal .skp-modal-content').on('click', function(e) {
                 e.stopPropagation();
             });
         },
 
-        openAddModal: function() {
+        openAddModal: function(e) {
+            if(e) e.preventDefault();
+            
             AsosiasiSKPTenagaAhliModal.resetForm();
-            $('#modal-title').text(asosiasiSKPTenagaAhli.strings.addTitle || 'Tambah SKP Tenaga Ahli');
+            $('#skp-tenaga-ahli-modal #modal-title').text(
+                asosiasiSKPTenagaAhli.strings.addTitle || 'Tambah SKP Tenaga Ahli'
+            );
             $('#pdf_file').prop('required', true);
             $('#pdf-required').show();
             $('#skp-tenaga-ahli-modal').show();
         },
 
-        loadSKPData: function(skpId) {
+        openEditModal: function(skpId) {
+            $('#skp-tenaga-ahli-modal #modal-title').text(
+                asosiasiSKPTenagaAhli.strings.editTitle || 'Edit SKP Tenaga Ahli'
+            );
+            $('#skp-tenaga-ahli-modal').show();
+            this.loadSKPDataTenagaAhli(skpId);
+        },
+
+        loadSKPDataTenagaAhli: function(skpId) {
             $.ajax({
                 url: ajaxurl,
                 type: 'GET',
@@ -68,15 +80,11 @@ var AsosiasiSKPTenagaAhliModal = {};
                     nonce: $('#skp_tenaga_ahli_nonce').val()
                 },
                 beforeSend: function() {
-                    $('#modal-title').text(asosiasiSKPTenagaAhli.strings.loading || 'Memuat data...');
-                    $('#skp-tenaga-ahli-modal').show();
                     $('#skp-tenaga-ahli-form').find('input, select, button').prop('disabled', true);
                 },
                 success: function(response) {
                     if (response.success && response.data.skp) {
                         AsosiasiSKPTenagaAhliModal.fillForm(response.data.skp);
-                        $('#modal-title').text(asosiasiSKPTenagaAhli.strings.editTitle || 'Edit SKP Tenaga Ahli');
-                        // File tidak required saat edit
                         $('#pdf_file').prop('required', false);
                         $('#pdf-required').hide();
                     } else {
@@ -97,15 +105,6 @@ var AsosiasiSKPTenagaAhliModal = {};
             });
         },
 
-        openEditModal: function(skpId) {
-            e.preventDefault();
-            AsosiasiSKPPerusahaanModal.resetForm();
-            $('#modal-title').text(asosiasiSKPTenagaAhli.strings.addTitle || 'Edit SKP');
-            $('#pdf_file').prop('required', true);
-            $('#pdf-required').show();
-            $('#skp-modal').show();
-        },
-
         closeModal: function() {
             $('#skp-tenaga-ahli-modal').hide();
             AsosiasiSKPTenagaAhliModal.resetForm();
@@ -117,8 +116,8 @@ var AsosiasiSKPTenagaAhliModal = {};
             $('#skp_id', $form).val('');
             $('#current-file', $form).empty();
             $('.error-message', $form).remove();
-
-            // Reset state untuk tambah baru
+            
+            // Reset file input state
             $('#pdf_file').prop('required', true);
             $('#pdf-required').show();
             
@@ -140,7 +139,7 @@ var AsosiasiSKPTenagaAhliModal = {};
                 $('#status', $form).val(data.status);
             }
 
-            // Reset file requirements
+            // Handle file requirements for edit mode
             $('#pdf_file').prop('required', false);
             $('#pdf-required').hide();
 
@@ -160,69 +159,26 @@ var AsosiasiSKPTenagaAhliModal = {};
             }
         },
 
-        validatePDFRequirement: function($form) {
-            const isEdit = $('#skp_id', $form).val() !== '';
-            const $fileInput = $('#pdf_file', $form);
-            const hasNewFile = $fileInput[0].files.length > 0;
-            const hasExistingFile = $('#current-file .current-file-info', $form).length > 0;
-
-            // Jika mode tambah baru, file harus ada
-            if (!isEdit && !hasNewFile) {
-                AsosiasiSKPUtils.showNotice('error', 'File PDF wajib diunggah');
-                return false;
-            }
-
-            // Jika mode edit, file tidak wajib jika sudah ada file sebelumnya
-            if (isEdit && !hasNewFile && !hasExistingFile) {
-                AsosiasiSKPUtils.showNotice('error', 'File PDF wajib diunggah');
-                return false;
-            }
-
-            // Validasi tipe file jika ada file baru
-            if (hasNewFile) {
-                const file = $fileInput[0].files[0];
-                if (file.type !== 'application/pdf') {
-                    AsosiasiSKPUtils.showNotice('error', 'File harus berformat PDF');
-                    return false;
-                }
-
-                // Validasi ukuran file (maksimal 2MB)
-                const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
-                if (file.size > maxSize) {
-                    AsosiasiSKPUtils.showNotice('error', 'Ukuran file maksimal 2MB');
-                    return false;
-                }
-            }
-
-            return true;
-        },
-
-        handleSubmit: function(e) {
-            e.preventDefault();
-
-            const $form = $(this);
-
-            // Validasi PDF
-            if (!AsosiasiSKPPerusahaanModal.validatePDFRequirement($form)) {
-                return false;
-            }
-
-            // Validasi field lainnya
+        handleSubmit: function($form) {
+            // Validate form
             if (!AsosiasiSKPUtils.validateForm($form)) {
                 return false;
             }
 
-            const formData = new FormData(this);
+            // Get form data
+            const formData = new FormData($form[0]);
             const isEdit = formData.get('id') ? true : false;
-           
-            formData.append('action', isEdit ? 'update_skp_perusahaan' : 'add_skp_perusahaan');
-            formData.append('nonce', $('#skp_nonce').val());
-
-            const submitBtn = $(this).find('button[type="submit"]');
-            submitBtn.prop('disabled', true).text(isEdit ? 
-                (asosiasiSKPPerusahaan.strings.saving || 'Menyimpan...') : 
-                (asosiasiSKPPerusahaan.strings.adding || 'Menambahkan...'));
             
+            // Set proper action
+            formData.append('action', isEdit ? 'update_skp_tenaga_ahli' : 'add_skp_tenaga_ahli');
+            formData.append('nonce', $('#skp_tenaga_ahli_nonce').val());
+
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+            
+            $submitBtn.prop('disabled', true)
+                     .text(isEdit ? asosiasiSKPTenagaAhli.strings.saving : asosiasiSKPTenagaAhli.strings.adding);
+
             $.ajax({
                 url: ajaxurl,
                 type: 'POST',
@@ -232,30 +188,27 @@ var AsosiasiSKPTenagaAhliModal = {};
                 success: function(response) {
                     if (response.success) {
                         AsosiasiSKPUtils.showNotice('success', response.data.message);
-                        AsosiasiSKPPerusahaan.reloadTable(formData.get('member_id'), 'active');
-                        AsosiasiSKPPerusahaanModal.closeModal();
-                        
-                        // Reload kedua tabel dengan delay
-                        setTimeout(function() {
-                            AsosiasiSKPPerusahaan.reloadTable(formData.get('member_id'));
-                            AsosiasiSKPTenagaAhli.reloadTable(formData.get('member_id'), 'active');
-                        }, 150);
+                        AsosiasiSKPTenagaAhli.reloadTable(null, 'active');
+                        setTimeout(() => {
+                            AsosiasiSKPTenagaAhli.reloadTable(null, 'inactive');
+                        }, 300);
+                        AsosiasiSKPTenagaAhliModal.closeModal();
                     } else {
                         AsosiasiSKPUtils.showNotice('error', response.data.message);
                     }
                 },
-                error: function() {
-                    AsosiasiSKPUtils.showNotice('error', asosiasiSKPPerusahaan.strings.saveError || 'Terjadi kesalahan saat menyimpan data');
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', {xhr, status, error});
+                    AsosiasiSKPUtils.showNotice('error', 
+                        asosiasiSKPTenagaAhli.strings.saveError || 'Gagal menyimpan data'
+                    );
                 },
                 complete: function() {
-                    submitBtn.prop('disabled', false)
-                           .text(isEdit ? 
-                               (asosiasiSKPPerusahaan.strings.save || 'Simpan') : 
-                               (asosiasiSKPPerusahaan.strings.add || 'Tambah'));
+                    $submitBtn.prop('disabled', false)
+                             .text(originalText);
                 }
             });
         }
-
     };
 
     // Initialize when document is ready
