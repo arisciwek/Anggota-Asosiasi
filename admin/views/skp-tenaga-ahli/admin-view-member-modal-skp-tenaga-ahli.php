@@ -187,7 +187,7 @@ $member_services = $services->get_member_services($member_id);
                                id="pdf_file" 
                                name="pdf_file" 
                                accept=".pdf"
-                               required>
+                        >
                         <p class="description">
                             <?php _e('Upload file PDF SKP. Maksimal 2MB.', 'asosiasi'); ?>
                         </p>
@@ -200,7 +200,7 @@ $member_services = $services->get_member_services($member_id);
                 <button type="button" class="button skp-modal-cancel">
                     <?php _e('Cancel', 'asosiasi'); ?>
                 </button>
-                <button type="submit" class="button button-primary">
+                <button type="submit" id="submit-skp-tenaga-ahli" class="button button-primary">
                     <?php _e('Save SKP', 'asosiasi'); ?>
                 </button>
             </div>
