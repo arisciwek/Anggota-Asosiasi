@@ -33,7 +33,7 @@ class Asosiasi_Status_Skp_Tenaga_Ahli {
     public function __construct() {
         global $wpdb;
         $this->table_skp = $wpdb->prefix . 'asosiasi_skp_tenaga_ahli';
-        $this->table_history = $wpdb->prefix . 'asosiasi_skp_status_history';
+        $this->table_history = $wpdb->prefix . 'asosiasi_skp_tenaga_ahli_history';
     }
 
     /**
@@ -95,7 +95,7 @@ class Asosiasi_Status_Skp_Tenaga_Ahli {
                 );
             }
 
-            // Log status change
+            // Log status change to the new history table
             $logged = $wpdb->insert(
                 $this->table_history,
                 array(
@@ -158,7 +158,6 @@ class Asosiasi_Status_Skp_Tenaga_Ahli {
              FROM {$this->table_history} h
              LEFT JOIN {$users_table} u ON h.changed_by = u.ID
              WHERE h.skp_id = %d 
-             AND h.skp_type = 'tenaga_ahli'
              ORDER BY h.changed_at DESC",
             $id
         ), ARRAY_A);

@@ -73,13 +73,20 @@ class Asosiasi_Enqueue_SKP_Tenaga_Ahli {
             $this->version,
             true
         );
+        
+        wp_enqueue_script( 'asosiasi-skp-tenaga-ahli-utils', 
+            ASOSIASI_URL . 'assets/js/skp-tenaga-ahli/skp-tenaga-ahli-utils.js', 
+            array( 'jquery' ), 
+            ASOSIASI_VERSION, 
+            true 
+        );
 
-        wp_enqueue_script(
-            'asosiasi-skp-tenaga-ahli-status',
+        // Load utils SEBELUM file lain yang membutuhkannya
+        wp_enqueue_script( 'asosiasi-skp-tenaga-ahli-status', 
             ASOSIASI_URL . 'assets/js/skp-tenaga-ahli/skp-tenaga-ahli-status.js',
-            array('jquery', 'asosiasi-skp-utils', 'asosiasi-skp-tenaga-ahli'),
-            $this->version,
-            true
+            array( 'jquery', 'asosiasi-skp-tenaga-ahli-utils' ),
+            ASOSIASI_VERSION, 
+            true 
         );
 
         // Localize script

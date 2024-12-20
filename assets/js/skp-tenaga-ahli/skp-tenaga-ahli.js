@@ -52,6 +52,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
         loadSKPTenagaAhliList('active');
     }
 
+
     function initTabHandlers() {
         // Event delegation dengan scope yang ketat
         $(SELECTORS.SECTION).on('click', `${SELECTORS.TAB}`, function(e) {
@@ -60,7 +61,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             
             const $this = $(this);
             const status = $this.data('tab');
-                        
+            
             // Update state
             _state.currentTab = status;
             
@@ -68,9 +69,9 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             $(`${SELECTORS.SECTION} ${SELECTORS.TAB}`).removeClass(SELECTORS.TAB_ACTIVE);
             $this.addClass(SELECTORS.TAB_ACTIVE);
             
-            // Update content visibility
+            // Update content visibility dengan transisi halus
             $(`${SELECTORS.SECTION} ${SELECTORS.CONTENT}`).removeClass(SELECTORS.ACTIVE_CONTENT).hide();
-            $(`#skp-tenaga-ahli-${status}`).addClass(SELECTORS.ACTIVE_CONTENT).show();
+            $(`#skp-tenaga-ahli-${status}`).addClass(SELECTORS.ACTIVE_CONTENT).fadeIn(300);
             
             if (status === 'history') {
                 if (typeof AsosiasiSKPTenagaAhliStatus !== 'undefined') {
@@ -98,6 +99,14 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
             }
         });
     }
+
+    // Tambahkan method untuk mengakses tab dari luar
+    AsosiasiSKPTenagaAhli.switchToHistoryTab = function() {
+        const $historyTab = $(`${SELECTORS.SECTION} ${SELECTORS.TAB}${SELECTORS.HISTORY_TAB}`);
+        if ($historyTab.length) {
+            $historyTab.trigger('click');
+        }
+    };
 
     function loadSKPTenagaAhliList(status = 'active') {
         const memberId = getMemberId();

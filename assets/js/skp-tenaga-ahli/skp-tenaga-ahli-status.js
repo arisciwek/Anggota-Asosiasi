@@ -76,27 +76,20 @@ var AsosiasiSKPTenagaAhliStatus = {};
 
         initModalHandlers: function() {
             // Handle form submission
+
             $('#status-change-form').on('submit', function(e) {
                 e.preventDefault();
 
-                if (!AsosiasiSKPUtils.validateForm($(this))) {
+                if (!AsosiasiSKPTenagaAhliUtils.validateForm($(this))) {
                     return;
                 }
 
+                const $form = $(this);
                 const skpId = $('#status_skp_id').val();
-                const oldStatus = $('#status_old_status').val();
                 const newStatus = $('#status_new_status').val();
                 const reason = $('#status_reason').val();
-                const formData = new FormData(this);
-                formData.append('action', 'update_skp_tenaga_ahli_status');
-                formData.append('nonce', $('#skp_tenaga_ahli_nonce').val());
-                formData.append('skp_id', skpId);
-                formData.append('old_status', oldStatus);
-                formData.append('new_status', newStatus);
-                formData.append('reason', reason);
-                formData.append('skp_type', 'tenaga_ahli');
 
-                const $submitBtn = $(this).find('button[type="submit"]');
+                const $submitBtn = $form.find('button[type="submit"]');
                 const originalText = $submitBtn.text();
                 
                 $submitBtn.prop('disabled', true)
@@ -105,25 +98,29 @@ var AsosiasiSKPTenagaAhliStatus = {};
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    data: {
+                        action: 'update_skp_tenaga_ahli_status',
+                        nonce: $('#skp_tenaga_ahli_nonce').val(),
+                        skp_id: skpId,
+                        new_status: newStatus,
+                        reason: reason
+                    },
                     success: function(response) {
                         if (response.success) {
-                            AsosiasiSKPUtils.showNotice('success', response.data.message);
-                            AsosiasiSKPTenagaAhli.reloadTable(null, 'active');
-                            setTimeout(() => {
-                                AsosiasiSKPTenagaAhli.reloadTable(null, 'inactive');
-                            }, 300);
-                            AsosiasiSKPTenagaAhliStatus.loadStatusHistory();
+                            AsosiasiSKPTenagaAhliUtils.showNotice('success', response.data.message);
+                            AsosiasiSKPTenagaAhliUtils.reloadAllTables();
+                            
+                            // Close modal
+                            $('#status-change-modal').hide();
                         } else {
-                            AsosiasiSKPUtils.showNotice('error', response.data.message);
+                            AsosiasiSKPTenagaAhliUtils.showNotice('error', 
+                                response.data.message || 'Gagal mengubah status'
+                            );
                         }
-                        $('#status-change-modal').hide();
                     },
                     error: function(xhr, status, error) {
-                        console.error('AJAX error:', error);
-                        AsosiasiSKPUtils.showNotice('error', 
+                        console.error('AJAX error:', {xhr, status, error});
+                        AsosiasiSKPTenagaAhliUtils.showNotice('error', 
                             asosiasiSKPTenagaAhli.strings.statusChangeError || 
                             'Gagal mengubah status SKP'
                         );
@@ -212,26 +209,26 @@ var AsosiasiSKPTenagaAhliStatus = {};
             }
 
             history.forEach((item, index) => {
-                const oldStatusClass = this.getStatusClassFromLabel(item.old_status);
-                const newStatusClass = this.getStatusClassFromLabel(item.new_status);
+                const oldStatusClass = AsosiasiSKPTenagaAhliUtils.getStatusClassFromLabel(item.old_status);
+                const newStatusClass = AsosiasiSKPTenagaAhliUtils.getStatusClassFromLabel(item.new_status);
                 
                 $historyList.append(`
                     <tr>
                         <td>${index + 1}</td>
-                        <td>${AsosiasiSKPUtils.escapeHtml(item.nomor_skp)}</td>
-                        <td>${AsosiasiSKPUtils.escapeHtml(item.nama_tenaga_ahli)}</td>
+                        <td>${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.nomor_skp)}</td>
+                        <td>${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.nama_tenaga_ahli)}</td>
                         <td>
                             <span class="skp-status ${oldStatusClass}">
-                                ${AsosiasiSKPUtils.escapeHtml(item.old_status)}
+                                ${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.old_status)}
                             </span>
                         </td>
                         <td>
                             <span class="skp-status ${newStatusClass}">
-                                ${AsosiasiSKPUtils.escapeHtml(item.new_status)}
+                                ${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.new_status)}
                             </span>
                         </td>
-                        <td>${AsosiasiSKPUtils.escapeHtml(item.reason)}</td>
-                        <td>${AsosiasiSKPUtils.escapeHtml(item.changed_by)}</td>
+                        <td>${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.reason)}</td>
+                        <td>${AsosiasiSKPTenagaAhliUtils.escapeHtml(item.changed_by)}</td>
                         <td>${item.changed_at}</td>
                     </tr>
                 `);

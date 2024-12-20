@@ -251,14 +251,44 @@ class Asosiasi_SKP_Perusahaan {
         return false;
     }
 
+
     /**
-     * Validate file
+     * Validate uploaded file
+     * 
+     * @param array $file Array data file dari $_FILES
+     * @return bool|WP_Error True jika valid, WP_Error jika tidak valid
      */
     private function validate_file($file) {
-        $allowed_types = array('application/pdf');
-        return in_array($file['type'], $allowed_types);
-    }
+        // Check file exists
+        if (empty($file['tmp_name'])) {
+            return new WP_Error(
+                'invalid_file',
+                __('File tidak ditemukan', 'asosiasi')
+            );
+        }
 
+        // Check file size (max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            return new WP_Error(
+                'invalid_size', 
+                __('Ukuran file maksimal 2MB', 'asosiasi')
+            );
+        }
+
+        // Check mime type
+        $mime_types = array('application/pdf');
+        $file_info = wp_check_filetype($file['name']);
+        
+        if (!in_array($file_info['type'], $mime_types)) {
+            return new WP_Error(
+                'invalid_type',
+                __('Hanya file PDF yang diperbolehkan', 'asosiasi')  
+            );
+        }
+
+        return true;
+    }
+    
     /**
      * Handle file upload
      */

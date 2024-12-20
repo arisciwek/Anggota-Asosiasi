@@ -138,6 +138,7 @@ class Asosiasi_Activator {
             '{table_skp_tenaga_ahli}' => $wpdb->prefix . 'asosiasi_skp_tenaga_ahli',
             '{table_member_images}' => $wpdb->prefix . 'asosiasi_member_images',
             '{table_status_history}' => $wpdb->prefix . 'asosiasi_skp_status_history',
+            '{table_skp_tenaga_ahli_history}' => $wpdb->prefix . 'asosiasi_skp_tenaga_ahli_history',
             '{table_certificate_log}' => $wpdb->prefix . 'asosiasi_certificate_log',
             '{wp_users_table}' => $wpdb->users
         );
@@ -160,6 +161,7 @@ class Asosiasi_Activator {
             'skp-perusahaan', // Depends on members and services
             'skp-tenaga-ahli', // Depends on members and services
             'status-history',  // Depends on skp_perusahaan
+            'skp-tenaga-ahli-history', // Tambahkan ini untuk history Tenaga Ahli
             'certificate-log'    // Depends on members and users
         );
         

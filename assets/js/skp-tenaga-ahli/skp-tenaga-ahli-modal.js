@@ -168,6 +168,22 @@ var AsosiasiSKPTenagaAhliModal = {};
             // Get form data
             const formData = new FormData($form[0]);
             const isEdit = formData.get('id') ? true : false;
+
+            if (!isEdit) {
+                const $fileInput = $form.find('#pdf_file');
+                if ($fileInput.length && !$fileInput[0].files.length) {
+                    const label = $fileInput.prev('label').text().replace('*', '').trim();
+                    // Ubah target insert ke form atau modal
+                    $('<div class="notice notice-error is-dismissible">')
+                        .append($('<p>', {
+                            text: asosiasiSKPTenagaAhli.strings.fieldRequired ? 
+                                  asosiasiSKPTenagaAhli.strings.fieldRequired.replace('%s', label) :
+                                  `Field ${label} wajib diisi`
+                        }))
+                        .insertBefore($form.find('.skp-form-body')); // Insert di dalam form
+                    return false;
+                }
+            }
             
             // Set proper action
             formData.append('action', isEdit ? 'update_skp_tenaga_ahli' : 'add_skp_tenaga_ahli');

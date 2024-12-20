@@ -157,6 +157,14 @@ class Asosiasi_Ajax_Tenaga_Ahli {
                     
             $this->verify_request();
 
+            // Validate file upload first
+            if (empty($_FILES['pdf_file'])) {
+                wp_send_json_error(array(
+                    'message' => __('File PDF wajib diunggah', 'asosiasi'),
+                    'field' => 'pdf_file'
+                ));
+            }
+
             // Validate required fields
             $required_fields = array(
                 'member_id' => __('ID Anggota', 'asosiasi'),
