@@ -71,6 +71,20 @@ class Host_DocGen_Checker {
             return false;
         }
 
+        // Check if DocGen Implementation is loaded
+        if (!class_exists('DocGen_Module')) {
+            add_action('admin_notices', function() use ($plugin_name) {
+                $message = sprintf(
+                    __('%s: DocGen Implementation Plugin is required but not properly loaded.', 'asosiasi'),
+                    '<strong>' . esc_html($plugin_name) . '</strong>'
+                );
+                echo '<div class="notice notice-error is-dismissible"><p>' . wp_kses_post($message) . '</p></div>';
+            });
+            
+            self::$check_result = false;
+            return false;
+        }
+
         // Check required directories
         $upload_dir = wp_upload_dir();
         $base_dir = $upload_dir['basedir'];

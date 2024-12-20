@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS {table_members} (
     contact_person varchar(100) NOT NULL,
     email varchar(100) NOT NULL,
     phone varchar(20),
-    -- New fields start
     company_leader varchar(100),
     leader_position varchar(100),
     company_address text,
@@ -23,10 +22,14 @@ CREATE TABLE IF NOT EXISTS {table_members} (
     ahu_number varchar(100),
     city varchar(100),
     npwp varchar(50),
-    -- New fields end
+    -- New fields for certificate
+    nomor_sertifikat varchar(100) DEFAULT NULL UNIQUE,
+    tanggal_cetak datetime DEFAULT NULL,
+    -- End new fields
     created_at datetime DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY  (id),
     KEY idx_email (email),
-    KEY idx_company (company_name)
+    KEY idx_company (company_name),
+    KEY idx_cert_number (nomor_sertifikat)
 ) {charset_collate};

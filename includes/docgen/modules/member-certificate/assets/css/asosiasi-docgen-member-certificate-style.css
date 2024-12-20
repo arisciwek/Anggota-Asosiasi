@@ -1,0 +1,19 @@
+/**
+ * Certificate Generation Styles
+ *
+ * @package     Asosiasi
+ * @subpackage  DocGen/Modules/Certificate/Assets
+ */
+
+/* Spinner styling */
+#generate-certificate .spinner {
+    float: none;
+    margin: 0 0 0 5px;
+    vertical-align: middle;
+}
+
+/* Button states */
+#generate-certificate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

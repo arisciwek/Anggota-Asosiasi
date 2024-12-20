@@ -82,51 +82,68 @@ function asosiasi_check_requirements() {
     return $errors;
 }
 
+// Fungsi helper untuk mencari file secara rekursif
+function asosiasi_find_class_file($dir, $file) {
+    if (!is_dir($dir)) {
+        return false;
+    }
+
+    // Cek file di current directory
+    $full_path = $dir . '/' . $file;
+    if (file_exists($full_path)) {
+        return $full_path;
+    }
+
+    // Scan subdirectories
+    $files = scandir($dir);
+    foreach ($files as $item) {
+        if ($item == '.' || $item == '..') {
+            continue;
+        }
+
+        $full_item_path = $dir . '/' . $item;
+        if (is_dir($full_item_path)) {
+            $found = asosiasi_find_class_file($full_item_path, $file);
+            if ($found) {
+                return $found;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Autoloader untuk regular classes
+spl_autoload_register(function ($class) {
+    // Base prefix untuk semua class di plugin
+    $prefix = 'Asosiasi';
+
+    // Jika class name tidak mulai dengan prefix kita, skip
+    if (strpos($class, $prefix) !== 0) {
+        return;
+    }
+
+    // Convert class name ke file path
+    $file_name = 'class-' . strtolower(
+        str_replace('_', '-', $class)
+    ) . '.php';
+
+    $base_dir = ASOSIASI_DIR . 'includes';
+    
+    // Cari file secara rekursif
+    $file = asosiasi_find_class_file($base_dir, $file_name);
+    if ($file) {
+        require $file;
+        return;
+    }
+
+    error_log("Not found: " . $file_name);
+});
+
+
 
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
-
-    // Core classes
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-activator.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-upload-directories.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-deactivator.php';
-    
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-member.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-settings.php';
-
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-crud.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-services.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-admin.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-public.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-member-images.php';
-
-    // SKP related classes
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-perusahaan.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-skp-cron.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-skp-perusahaan.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-perusahaan.php';
-
-
-    //require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-tenaga-ahli.php';
-
-
-
-    // SKP Tenaga Ahli related classes
-    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-skp-tenaga-ahli.php';
-    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-ajax-skp-tenaga-ahli.php';
-    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-status-skp-tenaga-ahli.php';
-    require_once ASOSIASI_DIR . 'includes/skp-tenaga-ahli/class-asosiasi-ajax-status-skp-tenaga-ahli.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-enqueue-skp-tenaga-ahli.php';
-
-
-    // SKP Status management classes - New
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-status-skp-perusahaan.php';
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-ajax-status-skp-perusahaan.php';
-
-    require_once ASOSIASI_DIR . 'includes/class-asosiasi-settings.php';
-
     // Activation/Deactivation hooks
     register_activation_hook(__FILE__, array('Asosiasi_Activator', 'activate'));
     register_deactivation_hook(__FILE__, array('Asosiasi_Deactivator', 'deactivate'));
@@ -157,10 +174,14 @@ if (empty(asosiasi_check_requirements())) {
         if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
             require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
             
-            if (!Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+            if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+                // Inisialisasi module tanpa require
+                new Asosiasi_DocGen_Member_Certificate_Module();
+            } else {
                 error_log('DocGen Implementation not properly initialized');
             }
         }
+
     }, 15);
     
     // Continue with regular plugin initialization...
@@ -172,15 +193,17 @@ if (empty(asosiasi_check_requirements())) {
     new Asosiasi_Enqueue_SKP_Tenaga_Ahli(ASOSIASI_VERSION);
 
     // Initialize SKP Perusahaan handlers    
-    new Asosiasi_Ajax_Perusahaan();
+    new Asosiasi_Ajax_SKP_Perusahaan();
     new Asosiasi_Ajax_Status_Skp_Perusahaan();
 
     // Initialize SKP Tenaga Ahli handlers
-    new Asosiasi_Ajax_Tenaga_Ahli();
+    new Asosiasi_Ajax_Skp_Tenaga_Ahli();
     new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();
     
     $plugin->run();
 }
+
+
     // Start the plugin
     run_asosiasi();
 }

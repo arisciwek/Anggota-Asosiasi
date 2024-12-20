@@ -20,7 +20,7 @@
 
 defined('ABSPATH') || exit;
 
-class Asosiasi_Ajax_Perusahaan {
+class Asosiasi_Ajax_SKP_Perusahaan {
    
    private $nonce_action = 'asosiasi_skp_perusahaan_nonce';
    

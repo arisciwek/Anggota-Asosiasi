@@ -124,7 +124,7 @@ if ($member) {
                     </div>
 
                     <!-- Actions Card --><!-- Actions Card -->
-                    <div class="card" style="max-width: 800px; margin-top: 20px;">
+                    <div class="card card-aksi" style="max-width: 800px; margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd;">
                             <?php _e('Aksi', 'asosiasi'); ?>
                         </h2>
