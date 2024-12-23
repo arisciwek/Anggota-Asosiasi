@@ -95,9 +95,8 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
      * @return string Output format (docx, pdf, etc)
      */
     public function get_output_format() {
-        return 'docx';
+        return isset($_POST['format']) && $_POST['format'] === 'pdf' ? 'pdf' : 'docx';
     }
-
     /**
      * Get temporary directory path
      * @return string Temp directory path

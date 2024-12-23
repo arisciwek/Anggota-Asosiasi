@@ -45,7 +45,7 @@ if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
-class Host_DocGen_Adapter extends DocGen_Adapter {
+class Asosiasi_DocGen_Adapter extends DocGen_Adapter {
     /**
      * Get plugin info
      * @return array Plugin information

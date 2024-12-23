@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
     die('Direct access not permitted.');
 }
 
-class Host_DocGen_Checker {
+class Asosiasi_DocGen_Checker {
     /**
      * Flag to track if we've already checked
      */

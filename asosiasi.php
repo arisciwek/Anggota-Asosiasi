@@ -165,16 +165,30 @@ if (empty(asosiasi_check_requirements())) {
     add_action('plugins_loaded', 'asosiasi_load_textdomain');
     
     function run_asosiasi() {
+
+    // Check WP mPDF plugin
+    if (!function_exists('wp_mpdf_verify_library')) {
+        add_action('admin_notices', function() {
+            $message = __('WP mPDF plugin is required for PDF generation.', 'asosiasi');
+            echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+        });
+    }
+
+
     $plugin = new Asosiasi();
-    
+
+    if (class_exists('WP_MPDF')) {
+        new Asosiasi_PDF_Certificate();
+    }
+
     add_action('plugins_loaded', function() {
         // Include admin functions
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
         
-        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php')) {
-            require_once ASOSIASI_DIR . 'includes/docgen/class-docgen-checker.php';
+        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php')) {
+            require_once ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php';
             
-            if (Host_DocGen_Checker::check_dependencies('Asosiasi')) {
+            if (Asosiasi_DocGen_Checker::check_dependencies('Asosiasi')) {
                 // Inisialisasi module tanpa require
                 new Asosiasi_DocGen_Member_Certificate_Module();
             } else {
