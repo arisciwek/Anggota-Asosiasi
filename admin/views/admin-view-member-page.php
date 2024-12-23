@@ -24,6 +24,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Tambahkan pengecekan capability
+if (!current_user_can('view_asosiasi_members')) {
+    wp_die(__('Anda tidak memiliki izin untuk melihat daftar anggota.', 'asosiasi'));
+}
+
 // Check untuk kedua kemungkinan parameter id
 $member_id = 0;
 if (isset($_GET['amp;id'])) {

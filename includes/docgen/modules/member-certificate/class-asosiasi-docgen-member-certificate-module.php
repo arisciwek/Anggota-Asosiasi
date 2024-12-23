@@ -158,9 +158,6 @@ public function handle_member_certificate_pdf() {
         // Convert to PDF - Pastikan $pdf_result didefinisikan
         $pdf_result = $this->convert_to_pdf($phpWord, $pdf_filename);
 
-        // Debug log
-        error_log('PDF conversion result: ' . print_r($pdf_result, true));
-
         if (is_wp_error($pdf_result)) {
             throw new Exception($pdf_result->get_error_message());
         }
@@ -181,12 +178,6 @@ public function handle_member_certificate_pdf() {
         $upload_dir = wp_upload_dir();
         $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $pdf_result);
        
-        // Debug logs
-        error_log('Generated PDF details:');
-        error_log('- File path: ' . $pdf_result);
-        error_log('- File URL: ' . $file_url);
-        error_log('- File size: ' . filesize($pdf_result));
-
         $response_data = [
             'url' => $file_url,
             'file' => basename($pdf_result),
@@ -197,10 +188,6 @@ public function handle_member_certificate_pdf() {
                 'nonce' => wp_create_nonce('download_certificate')
             ], admin_url('admin-ajax.php'))
         ];
-
-        // Debug log response
-        error_log('Response data: ' . print_r($response_data, true));
-
 
         // Return direct file URL instead of download handler
         wp_send_json_success([

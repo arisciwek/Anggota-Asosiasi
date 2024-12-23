@@ -101,7 +101,7 @@ class Asosiasi_Admin {
         add_menu_page(
             __('Asosiasi', 'asosiasi'),
             __('Asosiasi', 'asosiasi'),
-            'manage_options',
+            'list_asosiasi_members', // Capability yang diperlukan
             'asosiasi',
             array($this, 'display_admin_page'),
             'dashicons-groups',
@@ -112,7 +112,7 @@ class Asosiasi_Admin {
             'asosiasi',
             __('Daftar Anggota', 'asosiasi'),
             __('Daftar Anggota', 'asosiasi'),
-            'manage_options',
+            'list_asosiasi_members', // Capability yang diperlukan
             'asosiasi',
             array($this, 'display_admin_page')
         );

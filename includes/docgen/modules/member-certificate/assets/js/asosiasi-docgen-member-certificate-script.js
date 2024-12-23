@@ -4,7 +4,7 @@
  * @package     Asosiasi
  * @subpackage  DocGen/Modules/Certificate/Assets
  */
-// File: assets/js/document-generator.js
+// File: assets/js/asosiasi-docgen-member-certificate-script.js
 
 jQuery(document).ready(function($) {
     // Handler untuk generate DOCX (kode yang sudah ada tetap sama)
@@ -37,7 +37,7 @@ jQuery(document).ready(function($) {
                     document.body.appendChild(iframe);
                     
                     // Show success message
-                    alert(asosiasiDocGenCert.strings.generateSuccess);
+                    // alert(asosiasiDocGenCert.strings.generateSuccess);
                 } else {
                     alert(asosiasiDocGenCert.strings.generateError + ': ' + response.data);
                 }
@@ -54,25 +54,12 @@ jQuery(document).ready(function($) {
     });
 
 
+    // Handler untuk generate PDF - sekarang menggunakan pola yang sama
     $('#generate-pdf-certificate').on('click', function(e) {
         e.preventDefault();
         
-        console.log('PDF generation button clicked');
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        let memberId = $(this).data('member');
-        
-        if (!memberId && urlParams.get('id')) {
-            memberId = urlParams.get('id');
-        }
-        
-        if (!memberId) {
-            console.error('Member ID not found');
-            alert('Member ID tidak ditemukan');
-            return;
-        }
-
         const button = $(this);
+        const memberId = button.data('member');
         const spinner = button.find('.spinner');
         
         button.prop('disabled', true);
@@ -90,16 +77,11 @@ jQuery(document).ready(function($) {
                 console.log('AJAX response:', response);
                 
                 if (response.success && response.data.url) {
-                    console.log('PDF URL:', response.data.url);
-                    
-                    // Gunakan window.open untuk download langsung
                     const downloadWindow = window.open(response.data.url, '_blank');
                     
                     if (downloadWindow) {
                         downloadWindow.focus();
                     } else {
-                        // Jika popup diblokir, berikan link manual
-                        alert('Download gagal dibuka secara otomatis. Silakan klik OK untuk mendownload.');
                         window.location.href = response.data.url;
                     }
                     
@@ -123,7 +105,6 @@ jQuery(document).ready(function($) {
             }
         });
     });
-
 
 });
 

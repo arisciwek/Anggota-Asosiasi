@@ -26,9 +26,26 @@
 
 class Asosiasi_Activator {
 
+    private static $permissions = array(
+        'list_asosiasi_members',
+        'view_asosiasi_members',
+        'add_asosiasi_members', 
+        'edit_asosiasi_members',
+        'edit_own_asosiasi_members',
+        'delete_asosiasi_members',
+        'manage_skp_status'
+    );
+    
     public static function activate() {
         global $wpdb;
-
+        
+        $admin_role = get_role('administrator');
+        if ($admin_role) {
+            foreach (self::$permissions as $cap) {
+                $admin_role->add_cap($cap);
+            }
+        }
+        
         $current_db_version = get_option('asosiasi_db_version', '0');
 
         self::create_initial_tables();
@@ -147,25 +164,45 @@ class Asosiasi_Activator {
         return strtr($sql, $replacements);
     }
 
-    /**
-     * Create all database tables
-     */
-    private static function create_initial_tables() {
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-        // Table creation order is important for foreign keys
-        $tables = array(
-            'members',        // Base table
-            'services',       // Contains both services and member_services
-            'member-images',  // Depends on members
-            'skp-perusahaan', // Depends on members and services
-            'skp-tenaga-ahli', // Depends on members and services
-            'status-history',  // Depends on skp_perusahaan
-            'skp-tenaga-ahli-history', // Tambahkan ini untuk history Tenaga Ahli
-            'certificate-log'    // Depends on members and users
-        );
+/**
+ * Create all database tables
+ */
+private static function create_initial_tables() {
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    
+    // Table creation order is critical for foreign keys
+    // Each array element represents a group of tables that should be created together
+    // Tables within each group have no foreign key dependencies on each other
+    $table_groups = array(
+        // Base tables with no foreign key dependencies
+        array('members'),
         
-        foreach ($tables as $table) {
+        // Services tables group
+        array('services'),
+        
+        // Tables depending only on members or services
+        array(
+            'member-images',
+            'member_services'  // This was previously part of services.sql
+        ),
+        
+        // SKP tables depending on members and services
+        array(
+            'skp-perusahaan',
+            'skp-tenaga-ahli'
+        ),
+        
+        // History and log tables depending on SKP tables
+        array(
+            'status-history',
+            'skp-tenaga-ahli-history',
+            'certificate-log'
+        )
+    );
+    
+    // Process each group in order
+    foreach ($table_groups as $group) {
+        foreach ($group as $table) {
             $sql = self::load_sql_file($table);
             if (is_wp_error($sql)) {
                 error_log(sprintf(
@@ -175,9 +212,29 @@ class Asosiasi_Activator {
                 ));
                 continue;
             }
-            dbDelta($sql);
+            
+            // Execute each statement separately
+            $statements = explode(';', $sql);
+            foreach ($statements as $statement) {
+                $statement = trim($statement);
+                if (!empty($statement)) {
+                    $result = dbDelta($statement);
+                    if (!empty($wpdb->last_error)) {
+                        error_log(sprintf(
+                            '[Asosiasi] Database error while executing statement: %s\nError: %s',
+                            $statement,
+                            $wpdb->last_error
+                        ));
+                    }
+                }
+            }
         }
+        
+        // Add a small delay between groups to ensure previous tables are fully created
+        usleep(100000); // 100ms delay
     }
+}
+
 
     /**
      * Create certificate related tables
@@ -276,30 +333,6 @@ class Asosiasi_Activator {
      */
     private static function upgradeDatabase() {
         $current_db_version = get_option('asosiasi_db_version', '0');
-
-        // Run specific migrations based on version
-        if (version_compare($current_db_version, '2.3.0', '<')) {
-            self::migrate_to_2_3_0();
-            update_option('asosiasi_db_version', '2.3.0');
-        }
-
-        // Add 'activated' status to SKP enum
-        if (version_compare($current_db_version, '2.3.1', '<')) {
-            self::migrate_skp_status_enum();
-            update_option('asosiasi_db_version', '2.3.1');
-        }
-
-        // Add new member fields
-        if (version_compare($current_db_version, '2.4.0', '<')) {
-            self::migrate_member_fields();
-            update_option('asosiasi_db_version', '2.4.0');
-        }
-
-        // Create SKP Tenaga Ahli table
-        if (version_compare($current_db_version, '2.5.0', '<')) {
-            self::create_skp_tenaga_ahli_table();
-            update_option('asosiasi_db_version', '2.5.0');
-        }
 
     }
 

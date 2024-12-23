@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define permissions that can be assigned
-$asosiasi_permissions = array(
+$permission_labels = array(
     'list_asosiasi_members' => __('Lihat Daftar Anggota', 'asosiasi'),
     'view_asosiasi_members' => __('Lihat Detail Anggota', 'asosiasi'),
     'add_asosiasi_members' => __('Tambah Anggota', 'asosiasi'),
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         $role = get_role($role_name);
         if ($role) {
-            foreach ($asosiasi_permissions as $cap => $label) {
+            foreach ($permission_labels as $cap => $label) {
                 $has_cap = isset($_POST['permissions'][$role_name][$cap]);
                 // Only update if different from current state
                 if ($role->has_cap($cap) !== $has_cap) {
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <thead>
                 <tr>
                     <th class="column-role"><?php _e('Role', 'asosiasi'); ?></th>
-                    <?php foreach ($asosiasi_permissions as $cap => $label): ?>
+                    <?php foreach ($permission_labels as $cap => $label): ?>
                         <th class="column-permission">
                             <?php echo esc_html($label); ?>
                         </th>
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <td class="column-role">
                             <strong><?php echo translate_user_role($role_info['name']); ?></strong>
                         </td>
-                        <?php foreach ($asosiasi_permissions as $cap => $label): ?>
+                        <?php foreach ($permission_labels as $cap => $label): ?>
                             <td class="column-permission">
                                 <label class="screen-reader-text">
                                     <?php echo esc_html(sprintf(
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <tfoot>
                 <tr>
                     <th class="column-role"><?php _e('Role', 'asosiasi'); ?></th>
-                    <?php foreach ($asosiasi_permissions as $cap => $label): ?>
+                    <?php foreach ($permission_labels as $cap => $label): ?>
                         <th class="column-permission">
                             <?php echo esc_html($label); ?>
                         </th>

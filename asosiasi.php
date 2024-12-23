@@ -84,9 +84,18 @@ function asosiasi_check_requirements() {
 
 // Fungsi helper untuk mencari file secara rekursif
 function asosiasi_find_class_file($dir, $file) {
+    // Validate parameters
+    if (!is_string($dir) || !is_string($file)) {
+        return false;
+    }
+
     if (!is_dir($dir)) {
         return false;
     }
+
+    // Sanitize directory and file paths
+    $dir = rtrim(str_replace('\\', '/', $dir), '/');
+    $file = ltrim($file, '/');
 
     // Cek file di current directory
     $full_path = $dir . '/' . $file;
@@ -94,8 +103,17 @@ function asosiasi_find_class_file($dir, $file) {
         return $full_path;
     }
 
-    // Scan subdirectories
-    $files = scandir($dir);
+    // Scan subdirectories with error handling
+    try {
+        $files = @scandir($dir);
+        if ($files === false) {
+            return false;
+        }
+    } catch (Exception $e) {
+        error_log('Error scanning directory: ' . $e->getMessage());
+        return false;
+    }
+
     foreach ($files as $item) {
         if ($item == '.' || $item == '..') {
             continue;
@@ -115,6 +133,11 @@ function asosiasi_find_class_file($dir, $file) {
 
 // Autoloader untuk regular classes
 spl_autoload_register(function ($class) {
+    // Validate class parameter
+    if (!is_string($class)) {
+        return;
+    }
+
     // Base prefix untuk semua class di plugin
     $prefix = 'Asosiasi';
 
@@ -123,10 +146,21 @@ spl_autoload_register(function ($class) {
         return;
     }
 
-    // Convert class name ke file path
-    $file_name = 'class-' . strtolower(
-        str_replace('_', '-', $class)
-    ) . '.php';
+    // Pastikan class name valid sebelum melakukan str_replace
+    $class_name = (string)$class; // Explicit conversion to string
+    if (empty($class_name)) {
+        return;
+    }
+
+    // Convert class name ke file path dengan pengecekan tambahan
+    try {
+        $file_name = 'class-' . strtolower(
+            str_replace('_', '-', $class_name)
+        ) . '.php';
+    } catch (Exception $e) {
+        error_log('Error in autoloader string conversion: ' . $e->getMessage());
+        return;
+    }
 
     $base_dir = ASOSIASI_DIR . 'includes';
     
@@ -139,8 +173,6 @@ spl_autoload_register(function ($class) {
 
     error_log("Not found: " . $file_name);
 });
-
-
 
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
@@ -163,8 +195,66 @@ if (empty(asosiasi_check_requirements())) {
     }
 
     add_action('plugins_loaded', 'asosiasi_load_textdomain');
-    
-    function run_asosiasi() {
+
+function run_asosiasi() {
+        try {
+            // Check WP mPDF plugin
+            if (!function_exists('wp_mpdf_verify_library')) {
+                add_action('admin_notices', function() {
+                    $message = __('WP mPDF plugin is required for PDF generation.', 'asosiasi');
+                    echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+                });
+            }
+
+            $plugin = new Asosiasi();
+
+            add_action('plugins_loaded', function() {
+                // Include admin functions
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+                
+                if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php')) {
+                    require_once ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php';
+                    
+                    if (Asosiasi_DocGen_Checker::check_dependencies('Asosiasi')) {
+                        // Inisialisasi module tanpa require
+                        new Asosiasi_DocGen_Member_Certificate_Module();
+                    } else {
+                        error_log('DocGen Implementation not properly initialized');
+                    }
+                }
+            }, 15);
+            
+            // Inisialisasi kelas-kelas inti
+            new Asosiasi_Settings();
+            new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
+            new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
+
+            new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
+            new Asosiasi_Enqueue_SKP_Tenaga_Ahli(ASOSIASI_VERSION);
+
+            // Initialize SKP Perusahaan handlers    
+            new Asosiasi_Ajax_SKP_Perusahaan();
+            new Asosiasi_Ajax_Status_Skp_Perusahaan();
+
+            // Initialize SKP Tenaga Ahli handlers
+            new Asosiasi_Ajax_Skp_Tenaga_Ahli();
+            new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();
+            
+            $plugin->run();
+
+        } catch (Exception $e) {
+            error_log('Asosiasi plugin initialization error: ' . $e->getMessage());
+            add_action('admin_notices', function() use ($e) {
+                $message = sprintf(
+                    __('Error initializing Asosiasi plugin: %s', 'asosiasi'),
+                    esc_html($e->getMessage())
+                );
+                echo '<div class="notice notice-error"><p>' . $message . '</p></div>';
+            });
+        }
+    }
+/*        
+function run_asosiasi() {
 
     // Check WP mPDF plugin
     if (!function_exists('wp_mpdf_verify_library')) {
@@ -177,9 +267,9 @@ if (empty(asosiasi_check_requirements())) {
 
     $plugin = new Asosiasi();
 
-    if (class_exists('WP_MPDF')) {
-        new Asosiasi_PDF_Certificate();
-    }
+    //    if (class_exists('WP_MPDF')) {
+    //        new Asosiasi_PDF_Certificate();
+    //    }
 
     add_action('plugins_loaded', function() {
         // Include admin functions
@@ -216,7 +306,7 @@ if (empty(asosiasi_check_requirements())) {
     
     $plugin->run();
 }
-
+*/
 
     // Start the plugin
     run_asosiasi();
