@@ -113,9 +113,19 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 throw new Exception($result->get_error_message());
             }
 
-            $upload_dir = wp_upload_dir();
-            $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $result);
-            
+            $upload_dir = wp_upload_dir();if (!is_string($result)) {
+                throw new Exception(__('Invalid generation result', 'asosiasi')); 
+            }
+
+            $base_dir = $upload_dir['basedir'] ?? '';
+            $base_url = $upload_dir['baseurl'] ?? '';
+
+            if (empty($base_dir) || empty($base_url)) {
+                throw new Exception(__('Invalid upload directory configuration', 'asosiasi'));
+            }
+
+            $file_url = str_replace($base_dir, $base_url, $result);
+
             wp_send_json_success([
                 'url' => $file_url,
                 'file' => basename($result)
@@ -153,6 +163,9 @@ public function handle_member_certificate_pdf() {
         $phpWord = \PhpOffice\PhpWord\IOFactory::load($docx_result);
 
         // Generate PDF filename
+        if (!is_string($docx_result)) {
+            throw new Exception(__('Invalid DOCX generation result', 'asosiasi'));
+        }
         $pdf_filename = str_replace('.docx', '.pdf', $docx_result);
 
         // Convert to PDF - Pastikan $pdf_result didefinisikan
@@ -176,8 +189,20 @@ public function handle_member_certificate_pdf() {
 
         // Get URL for PDF
         $upload_dir = wp_upload_dir();
-        $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $pdf_result);
-       
+
+        if (!is_string($pdf_result)) {
+            throw new Exception(__('Invalid PDF generation result', 'asosiasi'));
+        }
+
+        $base_dir = $upload_dir['basedir'] ?? '';
+        $base_url = $upload_dir['baseurl'] ?? '';
+
+        if (empty($base_dir) || empty($base_url)) {
+            throw new Exception(__('Invalid upload directory configuration', 'asosiasi'));
+        }
+
+        $file_url = str_replace($base_dir, $base_url, $pdf_result);
+
         $response_data = [
             'url' => $file_url,
             'file' => basename($pdf_result),
@@ -369,6 +394,9 @@ private function convert_to_pdf($phpWord, $output_file) {
     }
 
     public function enqueue_assets($hook) {
+        if (!is_string($hook) || empty($hook)) {
+            return;
+        }
         if (strpos($hook, 'asosiasi') === false) {
             return;
         }

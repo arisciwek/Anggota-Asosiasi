@@ -74,29 +74,25 @@ jQuery(document).ready(function($) {
                 _ajax_nonce: asosiasiDocGenCert.nonce
             },
             success: function(response) {
-                console.log('AJAX response:', response);
-                
                 if (response.success && response.data.url) {
-                    const downloadWindow = window.open(response.data.url, '_blank');
-                    
-                    if (downloadWindow) {
-                        downloadWindow.focus();
-                    } else {
-                        window.location.href = response.data.url;
-                    }
+                    // Buat download link
+                    const link = document.createElement('a');
+                    link.href = response.data.url;
+                    link.download = response.data.file;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                    }, 1000);
                     
                     alert(asosiasiDocGenCert.strings.pdfSuccess);
                 } else {
-                    console.error('PDF generation failed:', response.data);
-                    alert(asosiasiDocGenCert.strings.pdfError + ': ' + (response.data || 'Unknown error'));
+                    alert(asosiasiDocGenCert.strings.pdfError);
                 }
             },
             error: function(xhr, status, error) {
-                console.error('AJAX error:', {
-                    status: status,
-                    error: error,
-                    response: xhr.responseText
-                });
+                console.error('AJAX error:', status, error);
                 alert(asosiasiDocGenCert.strings.pdfError);
             },
             complete: function() {
