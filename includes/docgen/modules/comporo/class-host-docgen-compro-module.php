@@ -83,7 +83,18 @@ class Host_DocGen_Compro_Module extends DocGen_Module {
      * Enqueue module assets
      */
     public function enqueue_assets($hook) {
-        if (strpos($hook, $this->module_info['slug']) === false) {
+        // Pastikan $hook adalah string dan tidak null
+        if (!is_string($hook) || empty($hook)) {
+            return;
+        }
+
+        // Pastikan module_info['slug'] juga ada dan tidak null 
+        $slug = $this->module_info['slug'] ?? '';
+        if (empty($slug)) {
+            return;
+        }
+
+        if (strpos($hook, $slug) === false) {
             return;
         }
 
@@ -146,7 +157,16 @@ class Host_DocGen_Compro_Module extends DocGen_Module {
 
             // Get URL for download
             $upload_dir = wp_upload_dir();
-            $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $result);
+            
+            // Validasi path yang akan diganti
+            $base_dir = $upload_dir['basedir'] ?? '';
+            $base_url = $upload_dir['baseurl'] ?? '';
+
+            if (empty($base_dir) || empty($base_url)) {
+                throw new Exception(__('Invalid upload directory configuration', 'host-docgen'));
+            }
+
+            $file_url = str_replace($base_dir, $base_url, $result);
             
             wp_send_json_success([
                 'url' => $file_url,

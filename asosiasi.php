@@ -199,12 +199,14 @@ if (empty(asosiasi_check_requirements())) {
 function run_asosiasi() {
         try {
             // Check WP mPDF plugin
-            if (!function_exists('wp_mpdf_verify_library')) {
-                add_action('admin_notices', function() {
-                    $message = __('WP mPDF plugin is required for PDF generation.', 'asosiasi');
-                    echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
-                });
-            }
+            /*
+                if (!function_exists('wp_mpdf_verify_library')) {
+                    add_action('admin_notices', function() {
+                        $message = __('WP mPDF plugin is required for PDF generation.', 'asosiasi');
+                        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+                    });
+                }
+            */
 
             $plugin = new Asosiasi();
 

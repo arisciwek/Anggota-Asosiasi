@@ -15,6 +15,11 @@ if (!defined('ABSPATH')) {
     die;
 }
 
+// Tambahkan pengecekan capability
+if (!current_user_can('list_asosiasi_members')) {
+    wp_die(__('Anda tidak memiliki izin untuk melihat daftar anggota.', 'asosiasi'));
+}
+
 $crud = new Asosiasi_CRUD();
 $services = new Asosiasi_Services();
 

@@ -61,7 +61,7 @@ class Asosiasi_Ajax_SKP_Perusahaan {
            ));
        }
 
-       if (!current_user_can('manage_options')) {
+       if (!current_user_can('add_asosiasi_members') || !current_user_can('view_asosiasi_members')) {
            wp_send_json_error(array(
                'message' => __('Anda tidak memiliki izin untuk melakukan operasi ini', 'asosiasi'),
                'code' => 'insufficient_permissions'
@@ -320,7 +320,7 @@ class Asosiasi_Ajax_SKP_Perusahaan {
            wp_die(__('Permintaan tidak valid', 'asosiasi'));
        }
 
-       if (!current_user_can('manage_options')) {
+       if (!current_user_can('add_asosiasi_members')) {
            wp_die(__('Akses tidak diizinkan', 'asosiasi'));
        }
 

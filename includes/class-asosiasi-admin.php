@@ -121,7 +121,7 @@ class Asosiasi_Admin {
             'asosiasi',
             __('Tambah Anggota', 'asosiasi'),
             __('Tambah Anggota', 'asosiasi'),
-            'manage_options',
+            'add_asosiasi_members',
             'asosiasi-add-member',
             array($this, 'display_add_member_page')
         );
@@ -140,7 +140,7 @@ class Asosiasi_Admin {
             null,
             __('Lihat Anggota', 'asosiasi'),
             __('Lihat Anggota', 'asosiasi'),
-            'manage_options',
+            'view_asosiasi_members',
             'asosiasi-view-member',
             array($this, 'display_view_member_page')
         );
@@ -149,7 +149,7 @@ class Asosiasi_Admin {
             null,
             __('Edit Foto', 'asosiasi'),
             __('Edit Foto', 'asosiasi'),
-            'manage_options',
+            'edit_own_asosiasi_members',
             'asosiasi-edit-photos',
             array($this, 'display_edit_photos_page')
         );

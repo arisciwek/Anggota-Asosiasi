@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
 
 // Tambahkan pengecekan capability
 if (!current_user_can('view_asosiasi_members')) {
-    wp_die(__('Anda tidak memiliki izin untuk melihat daftar anggota.', 'asosiasi'));
+    wp_die(__('Anda tidak memiliki izin untuk melihat detail anggota.', 'asosiasi'));
 }
 
 // Check untuk kedua kemungkinan parameter id
