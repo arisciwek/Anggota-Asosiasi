@@ -255,60 +255,51 @@ function run_asosiasi() {
             });
         }
     }
-/*        
-function run_asosiasi() {
 
-    // Check WP mPDF plugin
-    if (!function_exists('wp_mpdf_verify_library')) {
-        add_action('admin_notices', function() {
-            $message = __('WP mPDF plugin is required for PDF generation.', 'asosiasi');
-            echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
-        });
+    /*
+     * http://wppm.local/wp-admin/contribute.php
+     * http://wppm.local/wp-admin/about.php
+     * https://wordpress.org/
+     * https://wordpress.org/documentation/
+     * https://wordpress.org/support/forums/
+     * https://wordpress.org/support/forum/requests-and-feedback
+    */
+
+
+    function disable_wp_admin_menus() {
+        // Menghapus menu 'Dashboard' dan submenu terkait (about.php, updates, etc.)
+        remove_menu_page('index.php'); // Dashboard
+        remove_submenu_page('index.php', 'about.php'); // About
+        remove_submenu_page('index.php', 'contribute.php'); // Contribute
+        remove_submenu_page('index.php', 'update-core.php'); // Updates
+        remove_submenu_page('index.php', 'themes.php'); // Themes
+        remove_submenu_page('index.php', 'plugin-install.php'); // Plugin Installation
+        remove_submenu_page('index.php', 'themes.php?page=theme-editor'); // Theme Editor
+        remove_submenu_page('index.php', 'options-general.php?page=reading'); // Settings Reading
+
+        // Menghapus menu 'Posts', 'Media', 'Pages', dan lainnya jika perlu
+        //remove_menu_page('edit.php'); // Posts
+        //remove_menu_page('upload.php'); // Media
+        //remove_menu_page('edit.php?post_type=page'); // Pages
+
+        // Menghapus menu WordPress News, Documentation, Support, dan lainnya yang mengarah ke WordPress.org
+        remove_menu_page('tools.php'); // Tools (jika ada submenu WordPress.org di sini)
+        remove_submenu_page('tools.php', 'site-health.php'); // Site Health
     }
+    add_action('admin_menu', 'disable_wp_admin_menus', 999);
 
 
-    $plugin = new Asosiasi();
+    function redirect_forbidden_pages() {
+        // Cek apakah halaman yang diakses adalah about.php atau contribute.php
+        $forbidden_pages = array('about.php', 'contribute.php');
 
-    //    if (class_exists('WP_MPDF')) {
-    //        new Asosiasi_PDF_Certificate();
-    //    }
-
-    add_action('plugins_loaded', function() {
-        // Include admin functions
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        
-        if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php')) {
-            require_once ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php';
-            
-            if (Asosiasi_DocGen_Checker::check_dependencies('Asosiasi')) {
-                // Inisialisasi module tanpa require
-                new Asosiasi_DocGen_Member_Certificate_Module();
-            } else {
-                error_log('DocGen Implementation not properly initialized');
-            }
+        if (isset($_GET['page']) && in_array($_GET['page'], $forbidden_pages)) {
+            wp_redirect(admin_url()); // Redirect ke halaman Dashboard
+            exit;
         }
+    }
+    add_action('admin_init', 'redirect_forbidden_pages');
 
-    }, 15);
-    
-    // Continue with regular plugin initialization...
-    new Asosiasi_Settings();
-    new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
-    new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
-
-    new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
-    new Asosiasi_Enqueue_SKP_Tenaga_Ahli(ASOSIASI_VERSION);
-
-    // Initialize SKP Perusahaan handlers    
-    new Asosiasi_Ajax_SKP_Perusahaan();
-    new Asosiasi_Ajax_Status_Skp_Perusahaan();
-
-    // Initialize SKP Tenaga Ahli handlers
-    new Asosiasi_Ajax_Skp_Tenaga_Ahli();
-    new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();
-    
-    $plugin->run();
-}
-*/
 
     // Start the plugin
     run_asosiasi();
