@@ -48,6 +48,38 @@ class Asosiasi_Activator {
         
         $current_db_version = get_option('asosiasi_db_version', '0');
 
+
+
+       $upload_dir = wp_upload_dir();
+       $directories = array(
+           '/docgen-temp/asosiasi',
+           '/docgen-templates/asosiasi'
+       );
+
+       foreach ($directories as $dir) {
+           $path = $upload_dir['basedir'] . $dir;
+           if (!file_exists($path)) {
+               wp_mkdir_p($path);
+               chmod($path, 0755);
+
+               // Add index.php
+               file_put_contents($path . '/index.php', "<?php\n// Silence is golden");
+               
+               // Add .htaccess
+               $htaccess = "Options -Indexes\n\n";
+               $htaccess .= "<FilesMatch \"\.(docx|pdf)$\">\n";
+               $htaccess .= "    Order Allow,Deny\n";
+               $htaccess .= "    Allow from all\n";
+               $htaccess .= "</FilesMatch>\n\n";
+               $htaccess .= "Order Deny,Allow\n";
+               $htaccess .= "Deny from all";
+               
+               file_put_contents($path . '/.htaccess', $htaccess);
+           }
+       }
+
+
+
         self::create_initial_tables();
         self::upgradeDatabase(); // Tambahkan ini
         //self::addVersion();
