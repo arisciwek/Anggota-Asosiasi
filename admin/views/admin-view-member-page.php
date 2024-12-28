@@ -175,10 +175,14 @@ if ($member) {
                     <div class="card" style="margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
                             <?php _e('Foto Anggota', 'asosiasi'); ?>
+
+
                             <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-edit-photos&id=' . $member_id)); ?>" 
                                class="button">
                                 <?php _e('Edit Photos', 'asosiasi'); ?>
                             </a>
+
+
                         </h2>
                         <div class="inside" style="padding: 20px;">
                             <!-- Main Image Preview -->
