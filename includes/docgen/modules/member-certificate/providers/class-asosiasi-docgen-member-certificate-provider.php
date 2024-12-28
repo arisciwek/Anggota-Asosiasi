@@ -50,6 +50,14 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         $this->member_id = $member_id;
         // Load single member data
         $this->load_member_data(); 
+
+        // Tambahkan di konstruktor atau init plugin
+        add_filter('query_vars', function($vars) {
+            $vars[] = 'certificate_verify';
+            $vars[] = 'member_id';
+            $vars[] = 'verify_code';
+            return $vars;
+        });
     }
 
     private function load_member_data() {
@@ -112,31 +120,65 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         return $temp_dir;
     }
 
-    /**
-     * Get data for template
-     * @return array Template data
-     */
     public function get_data() {
-        // Check & update certificate info first
+        // Get current settings
+        //$settings = Asosiasi_Settings::get_settings();
+        //$services = new Asosiasi_Services();
+        
+        // Create template processor instance
+        // $template = new WP_DocGen_Template();
+
+        // Generate verification URL dengan format yang valid
+        $verification_code = base64_encode($this->member_id . '_' . time());
+        $verification_url = add_query_arg([
+            'certificate_verify' => 1,
+            'member_id' => $this->member_id,
+            'verify_code' => $verification_code
+        ], home_url());
+
+        // Pastikan certificate info updated
         $this->maybe_update_certificate_info();
         
-        // Generate data for single member
-        return array(
-            'nomor_sertifikat' => $this->data['nomor_sertifikat'],
-            'company_name' => $this->data['company_name'],
-            'company_leader' => $this->data['company_leader'],
-            'leader_position' => $this->data['leader_position'],
-            'business_field' => $this->data['business_field'],
-            'city' => $this->data['city'],
-            'company_address' => $this->data['company_address'],
-            'npwp' => $this->data['npwp'],
-            'issue_date' => date_i18n('j F Y', strtotime($this->data['tanggal_cetak'])),
-            'qr_data' => json_encode([
-                'cert_number' => $this->data['nomor_sertifikat'],
-                'company' => $this->data['company_name'],
-                'issued' => $this->data['tanggal_cetak']
-            ])
-        );
+        error_log('QR Data URL: ' . $verification_url);
+
+        $data  = [
+                'nomor_sertifikat' => $this->data['nomor_sertifikat'],
+                'company_name' => $this->data['company_name'],
+                'company_leader' => $this->data['company_leader'],
+                'leader_position' => $this->data['leader_position'],
+                'business_field' => $this->data['business_field'], 
+                'city' => $this->data['city'],
+                'company_address' => $this->data['company_address'],
+                'npwp' => $this->data['npwp'],
+                'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
+                'qr_data' => wp_kses_post($verification_url),
+            ];
+
+
+
+        // Khusus custom fields yang butuh processing, gunakan WP_DocGen
+        // $template = new WP_DocGen_Template();
+        $custom_fields = [
+
+                // Date
+                'date:issue_date:j F Y H:i' => $this->data['tanggal_cetak'],
+                
+                // Image
+                'image:logo:100:100' => wp_upload_dir()['basedir'] . '/asosiasi/logo-rui-02.png',
+                
+                // User 
+                'user:display_name' => wp_get_current_user()->display_name,
+                
+                // Site
+                'site:domain' => parse_url(home_url(), PHP_URL_HOST),
+                
+                // QR Code
+                'qrcode:qr_data:100' => wp_kses_post($verification_url)
+
+                // ... custom fields lainnya
+        ];
+        
+        return array_merge($data, $custom_fields);
     }
 
     private function maybe_update_certificate_info() {
