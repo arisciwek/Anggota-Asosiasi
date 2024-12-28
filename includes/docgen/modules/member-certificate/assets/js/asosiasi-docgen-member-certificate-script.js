@@ -86,7 +86,7 @@ jQuery(document).ready(function($) {
                         document.body.removeChild(link);
                     }, 1000);
                     
-                    alert(asosiasiDocGenCert.strings.pdfSuccess);
+                    // alert(asosiasiDocGenCert.strings.pdfSuccess);
                 } else {
                     alert(asosiasiDocGenCert.strings.pdfError);
                 }
