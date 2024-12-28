@@ -120,14 +120,52 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         return $temp_dir;
     }
 
-    public function get_data() {
-        // Get current settings
-        //$settings = Asosiasi_Settings::get_settings();
-        //$services = new Asosiasi_Services();
-        
-        // Create template processor instance
-        // $template = new WP_DocGen_Template();
+    /**
+    * Get template data untuk sertifikat anggota
+    * 
+    * Data yang disediakan terdiri dari 2 jenis:
+    * 1. Regular fields - Langsung digunakan di template tanpa processing
+    * 2. Custom fields - Memerlukan processing oleh WP_DocGen_Template
+    * 
+    * Regular Fields Format:
+    * - nomor_sertifikat    : Nomor sertifikat anggota
+    * - company_name        : Nama perusahaan
+    * - company_leader      : Nama pimpinan perusahaan  
+    * - leader_position     : Jabatan pimpinan
+    * - business_field      : Bidang usaha
+    * - city               : Kota
+    * - company_address     : Alamat lengkap
+    * - npwp               : NPWP perusahaan
+    * - issue_date         : Tanggal cetak (formatted)
+    * - qr_data            : Verification URL untuk QR code
+    * 
+    * Custom Fields Format:
+    * - date:field:format  : Format tanggal customize 
+    *   Example: 'date:issue_date:j F Y H:i' => $this->data['tanggal_cetak']
+    * 
+    * - image:name         : Path file gambar (hanya path)
+    *   Example: 'image:logo' => '/path/to/logo.png'
+    *   Template control: ${image:logo:50:50:center:middle}
+    * 
+    * - user:field         : Data user WordPress
+    *   Example: 'user:display_name' => wp_get_current_user()->display_name
+    * 
+    * - site:field         : Info site WordPress
+    *   Example: 'site:domain' => parse_url(home_url(), PHP_URL_HOST)
+    * 
+    * - qrcode:text        : URL/text untuk QR code (hanya text)
+    *   Example: 'qrcode:qr_data' => $verification_url
+    *   Template control: ${qrcode:qr_data:50:M}
+    *
+    * @since 1.0.0
+    * @since 1.0.2 Simplifikasi format custom fields (image & qrcode)
+    * 
+    * @access public
+    * @return array Associative array berisi data untuk template
+    * @throws Exception Jika member tidak ditemukan
+    */
 
+    public function get_data() {
         // Generate verification URL dengan format yang valid
         $verification_code = base64_encode($this->member_id . '_' . time());
         $verification_url = add_query_arg([
@@ -157,14 +195,13 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
 
 
         // Khusus custom fields yang butuh processing, gunakan WP_DocGen
-        // $template = new WP_DocGen_Template();
         $custom_fields = [
 
                 // Date
                 'date:issue_date:j F Y H:i' => $this->data['tanggal_cetak'],
                 
                 // Image
-                'image:logo:100:100' => wp_upload_dir()['basedir'] . '/asosiasi/logo-rui-02.png',
+                'image:logo' => wp_upload_dir()['basedir'] . '/asosiasi/logo-rui-02.png',
                 
                 // User 
                 'user:display_name' => wp_get_current_user()->display_name,
@@ -173,7 +210,7 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
                 'site:domain' => parse_url(home_url(), PHP_URL_HOST),
                 
                 // QR Code
-                'qrcode:qr_data:100' => wp_kses_post($verification_url)
+                'qrcode:qr_data' => wp_kses_post($verification_url)
 
                 // ... custom fields lainnya
         ];

@@ -27,6 +27,7 @@
  * - Added landscape orientation support
  */
 
+
 class Asosiasi_DocGen_MPDF_Writer extends \PhpOffice\PhpWord\Writer\PDF\MPDF
 {
     protected function createExternalWriterInstance()
@@ -48,4 +49,3 @@ class Asosiasi_DocGen_MPDF_Writer extends \PhpOffice\PhpWord\Writer\PDF\MPDF
         ]);
     }
 }
-
