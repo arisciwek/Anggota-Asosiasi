@@ -27,23 +27,13 @@ if (!defined('ABSPATH')) {
 // Check untuk parameter id
 $member_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Initialize handlers
+// Inisialisasi handlers
 $crud = new Asosiasi_CRUD();
 $images = new Asosiasi_Member_Images();
 
+// Get member data
 $member = $crud->get_member($member_id);
-$current_user = wp_get_current_user();
 $member_images = $images->get_member_images($member_id);
-
-// Permission check
-$can_edit = false;
-if ($member) {
-    if (current_user_can('edit_asosiasi_members')) {
-        $can_edit = true;
-    } else if (current_user_can('edit_own_asosiasi_members') && $member['created_by'] == $current_user->ID) {
-        $can_edit = true;
-    }
-}
 
 if ($member) {
     // Handle image upload
