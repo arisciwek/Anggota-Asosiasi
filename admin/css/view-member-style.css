@@ -114,3 +114,8 @@
         display: block;
     }
 }
+
+p#footer-upgrade,
+span#footer-thankyou {
+    display: none;
+}
