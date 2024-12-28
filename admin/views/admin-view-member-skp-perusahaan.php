@@ -22,9 +22,29 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
-if ($member) {
-   $member_services = $services->get_member_services($member_id);
-   $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
+    if ($member) {
+       $member_services = $services->get_member_services($member_id);
+       $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
+
+
+    // Initialize handlers
+    $crud = new Asosiasi_CRUD();
+
+
+    $member = $crud->get_member($member_id);
+    $current_user = wp_get_current_user();
+
+    // Permission check
+    $can_edit = false;
+    if ($member) {
+        if (current_user_can('edit_asosiasi_members')) {
+            $can_edit = true;
+        } else if (current_user_can('edit_own_asosiasi_members') && $member['created_by'] == $current_user->ID) {
+            $can_edit = true;
+        }
+    }
+
+
    ?>
    <div class="wrap">
        <div class="skp-container">
@@ -37,6 +57,8 @@ if ($member) {
                
                <div class="skp-content">
                    <?php if (!empty($member_services)): ?>
+
+                    
                        <div class="skp-actions">
                            <button type="button" 
                                    class="button add-skp-btn" 
