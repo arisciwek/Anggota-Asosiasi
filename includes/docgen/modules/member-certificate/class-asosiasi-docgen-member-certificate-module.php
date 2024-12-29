@@ -113,6 +113,13 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
             $data = $provider->get_data();
 
+            // Generate QR Code
+            $qrCode = new \Mpdf\QrCode\QrCode($data['qr_data'], 'L');
+            $qrOutput = new \Mpdf\QrCode\Output\Png();
+            $qrImage = $qrOutput->output($qrCode, 100);
+            $base64QRCode = base64_encode($qrImage);
+            $data['base64QRCode'] = $base64QRCode;
+
             // Initialize mPDF
             $mpdf = new \Mpdf\Mpdf([
                 'mode' => 'utf-8',
@@ -125,12 +132,15 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 ],
                 'fontCache' => $paths['cache_path'],
                 'default_font' => 'dejavusans',
-                'margin_top' => 5,     // 0.5 cm = 5 mm
-                'margin_right' => 5,   // 0.5 cm = 5 mm
-                'margin_bottom' => 5,  // 0.5 cm = 5 mm
-                'margin_left' => 5     // 0.5 cm = 5 mm
+                'margin_top' => 3,
+                'margin_right' => 3,
+                'margin_bottom' => 3,
+                'margin_left' => 3,
+                'charset_in' => 'UTF-8',
+                'allow_charset_conversion' => true,
+                'debug' => true
             ]);
-            
+
             // Get template content
             ob_start();
             include dirname(__FILE__) . '/templates/certificate-template.php';

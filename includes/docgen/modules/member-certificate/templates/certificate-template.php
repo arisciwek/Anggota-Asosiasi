@@ -289,7 +289,24 @@ if (!defined('ABSPATH')) {
     margin-left: 10px; /* Memberikan jarak antara label dan nama perusahaan */
 }
 
+.qr-code-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    text-align: center;
+}
 
+.qr-code-image {
+    width: 100%;
+    height: 100%;
+}
+
+.qr-code-title {
+    font-size: 8pt;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+}
 
 </style>
 </head>
@@ -305,7 +322,9 @@ if (!defined('ABSPATH')) {
                     <div class="organization-name"><?php echo esc_html($data['organization_name']); ?></div>
                     <h1 class="title">SERTIFIKAT ANGGOTA</h1>
                 </td>
-                <td style="width: 70px;"></td> <!-- Balancing column -->
+                <td style="width: 70px;">
+                    <img src="<?php echo esc_url($data['image:logo_k3']); ?>" alt="Logo K3" class="logo">
+                </td> <!-- Balancing column -->
             </tr>
         </table>
 
@@ -478,10 +497,22 @@ if (!defined('ABSPATH')) {
                         <?php echo esc_html($data['sekretaris_umum']); ?>
                     </div>
                 </div>
-                
-                <!-- Empty space for future QR -->
-                <div class="footer-col">
-                </div>
+                    <div class="footer-col">
+                        <div class="qr-code-container">
+                            <?php if(isset($data['base64QRCode'])): ?>
+                                <img src="data:image/png;base64,<?php echo $data['base64QRCode']; ?>" 
+                                     alt="QR Code" 
+                                     style="width: 400px; height: 400px; 
+                                            padding: 5px;
+                                            background: white;
+                                            image-rendering: -webkit-optimize-contrast;
+                                            image-rendering: crisp-edges;
+                                            display: block;
+                                            margin: 0 auto;">
+                                <div class="qr-code-title">Scan untuk verifikasi</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
             </div>
 
             <div class="footer-bottom clearfix">

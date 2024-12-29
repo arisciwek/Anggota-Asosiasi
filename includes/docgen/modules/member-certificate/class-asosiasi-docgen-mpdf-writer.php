@@ -46,7 +46,8 @@ class Asosiasi_DocGen_MPDF_Writer extends \PhpOffice\PhpWord\Writer\PDF\MPDF
             ],
             'fontCache' => $paths['cache_path'],
             'default_font' => 'dejavusans',
-            
+
+            'charset_in' => 'UTF-8',  // Mengatur encoding input menjadi UTF-8            
             'table_error_report' => false,
             'table_layout' => 'fixed',  // Penting untuk layout tabel
             'setAutoTopMargin' => 'stretch',

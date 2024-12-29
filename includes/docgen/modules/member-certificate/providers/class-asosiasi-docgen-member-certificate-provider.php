@@ -174,6 +174,19 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
             'verify_code' => $verification_code
         ], home_url());
 
+
+
+        // 1. Membuat URL untuk QR Code
+        $qrcode_verification_code = base64_encode($this->member_id . '_' . time());
+        $qrcode_verification_url = add_query_arg([
+            'certificate_verify' => 1,
+            'member_id' => $this->member_id,
+            'verify_code' => $qrcode_verification_code
+        ], home_url());
+
+        // 2. Encode URL untuk menghindari karakter-karakter yang tidak diinginkan
+        // $data['qr_data'] = urldecode($qrcode_verification_url);  // Menghapus rawurlencode() dan memastikan URL aman
+
         // Pastikan certificate info updated
         $this->maybe_update_certificate_info();
         
@@ -194,6 +207,10 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
             'ahu_number' => $this->data['ahu_number'],
             'npwp' => $this->data['npwp'],
             'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
+
+            //'qr_data' => urldecode($qrcode_verification_url)
+            'qr_data' => $qrcode_verification_url
+
         ];
 
         // Khusus custom fields yang butuh processing, gunakan WP_DocGen
@@ -204,6 +221,9 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
                 
                 // Image
                 'image:logo' => wp_upload_dir()['basedir'] . '/asosiasi/logo-rui-02.png',
+                
+                // Image
+                'image:logo_k3' => wp_upload_dir()['basedir'] . '/asosiasi/logo-k3.png',
                 
                 // User 
                 'user:display_name' => wp_get_current_user()->display_name,
