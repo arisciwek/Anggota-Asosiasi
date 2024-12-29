@@ -179,20 +179,22 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         
         error_log('QR Data URL: ' . $verification_url);
 
-        $data  = [
-                'nomor_sertifikat' => $this->data['nomor_sertifikat'],
-                'company_name' => $this->data['company_name'],
-                'company_leader' => $this->data['company_leader'],
-                'leader_position' => $this->data['leader_position'],
-                'business_field' => $this->data['business_field'], 
-                'city' => $this->data['city'],
-                'company_address' => $this->data['company_address'],
-                'npwp' => $this->data['npwp'],
-                'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
-                'qr_data' => wp_kses_post($verification_url),
-            ];
-
-
+        $data = [
+            'nomor_sertifikat' => $this->data['nomor_sertifikat'],
+            'company_name' => $this->data['company_name'],
+            'contact_person' => $this->data['contact_person'],  // Tambahan
+            'email' => $this->data['email'],                    // Tambahan
+            'phone' => $this->data['phone'],                    // Tambahan
+            'company_leader' => $this->data['company_leader'],
+            'leader_position' => $this->data['leader_position'],
+            'business_field' => $this->data['business_field'], 
+            'city' => $this->data['city'],
+            'company_address' => $this->data['company_address'],
+            'postal_code' => $this->data['postal_code'],        // Tambahan
+            'ahu_number' => $this->data['ahu_number'],
+            'npwp' => $this->data['npwp'],
+            'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
+        ];
 
         // Khusus custom fields yang butuh processing, gunakan WP_DocGen
         $custom_fields = [
@@ -214,8 +216,67 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
 
                 // ... custom fields lainnya
         ];
-        
-        return array_merge($data, $custom_fields);
+            
+
+        // Ambil semua setting yang ada
+        $organization_name = get_option('asosiasi_organization_name');
+        $ketua_umum = get_option('asosiasi_ketua_umum');
+        $sekretaris_umum = get_option('asosiasi_sekretaris_umum');
+        $contact_email = get_option('asosiasi_contact_email');
+        $certificate_header = get_option('asosiasi_certificate_header');
+        $certificate_footer = get_option('asosiasi_certificate_footer');
+        $website = get_option('asosiasi_website'); // Pengaturan Website
+
+
+        // Settings Fields (mengambil data pengaturan yang sudah disimpan)
+        $settings_fields = [
+            'organization_name' => $organization_name,
+            'ketua_umum' => $ketua_umum,
+            'sekretaris_umum' => $sekretaris_umum,
+            'contact_email' => $contact_email,
+            //'certificate_header' => $certificate_header,
+            //'certificate_footer' => $certificate_footer,
+            'website' => $website,  // Website
+        ];
+
+        // Ambil services yang dimiliki oleh member
+        $services = $this->get_member_services($this->member_id);
+
+        // Gabungkan layanan menjadi satu string
+        $services_data = [];
+        foreach ($services as $service) {
+            $services_data[] = $service['short_name'] . ' - ' . $service['full_name'];
+        }
+
+        // Gabungkan semua layanan menjadi satu string terpisah oleh koma
+        $services_data_string = implode(', ', $services_data);
+
+        $final_data = array_merge($data, $settings_fields, $custom_fields, ['services' => $services_data_string]);
+
+        error_log('Final Data for Template: ' . print_r($final_data, true));
+        return $final_data;
+
+    }
+
+    /**
+     * Mendapatkan semua layanan yang dimiliki oleh member
+     * 
+     * @param int $member_id ID member
+     * @return array Daftar layanan yang dimiliki oleh member
+     */
+    private function get_member_services($member_id) {
+        global $wpdb;
+
+        // Ambil service_id yang dimiliki oleh member
+        $services = $wpdb->get_results($wpdb->prepare(
+            "SELECT s.short_name, s.full_name
+            FROM {$wpdb->prefix}asosiasi_member_services ms
+            JOIN {$wpdb->prefix}asosiasi_services s ON ms.service_id = s.id
+            WHERE ms.member_id = %d",
+            $member_id
+        ), ARRAY_A);
+
+        return $services;
     }
 
     private function maybe_update_certificate_info() {

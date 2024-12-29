@@ -124,9 +124,13 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                     $paths['font_path']
                 ],
                 'fontCache' => $paths['cache_path'],
-                'default_font' => 'dejavusans'
+                'default_font' => 'dejavusans',
+                'margin_top' => 5,     // 0.5 cm = 5 mm
+                'margin_right' => 5,   // 0.5 cm = 5 mm
+                'margin_bottom' => 5,  // 0.5 cm = 5 mm
+                'margin_left' => 5     // 0.5 cm = 5 mm
             ]);
-
+            
             // Get template content
             ob_start();
             include dirname(__FILE__) . '/templates/certificate-template.php';
@@ -163,7 +167,7 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             wp_send_json_error($e->getMessage());
         }
     }
-    
+
     public function add_member_certificate_button($member_id) {
         ?>
         <button type="button" 

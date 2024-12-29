@@ -153,6 +153,23 @@ class Asosiasi_Admin {
             'asosiasi-edit-photos',
             array($this, 'display_edit_photos_page')
         );
+
+        // Di method add_plugin_admin_menu(), tambahkan:
+        add_submenu_page(
+            null,  // tidak tampil di menu
+            'Member Certificate',
+            'Member Certificate',
+            'manage_options',
+            'member-certificate',
+            array($this, 'display_member_certificate_page')
+        );
+
+    }
+
+
+    public function display_member_certificate_page() {
+        // wp-admin/admin.php?page=member-certificate&id=1
+        require_once ASOSIASI_DIR . 'includes/docgen/modules/member-certificate/member-certificate.php';
     }
 
     public function display_admin_page() {
