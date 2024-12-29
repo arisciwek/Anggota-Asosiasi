@@ -45,7 +45,17 @@ class Asosiasi_DocGen_MPDF_Writer extends \PhpOffice\PhpWord\Writer\PDF\MPDF
                 $paths['font_path']
             ],
             'fontCache' => $paths['cache_path'],
-            'default_font' => 'dejavusans'
+            'default_font' => 'dejavusans',
+            
+            'table_error_report' => false,
+            'table_layout' => 'fixed',  // Penting untuk layout tabel
+            'setAutoTopMargin' => 'stretch',
+            'setAutoBottomMargin' => 'stretch',
+            'shrink_tables_to_fit' => 1,
+            'use_kwt' => true,  // Keep with table
+            'keepColumns' => true,
+            'keep_table_proportions' => true,
+            'tabSpaces' => 6
         ]);
     }
 }

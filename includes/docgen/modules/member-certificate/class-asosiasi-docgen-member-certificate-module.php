@@ -63,13 +63,107 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         // Register handlers
         add_action('wp_ajax_generate_member_certificate_docx', [$this, 'handle_member_certificate_docx']);
         add_action('wp_ajax_generate_member_certificate_pdf', [$this, 'handle_member_certificate_pdf']);
+
         add_action('asosiasi_after_member_info', [$this, 'add_member_certificate_button']);
         add_action('asosiasi_after_member_info', [$this, 'add_pdf_certificate_button']);
+        
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);   // Add download handler
         add_action('wp_ajax_download_member_certificate', [$this, 'handle_certificate_download']);
 
+        // Add new direct PDF generation button
+        add_action('asosiasi_after_member_info', [$this, 'create_pdf_certificate_button']);
+        
+        // Add new AJAX handler
+        add_action('wp_ajax_create_member_certificate_pdf', [$this, 'handle_direct_pdf_generation']);
+
     }
 
+    public function create_pdf_certificate_button($member_id) {
+        ?>
+        <button type="button" 
+                id="create-pdf-certificate" 
+                class="button button-secondary" 
+                data-member="<?php echo esc_attr($member_id); ?>">
+            <?php _e('Generate Direct PDF', 'asosiasi'); ?>
+            <span class="spinner"></span>
+        </button>
+        <?php
+    }
+
+    public function handle_direct_pdf_generation() {
+        check_ajax_referer('asosiasi-docgen-certificate');
+
+        try {
+            error_log('=== START PDF CERTIFICATE DIRECT GENERATION ===');
+            
+            $member_id = absint($_POST['member_id'] ?? 0);
+            error_log('Member ID: ' . $member_id);
+            
+            if (!$member_id) {
+                throw new Exception(__('Invalid member ID', 'asosiasi'));
+            }
+
+            // Setup temp directory
+            error_log('Getting mPDF paths...');
+            $paths = WP_MPDF_Activator::get_mpdf_paths();
+            error_log('mPDF paths: ' . print_r($paths, true));
+
+            // Get member data
+            require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
+            $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
+            $data = $provider->get_data();
+
+            // Initialize mPDF
+            $mpdf = new \Mpdf\Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4-L',
+                'orientation' => 'L',
+                'tempDir' => $paths['temp_path'],
+                'fontDir' => [
+                    WP_MPDF_DIR . 'libs/mpdf/ttfonts',
+                    $paths['font_path']
+                ],
+                'fontCache' => $paths['cache_path'],
+                'default_font' => 'dejavusans'
+            ]);
+
+            // Get template content
+            ob_start();
+            include dirname(__FILE__) . '/templates/certificate-template.php';
+            $html = ob_get_clean();
+
+            // Generate PDF
+            $mpdf->WriteHTML($html);
+            
+            // Save to output directory
+            $output_dir = $provider->get_temp_dir();
+            $filename = 'sertifikat-' . sanitize_title($data['company_name']) . '-' . date('Ymd-His') . '.pdf';
+            $output_path = $output_dir . '/' . $filename;
+            
+            error_log('Saving PDF to: ' . $output_path);
+            
+            $mpdf->Output($output_path, 'F');
+
+            // Get URL for response
+            $upload_dir = wp_upload_dir();
+            $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
+            error_log('PDF URL: ' . $file_url);
+
+            wp_send_json_success([
+                'url' => $file_url,
+                'file' => $filename,
+                'direct_download' => true
+            ]);
+
+            error_log('=== END PDF CERTIFICATE DIRECT GENERATION ===');
+
+        } catch (Exception $e) {
+            error_log('Direct PDF Generation Error: ' . $e->getMessage());
+            error_log('Error trace: ' . $e->getTraceAsString());
+            wp_send_json_error($e->getMessage());
+        }
+    }
+    
     public function add_member_certificate_button($member_id) {
         ?>
         <button type="button" 
@@ -127,50 +221,6 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             wp_send_json_error($e->getMessage());
         }
     }
-
-/*
-    public function handle_member_certificate_docx() {
-        check_ajax_referer('asosiasi-docgen-certificate');
-
-        try {
-            $member_id = absint($_POST['member_id'] ?? 0);
-            if (!$member_id) {
-                throw new Exception(__('Invalid member ID', 'asosiasi'));
-            }
-
-            require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
-            $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
-
-            $generator = new WP_DocGen();
-            $result = $generator->generate($provider);
-            
-            if (is_wp_error($result)) {
-                throw new Exception($result->get_error_message());
-            }
-
-            $upload_dir = wp_upload_dir();if (!is_string($result)) {
-                throw new Exception(__('Invalid generation result', 'asosiasi')); 
-            }
-
-            $base_dir = $upload_dir['basedir'] ?? '';
-            $base_url = $upload_dir['baseurl'] ?? '';
-
-            if (empty($base_dir) || empty($base_url)) {
-                throw new Exception(__('Invalid upload directory configuration', 'asosiasi'));
-            }
-
-            $file_url = str_replace($base_dir, $base_url, $result);
-
-            wp_send_json_success([
-                'url' => $file_url,
-                'file' => basename($result)
-            ]);
-
-        } catch (Exception $e) {
-            wp_send_json_error($e->getMessage());
-        }
-    }
-*/
 
     public function handle_member_certificate_pdf() {
         check_ajax_referer('asosiasi-docgen-certificate');

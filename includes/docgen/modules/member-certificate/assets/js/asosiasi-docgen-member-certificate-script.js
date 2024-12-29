@@ -102,5 +102,50 @@ jQuery(document).ready(function($) {
         });
     });
 
+    // Add to existing script
+    $('#create-pdf-certificate').on('click', function(e) {
+        e.preventDefault();
+        
+        const button = $(this);
+        const memberId = button.data('member');
+        const spinner = button.find('.spinner');
+        
+        button.prop('disabled', true);
+        spinner.addClass('is-active');
+
+        $.ajax({
+            url: asosiasiDocGenCert.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'create_member_certificate_pdf',
+                member_id: memberId,
+                _ajax_nonce: asosiasiDocGenCert.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data.url) {
+                    const link = document.createElement('a');
+                    link.href = response.data.url;
+                    link.download = response.data.file;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                    }, 1000);
+                } else {
+                    alert(asosiasiDocGenCert.strings.pdfError);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                alert(asosiasiDocGenCert.strings.pdfError);
+            },
+            complete: function() {
+                button.prop('disabled', false);
+                spinner.removeClass('is-active');
+            }
+        });
+    });    
+
 });
 
