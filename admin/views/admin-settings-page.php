@@ -115,6 +115,16 @@ $tab_paths = array(
                                 value="<?php echo esc_attr(get_option('asosiasi_contact_email')); ?>" class="regular-text">
                         </td>
                     </tr>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label for="asosiasi_website"><?php _e('Website', 'asosiasi'); ?></label>
+                        </th>
+                        <td>
+                            <input type="url" id="asosiasi_website" name="asosiasi_website" 
+                                value="<?php echo esc_attr(get_option('asosiasi_website')); ?>" class="regular-text">
+                            <p class="description"><?php _e('URL website organisasi (misalnya: https://www.example.com)', 'asosiasi'); ?></p>
+                        </td>
+                    </tr>
                 </table>
 
                 

@@ -69,7 +69,18 @@ class Asosiasi_Settings {
                 'default' => ''
             )
         );
-            
+        
+        // Register website setting
+        register_setting(
+            'asosiasi_settings_group',
+            'asosiasi_website',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => 'esc_url_raw', // Sanitasi URL
+                'default' => ''
+            )
+        );
+        
         // Certificate settings
         register_setting(
             'asosiasi_settings_group',
@@ -124,7 +135,8 @@ class Asosiasi_Settings {
             'organization_name' => get_option('asosiasi_organization_name', ''),
             'ketua_umum' => get_option('asosiasi_ketua_umum', ''),
             'sekretaris_umum' => get_option('asosiasi_sekretaris_umum', ''), 
-            'contact_email' => get_option('asosiasi_contact_email', '')
+            'contact_email' => get_option('asosiasi_contact_email', ''),
+            'website' => get_option('asosiasi_website', '') // Menambahkan website
         );
     }
 }
