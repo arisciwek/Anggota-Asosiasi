@@ -93,7 +93,6 @@ if (!defined('ABSPATH')) {
         .certificate-section,
         .footer-bottom{
             text-align: center;
-
         }
 
         .logo {
@@ -290,8 +289,6 @@ if (!defined('ABSPATH')) {
 }
 
 .qr-code-container {
-    width: 100px;
-    height: 100px;
     margin: 0 auto;
     text-align: center;
 }
@@ -300,7 +297,7 @@ if (!defined('ABSPATH')) {
     width: 100%;
     height: 100%;
 }
-
+.footer-bottom,
 .qr-code-title {
     font-size: 8pt;
     color: #666;
@@ -352,7 +349,7 @@ if (!defined('ABSPATH')) {
                                 <div class="info-bold">Berlaku Sampai</div>
                                 <div class="info-small">Valid Untill</div>
                             </div>
-                            <div class="info-value"><?php echo esc_html($data['issue_date']); ?></div>
+                            <div class="info-value"><?php // echo esc_html($data['issue_date']); ?></div>
                         </div>
                     </div>
                 </div>
@@ -502,7 +499,7 @@ if (!defined('ABSPATH')) {
                             <?php if(isset($data['base64QRCode'])): ?>
                                 <img src="data:image/png;base64,<?php echo $data['base64QRCode']; ?>" 
                                      alt="QR Code" 
-                                     style="width: 400px; height: 400px; 
+                                     style="width: 150px; height: 150px; 
                                             padding: 5px;
                                             background: white;
                                             image-rendering: -webkit-optimize-contrast;
@@ -511,13 +508,17 @@ if (!defined('ABSPATH')) {
                                             margin: 0 auto;">
                                 <div class="qr-code-title">Scan untuk verifikasi</div>
                             <?php endif; ?>
+
                         </div>
                     </div>
             </div>
 
             <div class="footer-bottom clearfix">
                 <span class="info-website">Website:</span>
-                <span><?php echo esc_html($data['website']); ?></span>
+                <span class="info-value"><?php echo esc_html($data['website']); ?></span> || 
+                
+                <span class="info-website">Tanggal Cetak:</span>
+                <span class="info-value"><?php echo esc_html($data['issue_date']); ?></span>
             </div>
         </div>
 

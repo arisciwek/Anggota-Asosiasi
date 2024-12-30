@@ -79,12 +79,16 @@ class Asosiasi_DocGen_Member_Certificate_Module {
     }
 
     public function create_pdf_certificate_button($member_id) {
+        $can_edit = Asosiasi_Permission_Helper::can_edit_member($member_id);
+        if (!$can_edit) {
+            return;
+        }
         ?>
         <button type="button" 
                 id="create-pdf-certificate" 
                 class="button button-secondary" 
                 data-member="<?php echo esc_attr($member_id); ?>">
-            <?php _e('Generate Direct PDF', 'asosiasi'); ?>
+            <?php _e('Generate PDF', 'asosiasi'); ?>
             <span class="spinner"></span>
         </button>
         <?php
@@ -115,11 +119,14 @@ class Asosiasi_DocGen_Member_Certificate_Module {
 
             // Generate QR Code
             $qrCode = new \Mpdf\QrCode\QrCode($data['qr_data'], 'L');
+            
+            // Dari:
             $qrOutput = new \Mpdf\QrCode\Output\Png();
-            $qrImage = $qrOutput->output($qrCode, 100);
+            $qrImage = $qrOutput->output($qrCode, 400);
+            $base64QRCode = base64_encode($qrImage);
             $base64QRCode = base64_encode($qrImage);
             $data['base64QRCode'] = $base64QRCode;
-
+            
             // Initialize mPDF
             $mpdf = new \Mpdf\Mpdf([
                 'mode' => 'utf-8',
@@ -179,6 +186,10 @@ class Asosiasi_DocGen_Member_Certificate_Module {
     }
 
     public function add_member_certificate_button($member_id) {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         ?>
         <button type="button" 
                 id="generate-certificate" 
@@ -191,6 +202,9 @@ class Asosiasi_DocGen_Member_Certificate_Module {
     }
 
     public function add_pdf_certificate_button($member_id) {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
         ?>
         <button type="button" 
                 id="generate-pdf-certificate" 
