@@ -232,18 +232,16 @@ var AsosiasiSKPPerusahaan = AsosiasiSKPPerusahaan || {};
                        </a>
                    </td>
                    <td>
-                       <div class="button-group">
-                           ${skp.can_edit ? `
-                               <button type="button" class="button edit-skp" 
-                                       data-id="${skp.id}">
-                                   ${asosiasiSKPPerusahaan.strings.edit || 'Edit'}
-                               </button>
-                               <button type="button" class="button delete-skp" 
-                                       data-id="${skp.id}">
-                                   ${asosiasiSKPPerusahaan.strings.delete || 'Hapus'}
-                               </button>
-                           ` : ''}
-                       </div>
+                        <div class="button-group">
+                            ${asosiasiPermissions.canEdit ? `
+                                <button type="button" class="button edit-skp" data-id="${skp.id}">
+                                    ${asosiasiSKPPerusahaan.strings.edit || 'Edit'}
+                                </button>
+                                <button type="button" class="button delete-skp" data-id="${skp.id}">
+                                    ${asosiasiSKPPerusahaan.strings.delete || 'Hapus'}
+                                </button>
+                            ` : ''}
+                        </div>
                    </td>
                </tr>
            `);

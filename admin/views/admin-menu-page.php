@@ -172,10 +172,14 @@ if (isset($_POST['action']) && isset($_POST['member_id'])) {
                                 ?>
                             </td>
                             <td>
+                            <?php $member_id = $member['id']; ?>                                
+                            <?php if (Asosiasi_Permission_Helper::can_edit_member($member_id)): ?>
                                 <a href="<?php echo admin_url('admin.php?page=asosiasi-add-member&action=edit&id=' . $member['id']); ?>" 
                                    class="button button-small">
                                     <?php _e('Edit', 'asosiasi'); ?>
                                 </a>
+                            <?php endif; ?>
+                            <?php if (Asosiasi_Permission_Helper::can_delete_member($member_id)): ?>
                                 <form method="post" style="display:inline;">
                                     <?php wp_nonce_field('delete_member_' . $member['id']); ?>
                                     <input type="hidden" name="action" value="delete">
@@ -185,6 +189,7 @@ if (isset($_POST['action']) && isset($_POST['member_id'])) {
                                         <?php _e('Hapus', 'asosiasi'); ?>
                                     </button>
                                 </form>
+                            <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

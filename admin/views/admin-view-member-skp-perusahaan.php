@@ -25,25 +25,7 @@ if (!defined('ABSPATH')) {
     if ($member) {
        $member_services = $services->get_member_services($member_id);
        $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
-
-
-    // Initialize handlers
-    $crud = new Asosiasi_CRUD();
-
-
-    $member = $crud->get_member($member_id);
-    $current_user = wp_get_current_user();
-
-    // Permission check
-    $can_edit = false;
-    if ($member) {
-        if (current_user_can('edit_asosiasi_members')) {
-            $can_edit = true;
-        } else if (current_user_can('edit_own_asosiasi_members') && $member['created_by'] == $current_user->ID) {
-            $can_edit = true;
-        }
-    }
-
+       $can_edit = Asosiasi_Permission_Helper::can_edit_member($member_id);
 
    ?>
    <div class="wrap">
@@ -58,7 +40,8 @@ if (!defined('ABSPATH')) {
                <div class="skp-content">
                    <?php if (!empty($member_services)): ?>
 
-                    
+                    <?php //if (Asosiasi_Permission_Helper::can_edit_member($member_id)): ?>
+                    <?php if ($can_edit): ?>
                        <div class="skp-actions">
                            <button type="button" 
                                    class="button add-skp-btn" 
@@ -68,6 +51,7 @@ if (!defined('ABSPATH')) {
                                <?php _e('Tambah SKP', 'asosiasi'); ?>
                            </button>
                        </div>
+                    <?php endif; ?>
 
                        <!-- Tab Navigation -->
                        <div class="skp-tabs">
@@ -169,18 +153,29 @@ if (!defined('ABSPATH')) {
        </div>
 
        <?php 
-       // Include modal templates if member has services
-       if (!empty($member_services)) {
-           // Include status change modal if user has permissions
-           if ($can_change_status) {
-               require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-status-skp-perusahaan.php';
-           }
-
-           // Include SKP form modal
-           require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
+           // Include modal templates if member has services
+           if (!empty($member_services)) {
+               // Include status change modal if user has permissions
+               if ($can_change_status) {
+                   require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-status-skp-perusahaan.php';
+               }
+           //if ($can_edit) {
+               // Include SKP form modal
+               require_once ASOSIASI_DIR . 'admin/views/admin-view-member-modal-skp-perusahaan.php';
+           //}
        }
        ?>
    </div>
    <?php
 }
 ?>
+
+
+<script>
+// Pass permission flags to JavaScript
+var asosiasiPermissions = {
+    canEdit: <?php echo $can_edit ? 'true' : 'false'; ?>,
+    canChangeStatus: <?php echo $can_change_status ? 'true' : 'false'; ?>
+};
+</script>
+

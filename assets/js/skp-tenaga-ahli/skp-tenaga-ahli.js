@@ -236,7 +236,7 @@ var AsosiasiSKPTenagaAhli = AsosiasiSKPTenagaAhli || {};
                     </td>
                     <td>
                         <div class="button-group">
-                            ${skp.can_edit ? `
+                            ${asosiasiPermissions.canEdit ? `
                                 <button type="button" 
                                         class="button edit-skp" 
                                         data-type="tenaga-ahli"

@@ -18,9 +18,11 @@
 
 defined('ABSPATH') || exit;
 
-if ($member) {
-    $member_services = $services->get_member_services($member_id);
-    $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
+    if ($member) {
+       $member_services = $services->get_member_services($member_id);
+       $can_change_status = current_user_can('manage_options') || current_user_can('manage_skp_status');
+       $can_edit = Asosiasi_Permission_Helper::can_edit_member($member_id);
+
     ?>
     <div class="wrap">
         <div class="skp-container skp-tenaga-ahli-container">
@@ -173,3 +175,12 @@ if ($member) {
    <?php
 }
 ?>
+
+
+<script>
+// Pass permission flags to JavaScript
+var asosiasiPermissions = {
+    canEdit: <?php echo $can_edit ? 'true' : 'false'; ?>,
+    canChangeStatus: <?php echo $can_change_status ? 'true' : 'false'; ?>
+};
+</script>

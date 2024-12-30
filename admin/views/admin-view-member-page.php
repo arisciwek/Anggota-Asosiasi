@@ -134,17 +134,22 @@ if ($member) {
                             <?php _e('Aksi', 'asosiasi'); ?>
                         </h2>
                         <div class="inside" style="padding: 20px;">
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-add-member&action=edit&id=' . $member_id)); ?>" 
-                               class="button button-primary" style="margin-right: 10px;">
-                                <?php _e('Edit Member', 'asosiasi'); ?>
-                            </a>
 
-                            <button type="button" class="button" style="color: #d63638; margin-right: 10px;"
-                                    onclick="if(confirm('<?php esc_attr_e('Are you sure you want to delete this member?', 'asosiasi'); ?>')) { 
-                                        document.getElementById('delete-member-form').submit(); 
-                                    }">
-                                <?php _e('Delete Member', 'asosiasi'); ?>
-                            </button>
+                            <?php if (Asosiasi_Permission_Helper::can_edit_member($member_id)): ?>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-add-member&action=edit&id=' . $member_id)); ?>" 
+                                   class="button button-primary" style="margin-right: 10px;">
+                                    <?php _e('Edit Member', 'asosiasi'); ?>
+                                </a>
+                            <?php endif; ?>
+
+                            <?php if (Asosiasi_Permission_Helper::can_delete_member($member_id)): ?>
+                                <button type="button" class="button" style="color: #d63638; margin-right: 10px;"
+                                        onclick="if(confirm('<?php esc_attr_e('Are you sure you want to delete this member?', 'asosiasi'); ?>')) { 
+                                            document.getElementById('delete-member-form').submit(); 
+                                        }">
+                                    <?php _e('Delete Member', 'asosiasi'); ?>
+                                </button>
+                            <?php endif; ?>
 
                             <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi')); ?>" 
                                class="button">
@@ -175,12 +180,13 @@ if ($member) {
                     <div class="card" style="margin-top: 20px;">
                         <h2 class="title" style="padding: 15px 20px; margin: 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
                             <?php _e('Foto Anggota', 'asosiasi'); ?>
-
-
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-edit-photos&id=' . $member_id)); ?>" 
-                               class="button">
-                                <?php _e('Edit Photos', 'asosiasi'); ?>
-                            </a>
+                            
+                            <?php if (Asosiasi_Permission_Helper::can_edit_member($member_id)): ?>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=asosiasi-edit-photos&id=' . $member_id)); ?>" 
+                                   class="button">
+                                    <?php _e('Edit Photos', 'asosiasi'); ?>
+                                </a>
+                            <?php endif; ?>
 
 
                         </h2>
