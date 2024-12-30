@@ -25,11 +25,14 @@ CREATE TABLE IF NOT EXISTS {table_members} (
     -- New fields for certificate
     nomor_sertifikat varchar(100) DEFAULT NULL UNIQUE,
     tanggal_cetak datetime DEFAULT NULL,
+    -- Add created_by field
+    created_by bigint(20) DEFAULT NULL,
     -- End new fields
     created_at datetime DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY  (id),
     KEY idx_email (email),
     KEY idx_company (company_name),
-    KEY idx_cert_number (nomor_sertifikat)
+    KEY idx_cert_number (nomor_sertifikat),
+    KEY idx_created_by (created_by)
 ) {charset_collate};

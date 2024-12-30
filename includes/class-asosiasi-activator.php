@@ -364,8 +364,28 @@ private static function create_initial_tables() {
      * Called during plugin activation
      */
     private static function upgradeDatabase() {
-        $current_db_version = get_option('asosiasi_db_version', '0');
+        global $wpdb;
+        
+        // Check and add created_by column
+        $table_name = $wpdb->prefix . 'asosiasi_members';
+        $check_column = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = %s 
+             AND TABLE_NAME = %s 
+             AND COLUMN_NAME = %s",
+            DB_NAME,
+            $table_name,
+            'created_by'
+        ));
 
+        if (empty($check_column)) {
+            // Add created_by column if it doesn't exist
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN created_by bigint(20) DEFAULT NULL");
+            // Add index for faster queries
+            $wpdb->query("ALTER TABLE {$table_name} ADD INDEX idx_created_by (created_by)");
+            
+            error_log('Added created_by column to members table');
+        }
     }
 
 }
