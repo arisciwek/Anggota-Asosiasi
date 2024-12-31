@@ -122,7 +122,7 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             
             // Dari:
             $qrOutput = new \Mpdf\QrCode\Output\Png();
-            $qrImage = $qrOutput->output($qrCode, 400);
+            $qrImage = $qrOutput->output($qrCode, 300);
             $base64QRCode = base64_encode($qrImage);
             $base64QRCode = base64_encode($qrImage);
             $data['base64QRCode'] = $base64QRCode;
