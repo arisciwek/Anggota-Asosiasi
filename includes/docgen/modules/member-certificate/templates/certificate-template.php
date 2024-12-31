@@ -78,7 +78,7 @@ if (!defined('ABSPATH')) {
             width: 100%;
             height: 70px;
             position: relative;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .logo-container {
@@ -420,7 +420,6 @@ if (!defined('ABSPATH')) {
                             <div class="info-value"><?php echo esc_html($data['city']); ?></div>
                         </div>
 
-
                         <div class="info-item">
                             <div class="services-col">
                                 <!-- Services Section -->
@@ -460,9 +459,6 @@ if (!defined('ABSPATH')) {
                 <!-- Empty space -->
                 <div class="statement-col-25"><p>&nbsp;</p></div>
             </div>
-
-
-
         </div>
 
         <!-- Footer -->
@@ -499,7 +495,7 @@ if (!defined('ABSPATH')) {
                             <?php if(isset($data['base64QRCode'])): ?>
                                 <img src="data:image/png;base64,<?php echo $data['base64QRCode']; ?>" 
                                      alt="QR Code" 
-                                     style="width: 150px; height: 150px; 
+                                     style="width: 100px; height: 100px; 
                                             padding: 5px;
                                             background: white;
                                             image-rendering: -webkit-optimize-contrast;
