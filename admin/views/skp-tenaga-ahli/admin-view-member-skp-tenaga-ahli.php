@@ -38,6 +38,7 @@ defined('ABSPATH') || exit;
                 
                 <div class="skp-content">
                     <?php if (!empty($member_services)): ?>
+                    <?php if ($can_edit): ?>                        
                         <div class="skp-actions">
                             <button type="button" 
                                     class="button add-skp-tenaga-ahli-btn"
@@ -47,6 +48,7 @@ defined('ABSPATH') || exit;
                                 <?php _e('Tambah SKP TA', 'asosiasi'); ?>
                             </button>
                         </div>
+                    <?php endif; ?>
 
                         <!-- Tab Navigation dengan namespace -->
                         <div class="skp-tabs skp-tenaga-ahli-tabs">
