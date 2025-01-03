@@ -196,76 +196,76 @@ class Asosiasi_Activator {
         return strtr($sql, $replacements);
     }
 
-/**
- * Create all database tables
- */
-private static function create_initial_tables() {
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    
-    // Table creation order is critical for foreign keys
-    // Each array element represents a group of tables that should be created together
-    // Tables within each group have no foreign key dependencies on each other
-    $table_groups = array(
-        // Base tables with no foreign key dependencies
-        array('members'),
+    /**
+     * Create all database tables
+     */
+    private static function create_initial_tables() {
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         
-        // Services tables group
-        array('services'),
-        
-        // Tables depending only on members or services
-        array(
-            'member-images',
-            'member_services'  // This was previously part of services.sql
-        ),
-        
-        // SKP tables depending on members and services
-        array(
-            'skp-perusahaan',
-            'skp-tenaga-ahli'
-        ),
-        
-        // History and log tables depending on SKP tables
-        array(
-            'status-history',
-            'skp-tenaga-ahli-history',
-            'certificate-log'
-        )
-    );
-    
-    // Process each group in order
-    foreach ($table_groups as $group) {
-        foreach ($group as $table) {
-            $sql = self::load_sql_file($table);
-            if (is_wp_error($sql)) {
-                error_log(sprintf(
-                    '[Asosiasi] Failed to load SQL file: %s - %s',
-                    $table,
-                    $sql->get_error_message()
-                ));
-                continue;
-            }
+        // Table creation order is critical for foreign keys
+        // Each array element represents a group of tables that should be created together
+        // Tables within each group have no foreign key dependencies on each other
+        $table_groups = array(
+            // Base tables with no foreign key dependencies
+            array('members'),
             
-            // Execute each statement separately
-            $statements = explode(';', $sql);
-            foreach ($statements as $statement) {
-                $statement = trim($statement);
-                if (!empty($statement)) {
-                    $result = dbDelta($statement);
-                    if (!empty($wpdb->last_error)) {
-                        error_log(sprintf(
-                            '[Asosiasi] Database error while executing statement: %s\nError: %s',
-                            $statement,
-                            $wpdb->last_error
-                        ));
+            // Services tables group
+            array('services'),
+            
+            // Tables depending only on members or services
+            array(
+                'member-images',
+                'member_services'  // This was previously part of services.sql
+            ),
+            
+            // SKP tables depending on members and services
+            array(
+                'skp-perusahaan',
+                'skp-tenaga-ahli'
+            ),
+            
+            // History and log tables depending on SKP tables
+            array(
+                'status-history',
+                'skp-tenaga-ahli-history',
+                'certificate-log'
+            )
+        );
+        
+        // Process each group in order
+        foreach ($table_groups as $group) {
+            foreach ($group as $table) {
+                $sql = self::load_sql_file($table);
+                if (is_wp_error($sql)) {
+                    error_log(sprintf(
+                        '[Asosiasi] Failed to load SQL file: %s - %s',
+                        $table,
+                        $sql->get_error_message()
+                    ));
+                    continue;
+                }
+                
+                // Execute each statement separately
+                $statements = explode(';', $sql);
+                foreach ($statements as $statement) {
+                    $statement = trim($statement);
+                    if (!empty($statement)) {
+                        $result = dbDelta($statement);
+                        if (!empty($wpdb->last_error)) {
+                            error_log(sprintf(
+                                '[Asosiasi] Database error while executing statement: %s\nError: %s',
+                                $statement,
+                                $wpdb->last_error
+                            ));
+                        }
                     }
                 }
             }
+            
+            // Add a small delay between groups to ensure previous tables are fully created
+            usleep(100000); // 100ms delay
         }
-        
-        // Add a small delay between groups to ensure previous tables are fully created
-        usleep(100000); // 100ms delay
     }
-}
 
 
     /**
@@ -366,26 +366,43 @@ private static function create_initial_tables() {
     private static function upgradeDatabase() {
         global $wpdb;
         
-        // Check and add created_by column
+        // Nama tabel
         $table_name = $wpdb->prefix . 'asosiasi_members';
-        $check_column = $wpdb->get_results($wpdb->prepare(
+        
+        // Periksa apakah kolom 'active' ada
+        $check_active_column = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
              WHERE TABLE_SCHEMA = %s 
              AND TABLE_NAME = %s 
              AND COLUMN_NAME = %s",
             DB_NAME,
             $table_name,
-            'created_by'
+            'active'
         ));
-
-        if (empty($check_column)) {
-            // Add created_by column if it doesn't exist
-            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN created_by bigint(20) DEFAULT NULL");
-            // Add index for faster queries
-            $wpdb->query("ALTER TABLE {$table_name} ADD INDEX idx_created_by (created_by)");
-            
-            error_log('Added created_by column to members table');
+        
+        // Jika kolom 'active' tidak ada, tambahkan kolom tersebut
+        if (empty($check_active_column)) {
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN active ENUM('active', 'inactive') DEFAULT 'active'");
+            error_log('Added active column to members table');
+        }
+        
+        // Periksa apakah kolom 'valid_until' ada
+        $check_valid_until_column = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = %s 
+             AND TABLE_NAME = %s 
+             AND COLUMN_NAME = %s",
+            DB_NAME,
+            $table_name,
+            'valid_until'
+        ));
+        
+        // Jika kolom 'valid_until' tidak ada, tambahkan kolom tersebut
+        if (empty($check_valid_until_column)) {
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN valid_until DATE DEFAULT NULL");
+            error_log('Added valid_until column to members table');
         }
     }
+
 
 }
