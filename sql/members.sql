@@ -30,6 +30,11 @@ CREATE TABLE IF NOT EXISTS {table_members} (
     -- End new fields
     created_at datetime DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- New fields added
+    active ENUM('active', 'inactive') DEFAULT 'active',  -- Add active field with enum type
+    valid_until DATE DEFAULT NULL,  -- Add valid_until field with date type
+    
     PRIMARY KEY  (id),
     KEY idx_email (email),
     KEY idx_company (company_name),
