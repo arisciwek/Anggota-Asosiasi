@@ -153,7 +153,8 @@ class Asosiasi_CRUD {
             'business_field' => sanitize_text_field($data['business_field']),
             'ahu_number' => sanitize_text_field($data['ahu_number']),
             'city' => sanitize_text_field($data['city']),
-            'npwp' => sanitize_text_field($data['npwp'])
+            'npwp' => sanitize_text_field($data['npwp']),
+            'valid_until' => sanitize_text_field($data['valid_until'])
         );
 
         $result = $wpdb->update(
