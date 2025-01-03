@@ -37,7 +37,7 @@ class Asosiasi_Ajax_Skp_Tenaga_Ahli {
         add_action('wp_ajax_delete_skp_tenaga_ahli', array($this, 'delete_skp_tenaga_ahli'));
         add_action('wp_ajax_get_skp_tenaga_ahli_list', array($this, 'get_skp_tenaga_ahli_list'));
         add_action('wp_ajax_get_skp_tenaga_ahli', array($this, 'get_skp_tenaga_ahli'));
-        add_action('wp_ajax_get_skp_pdf', array($this, 'get_skp_pdf'));
+        add_action('wp_ajax_get_skp_tenaga_ahli_pdf', array($this, 'get_skp_tenaga_ahli_pdf'));
     }
     
     private function verify_request() {
@@ -318,7 +318,7 @@ class Asosiasi_Ajax_Skp_Tenaga_Ahli {
      */
     private function get_secure_pdf_url($id, $file_path) {
         return add_query_arg(array(
-            'action' => 'get_skp_pdf',
+            'action' => 'get_skp_tenaga_ahli_pdf',
             'id' => $id,
             'nonce' => wp_create_nonce('view_skp_pdf_' . $id)
         ), admin_url('admin-ajax.php'));
@@ -327,7 +327,7 @@ class Asosiasi_Ajax_Skp_Tenaga_Ahli {
     /**
      * Handle secure PDF file download
      */
-    public function get_skp_pdf() {
+    public function get_skp_tenaga_ahli_pdf() {
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         
         if (!$id || !check_ajax_referer('view_skp_pdf_' . $id, 'nonce', false)) {
