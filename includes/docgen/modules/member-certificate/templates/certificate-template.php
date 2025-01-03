@@ -349,7 +349,7 @@ if (!defined('ABSPATH')) {
                                 <div class="info-bold">Berlaku Sampai</div>
                                 <div class="info-small">Valid Untill</div>
                             </div>
-                            <div class="info-value"><?php // echo esc_html($data['issue_date']); ?></div>
+                            <div class="info-value"><?php echo esc_html($data['valid_until']); ?></div>
                         </div>
                     </div>
                 </div>
@@ -514,7 +514,7 @@ if (!defined('ABSPATH')) {
                 <span class="info-value"><?php echo esc_html($data['website']); ?></span> || 
                 
                 <span class="info-website">Tanggal Cetak:</span>
-                <span class="info-value"><?php echo esc_html($data['issue_date']); ?></span>
+                <span class="info-value"><?php echo esc_html($data['tanggal_cetak']); ?></span>
             </div>
         </div>
 
