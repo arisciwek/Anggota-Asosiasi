@@ -40,6 +40,7 @@ $data = array(
     'npwp' => $member['npwp'] ?? '',
     'issue_date' => $member['tanggal_cetak'] ?? current_time('mysql'),
     'ahu_number' => $member['ahu_number'] ?? '',
+    'valid_until' => $member['valid_until'] ?? '',
     
     // Organization settings
     'organization_name' => get_option('asosiasi_organization_name'),
