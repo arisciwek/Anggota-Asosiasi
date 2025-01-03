@@ -206,6 +206,7 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
             'postal_code' => $this->data['postal_code'],        // Tambahan
             'ahu_number' => $this->data['ahu_number'],
             'npwp' => $this->data['npwp'],
+            'valid_until' => date_i18n('j F Y', $this->data['valid_until']),
             'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
 
             //'qr_data' => urldecode($qrcode_verification_url)
@@ -217,7 +218,7 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         $custom_fields = [
 
                 // Date
-                'date:issue_date:j F Y H:i' => $this->data['tanggal_cetak'],
+                'date:tanggal_cetak:j F Y H:i' => $this->data['tanggal_cetak'],
                 
                 // Image
                 'image:logo' => wp_upload_dir()['basedir'] . '/asosiasi/logo-rui-02.png',
