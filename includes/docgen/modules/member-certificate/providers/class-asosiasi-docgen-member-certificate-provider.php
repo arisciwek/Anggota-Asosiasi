@@ -190,7 +190,7 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
         // Pastikan certificate info updated
         $this->maybe_update_certificate_info();
         
-        error_log('QR Data URL: ' . $verification_url);
+        //error_log('QR Data URL: ' . $verification_url);
 
         $data = [
             'nomor_sertifikat' => $this->data['nomor_sertifikat'],

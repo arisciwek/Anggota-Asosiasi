@@ -98,19 +98,19 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         check_ajax_referer('asosiasi-docgen-certificate');
 
         try {
-            error_log('=== START PDF CERTIFICATE DIRECT GENERATION ===');
+            //error_log('=== START PDF CERTIFICATE DIRECT GENERATION ===');
             
             $member_id = absint($_POST['member_id'] ?? 0);
-            error_log('Member ID: ' . $member_id);
+            //error_log('Member ID: ' . $member_id);
             
             if (!$member_id) {
                 throw new Exception(__('Invalid member ID', 'asosiasi'));
             }
 
             // Setup temp directory
-            error_log('Getting mPDF paths...');
+            //error_log('Getting mPDF paths...');
             $paths = WP_MPDF_Activator::get_mpdf_paths();
-            error_log('mPDF paths: ' . print_r($paths, true));
+            //error_log('mPDF paths: ' . print_r($paths, true));
 
             // Get member data
             require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
@@ -148,6 +148,27 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 'debug' => true
             ]);
 
+        $watermark_path = $paths['temp_path'] . '/watermark-pattern.svg';// Define watermark path 
+
+        // Create watermark object with the file
+        $watermark_image = new \Mpdf\WatermarkImage(
+            $watermark_path,
+            \Mpdf\WatermarkImage::SIZE_FIT_PAGE,         
+            \Mpdf\WatermarkImage::POSITION_CENTER_PAGE,  
+            0.5,                                         
+            true                                         
+        );
+
+        // Set watermark
+        $mpdf->SetWatermarkImage(
+            $watermark_path,
+            0.5,
+            $watermark_image->getSize(),
+            $watermark_image->getPosition()
+        );
+        $mpdf->showWatermarkImage = true;
+
+
             // Get template content
             ob_start();
             include dirname(__FILE__) . '/templates/certificate-template.php';
@@ -155,20 +176,20 @@ class Asosiasi_DocGen_Member_Certificate_Module {
 
             // Generate PDF
             $mpdf->WriteHTML($html);
-            
+
             // Save to output directory
             $output_dir = $provider->get_temp_dir();
             $filename = 'sertifikat-' . sanitize_title($data['company_name']) . '-' . date('Ymd-His') . '.pdf';
             $output_path = $output_dir . '/' . $filename;
             
-            error_log('Saving PDF to: ' . $output_path);
+            //error_log('Saving PDF to: ' . $output_path);
             
             $mpdf->Output($output_path, 'F');
 
             // Get URL for response
             $upload_dir = wp_upload_dir();
             $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
-            error_log('PDF URL: ' . $file_url);
+            //error_log('PDF URL: ' . $file_url);
 
             wp_send_json_success([
                 'url' => $file_url,
@@ -176,7 +197,7 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 'direct_download' => true
             ]);
 
-            error_log('=== END PDF CERTIFICATE DIRECT GENERATION ===');
+            //error_log('=== END PDF CERTIFICATE DIRECT GENERATION ===');
 
         } catch (Exception $e) {
             error_log('Direct PDF Generation Error: ' . $e->getMessage());
@@ -254,25 +275,25 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         check_ajax_referer('asosiasi-docgen-certificate');
 
         try {
-            error_log('=== START PDF CERTIFICATE GENERATION ===');
+            //error_log('=== START PDF CERTIFICATE GENERATION ===');
             
             $member_id = absint($_POST['member_id'] ?? 0);
-            error_log('Member ID: ' . $member_id);
+            //error_log('Member ID: ' . $member_id);
             
             if (!$member_id) {
                 throw new Exception(__('Invalid member ID', 'asosiasi'));
             }
 
             // Setup temp directory
-            error_log('Getting mPDF paths...');
+            //error_log('Getting mPDF paths...');
             $paths = WP_MPDF_Activator::get_mpdf_paths();
-            error_log('mPDF paths: ' . print_r($paths, true));
+            //error_log('mPDF paths: ' . print_r($paths, true));
             
             // Generate DOCX first
-            error_log('Initializing provider for DOCX generation...');
+            //error_log('Initializing provider for DOCX generation...');
             $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
             
-            error_log('Starting DOCX generation...');
+            //error_log('Starting DOCX generation...');
             $generator = new WP_DocGen();
             $docx_result = $generator->generate($provider);
             
@@ -280,29 +301,29 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 error_log('DOCX generation failed: ' . $docx_result->get_error_message());
                 throw new Exception($docx_result->get_error_message());
             }
-            error_log('DOCX generated at: ' . $docx_result);
+            //error_log('DOCX generated at: ' . $docx_result);
 
             // Load generated DOCX
-            error_log('Loading DOCX into PHPWord...');
+            //error_log('Loading DOCX into PHPWord...');
             $phpWord = \PhpOffice\PhpWord\IOFactory::load($docx_result);
             $pdf_filename = str_replace('.docx', '.pdf', $docx_result);
-            error_log('PDF will be saved as: ' . $pdf_filename);
+            //error_log('PDF will be saved as: ' . $pdf_filename);
 
             // Convert to PDF using custom writer
-            error_log('Starting PDF conversion...');
+            //error_log('Starting PDF conversion...');
             $pdf_writer = new Asosiasi_DocGen_MPDF_Writer($phpWord);
             $pdf_writer->save($pdf_filename);
-            error_log('PDF saved successfully');
+            //error_log('PDF saved successfully');
 
             // Clean up DOCX
-            error_log('Cleaning up temporary DOCX...');
+            //error_log('Cleaning up temporary DOCX...');
             @unlink($docx_result);
 
             // Get URL for PDF
-            error_log('Preparing PDF URL...');
+            //error_log('Preparing PDF URL...');
             $upload_dir = wp_upload_dir();
             $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $pdf_filename);
-            error_log('PDF URL: ' . $file_url);
+            //error_log('PDF URL: ' . $file_url);
 
             wp_send_json_success([
                 'url' => $file_url,
@@ -310,7 +331,7 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 'direct_download' => true
             ]);
 
-            error_log('=== END PDF CERTIFICATE GENERATION ===');
+            //error_log('=== END PDF CERTIFICATE GENERATION ===');
 
         } catch (Exception $e) {
             error_log('PDF Generation Error: ' . $e->getMessage());
