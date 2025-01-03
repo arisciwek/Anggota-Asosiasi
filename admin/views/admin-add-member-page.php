@@ -132,7 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
         // Address Info
         'company_address' => isset($_POST['company_address']) ? $_POST['company_address'] : '',
         'city' => isset($_POST['city']) ? $_POST['city'] : '',
-        'postal_code' => isset($_POST['postal_code']) ? $_POST['postal_code'] : ''
+        'postal_code' => isset($_POST['postal_code']) ? $_POST['postal_code'] : '',
+        'valid_until' => isset($_POST['valid_until']) ? $_POST['valid_until'] : ''
     );
 
     $required_fields = array('company_name', 'contact_person', 'email');
@@ -201,6 +202,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
 
     <form method="post" action="" id="member-form">
         <?php wp_nonce_field('save_member'); ?>
+
+        <?php 
+        // Tentukan apakah pengguna memiliki kemampuan untuk mengedit
+        $disabled = '';
+        if ( ! current_user_can( 'edit_asosiasi_members' ) ) {
+            $disabled = 'disabled';  // Jika tidak memiliki kemampuan, set disabled
+        }
+        ?>
 
         <div class="form-wrapper">
             <div class="two-column-grid">
@@ -415,6 +424,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_member'])) {
                     </tr>
                 </table>
             </div>
+
+
+            <!-- Membership (Full Width) -->
+            <div class="membership-section">
+                <h2><?php _e('Keanggotaan', 'asosiasi'); ?></h2>
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Masa Berlaku', 'asosiasi'); ?></label>
+                        </th>
+                        <td>
+                            <input type="date" 
+                                   id="valid_until"
+                                   name="valid_until" 
+                                   value="<?php echo $member ? esc_attr($member['valid_until']) : ''; ?>"
+                                   class="regular-text"
+                                   <?php echo $disabled; ?>>
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+
         </div>
 
         <p class="submit">
