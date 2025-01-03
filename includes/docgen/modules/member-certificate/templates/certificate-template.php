@@ -473,23 +473,36 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
                 
-                <!-- Ketua Umum -->
+                <!-- Signature Section -->
                 <div class="footer-col">
                     <div class="signature-block">
                         <strong>Ketua Umum</strong>
-                        <div class="signature-line"></div>
-                        <?php echo esc_html($data['ketua_umum']); ?>
+                        <div class="signature-image" style="margin: 10px 0;">
+                            <img src="<?php echo esc_url($data['image:ttd_ketua']); ?>" 
+                                 alt="Tanda tangan Ketua" 
+                                 style="height: 60px; width: auto; display: block; margin: 0 auto;">
+                        </div>
+                        <div class="signature-name">
+                            <?php echo esc_html($data['ketua_umum']); ?>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Sekretaris Umum -->
+
+                <!-- Secretary Signature -->
                 <div class="footer-col">
                     <div class="signature-block">
                         <strong>Sekretaris Umum</strong>
-                        <div class="signature-line"></div>
-                        <?php echo esc_html($data['sekretaris_umum']); ?>
+                        <div class="signature-image" style="margin: 10px 0;">
+                            <img src="<?php echo esc_url($data['image:ttd_sekretaris']); ?>" 
+                                 alt="Tanda tangan Sekretaris" 
+                                 style="height: 60px; width: auto; display: block; margin: 0 auto;">
+                        </div>
+                        <div class="signature-name">
+                            <?php echo esc_html($data['sekretaris_umum']); ?>
+                        </div>
                     </div>
                 </div>
+
                     <div class="footer-col">
                         <div class="qr-code-container">
                             <?php if(isset($data['base64QRCode'])): ?>
@@ -514,7 +527,7 @@ if (!defined('ABSPATH')) {
                 <span class="info-value"><?php echo esc_html($data['website']); ?></span> || 
                 
                 <span class="info-website">Tanggal Cetak:</span>
-                <span class="info-value"><?php echo esc_html($data['tanggal_cetak']); ?></span>
+                <span class="info-value"><?php echo esc_html($data['issue_date']); ?></span>
             </div>
         </div>
 
