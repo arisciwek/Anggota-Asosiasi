@@ -49,6 +49,8 @@ class Asosiasi_Public {
      * @return   string    HTML output
      */
     public function display_member_list($atts) {
+        $atts = is_array($atts) ? $atts : array();
+
         // Sanitize and validate attributes
         $atts = shortcode_atts(
             array(
