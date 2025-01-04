@@ -275,7 +275,7 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
 
         $final_data = array_merge($data, $settings_fields, $custom_fields, ['services' => $services_data_string]);
 
-        error_log('Final Data for Template: ' . print_r($final_data, true));
+        //error_log('Final Data for Template: ' . print_r($final_data, true));
         return $final_data;
 
     }
