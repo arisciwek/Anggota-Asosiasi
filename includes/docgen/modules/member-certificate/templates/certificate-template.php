@@ -161,7 +161,7 @@ if (!defined('ABSPATH')) {
         /* Footer with 4 columns */
         .footer {
             position: absolute;
-            bottom: 10mm;
+            bottom: 5mm;
             left: 10mm;
             right: 10mm;
             height: 120px;
@@ -172,6 +172,14 @@ if (!defined('ABSPATH')) {
             width: 25%;
             text-align: center;
             position: relative;
+        }
+
+        .footer-bottom {
+            margin-top: 50px;
+            width: 100%;
+            text-align: center;
+            color: #666;
+            font-size: 8pt;
         }
 
         .photo-placeholder {
@@ -297,7 +305,7 @@ if (!defined('ABSPATH')) {
     width: 100%;
     height: 100%;
 }
-.footer-bottom,
+
 .qr-code-title {
     font-size: 8pt;
     color: #666;
@@ -503,23 +511,23 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
-                    <div class="footer-col">
-                        <div class="qr-code-container">
-                            <?php if(isset($data['base64QRCode'])): ?>
-                                <img src="data:image/png;base64,<?php echo $data['base64QRCode']; ?>" 
-                                     alt="QR Code" 
-                                     style="width: 100px; height: 100px; 
-                                            padding: 5px;
-                                            background: white;
-                                            image-rendering: -webkit-optimize-contrast;
-                                            image-rendering: crisp-edges;
-                                            display: block;
-                                            margin: 0 auto;">
-                                <div class="qr-code-title">Scan untuk verifikasi</div>
-                            <?php endif; ?>
+                <div class="footer-col">
+                    <div class="qr-code-container">
+                        <?php if(isset($data['base64QRCode'])): ?>
+                            <img src="data:image/png;base64,<?php echo $data['base64QRCode']; ?>" 
+                                 alt="QR Code" 
+                                 style="width: 100px; height: 100px; 
+                                        padding: 5px;
+                                        background: white;
+                                        image-rendering: -webkit-optimize-contrast;
+                                        image-rendering: crisp-edges;
+                                        display: block;
+                                        margin: 0 auto;">
+                            <div class="qr-code-title">Scan untuk verifikasi</div>
+                        <?php endif; ?>
 
-                        </div>
                     </div>
+                </div>
             </div>
 
             <div class="footer-bottom clearfix">
@@ -529,7 +537,10 @@ if (!defined('ABSPATH')) {
                 <span class="info-website">Tanggal Cetak:</span>
                 <span class="info-value"><?php echo esc_html($data['issue_date']); ?></span>
             </div>
+
+
         </div>
+
 
     </div>
 </body>
