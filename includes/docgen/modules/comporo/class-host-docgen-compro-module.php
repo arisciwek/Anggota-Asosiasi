@@ -83,11 +83,13 @@ class Host_DocGen_Compro_Module extends DocGen_Module {
      * Enqueue module assets
      */
     public function enqueue_assets($hook) {
-        // Pastikan $hook adalah string dan tidak null
-        if (!is_string($hook) || empty($hook)) {
+        // Convert null to empty string and ensure we have a string
+        $hook = (string)($hook ?? '');
+        
+        if (empty($hook)) {
             return;
         }
-
+        
         // Pastikan module_info['slug'] juga ada dan tidak null 
         $slug = $this->module_info['slug'] ?? '';
         if (empty($slug)) {
