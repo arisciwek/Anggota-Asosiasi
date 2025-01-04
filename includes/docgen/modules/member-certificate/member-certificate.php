@@ -3,7 +3,7 @@
  * Test Certificate View
  * 
  * @package Asosiasi
- * Path: admin/views/test-certificate.php
+ * Path: admin/views/member-certificate.php
  */
 
 if (!defined('ABSPATH')) {
