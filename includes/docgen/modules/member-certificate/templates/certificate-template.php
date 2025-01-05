@@ -537,8 +537,6 @@ if (!defined('ABSPATH')) {
                 <span class="info-website">Tanggal Cetak:</span>
                 <span class="info-value"><?php echo esc_html($data['issue_date']); ?></span>
             </div>
-
-
         </div>
 
 

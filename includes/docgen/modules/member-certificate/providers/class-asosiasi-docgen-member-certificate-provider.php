@@ -226,6 +226,8 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
                 'image:ttd_sekretaris' => wp_upload_dir()['basedir'] . '/asosiasi/ttd-sekretaris-02.png',
                 
                 'image:logo_k3' => wp_upload_dir()['basedir'] . '/asosiasi/logo-k3.png',
+
+                'image:member_card_pattern' => wp_upload_dir()['basedir'] . '/asosiasi/watermark-card-pattern.svg',
                 
                 // User 
                 'user:display_name' => wp_get_current_user()->display_name,

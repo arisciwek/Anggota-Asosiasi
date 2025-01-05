@@ -69,13 +69,34 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         add_action('wp_ajax_generate_member_certificate_docx', [$this, 'handle_member_certificate_docx']);
         add_action('wp_ajax_generate_member_certificate_pdf', [$this, 'handle_member_certificate_pdf']);
         add_action('wp_ajax_download_member_certificate', [$this, 'handle_certificate_download']);
-        add_action('wp_ajax_create_member_certificate_pdf', [$this, 'handle_direct_pdf_generation']);
-        
+        add_action('wp_ajax_create_member_certificate_pdf', [$this, 'handle_member_certificate_generation']);
+        add_action('wp_ajax_generate_member_card', [$this, 'handle_member_card_generation']);
+
         add_action('asosiasi_after_member_info', [$this, 'add_member_certificate_button']);
         add_action('asosiasi_after_member_info', [$this, 'add_pdf_certificate_button']);
+
+        add_action('asosiasi_after_member_info', [$this, 'create_member_card_button']);
         add_action('asosiasi_after_member_info', [$this, 'create_pdf_certificate_button']);
         
+
+        
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+    }
+
+    public function create_member_card_button($member_id) {
+        $can_edit = Asosiasi_Permission_Helper::can_edit_member($member_id);
+        if (!$can_edit) {
+            return;
+        }
+        ?>
+        <button type="button" 
+                id="generate-member-card" 
+                class="button button-secondary" 
+                data-member="<?php echo esc_attr($member_id); ?>">
+            <?php _e('Generate Kartu Anggota', 'asosiasi'); ?>
+            <span class="spinner"></span>
+        </button>
+        <?php
     }
 
     public function create_pdf_certificate_button($member_id) {
@@ -88,7 +109,7 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 id="create-pdf-certificate" 
                 class="button button-secondary" 
                 data-member="<?php echo esc_attr($member_id); ?>">
-            <?php _e('Generate PDF', 'asosiasi'); ?>
+            <?php _e('Generate Sertifikat Anggota', 'asosiasi'); ?>
             <span class="spinner"></span>
         </button>
         <?php
@@ -139,8 +160,91 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         return $this->mpdf;
     }
 
+    // Tambahkan method baru untuk generate kartu member
+    public function handle_member_card_generation() {
+        check_ajax_referer('asosiasi-docgen-certificate');
 
-    public function handle_direct_pdf_generation() {
+        try {
+            $member_id = absint($_POST['member_id'] ?? 0);
+            if (!$member_id) {
+                throw new Exception(__('Invalid member ID', 'asosiasi'));
+            }
+
+            // Get member data
+            require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
+            $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
+            $data = $provider->get_data();
+
+            // Generate QR Code
+            $qrCode = new \Mpdf\QrCode\QrCode($data['qr_data'], 'L');
+            $qrOutput = new \Mpdf\QrCode\Output\Png();
+            $qrImage = $qrOutput->output($qrCode, 200);
+            $data['base64QRCode'] = base64_encode($qrImage);
+
+            // Get mPDF instance dengan config default untuk A4
+            $mpdf = $this->get_mpdf_instance([
+                'format' => 'A4',
+                'orientation' => 'P', // Portrait untuk kartu
+                'margin_top' => 10,
+                'margin_right' => 10,
+                'margin_bottom' => 10,
+                'margin_left' => 10
+            ]);
+
+            $upload_dir = wp_upload_dir();
+
+            // Get paths untuk watermark
+            $paths = WP_MPDF_Activator::get_mpdf_paths();
+            $watermark_path = $upload_dir['basedir'] . '/asosiasi/watermark-card-pattern.svg';            
+            // Set watermark jika diperlukan
+            if (file_exists($watermark_path)) {
+                $watermark_image = new \Mpdf\WatermarkImage(
+                    $watermark_path,
+                    \Mpdf\WatermarkImage::SIZE_FIT_PAGE,
+                    \Mpdf\WatermarkImage::POSITION_CENTER_PAGE,
+                    0.5,
+                    true
+                );
+                
+                $mpdf->SetWatermarkImage(
+                    $watermark_path,
+                    0.5,
+                    $watermark_image->getSize(),
+                    $watermark_image->getPosition()
+                );
+                $mpdf->showWatermarkImage = true;
+            }
+
+            // Generate PDF content
+            ob_start();
+            include dirname(__FILE__) . '/templates/member-card-template.php';
+            $html = ob_get_clean();
+
+            $mpdf->WriteHTML($html);
+
+            // Save output
+            $output_dir = $provider->get_temp_dir();
+            $filename = 'kartu-anggota-' . sanitize_title($data['company_name']) . '-' . date('Ymd-His') . '.pdf';
+            $output_path = $output_dir . '/' . $filename;
+
+            $mpdf->Output($output_path, 'F');
+
+            // Get URL for response
+            $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
+
+            wp_send_json_success([
+                'url' => $file_url,
+                'file' => $filename,
+                'direct_download' => true
+            ]);
+
+        } catch (Exception $e) {
+            error_log('Member Card Generation Error: ' . $e->getMessage());
+            error_log('Error trace: ' . $e->getTraceAsString());
+            wp_send_json_error($e->getMessage());
+        }
+    }
+    public function handle_member_certificate_generation() {
         check_ajax_referer('asosiasi-docgen-certificate');
 
         try {
@@ -594,8 +698,12 @@ class Asosiasi_DocGen_Member_Certificate_Module {
                 'generateSuccess' => __('Certificate generated successfully!', 'asosiasi'),
                 'generateError' => __('Failed to generate certificate.', 'asosiasi'),
                 'pdfSuccess' => __('PDF generated successfully!', 'asosiasi'),
-                'pdfError' => __('Failed to generate PDF.', 'asosiasi')
+                'pdfError' => __('Failed to generate PDF.', 'asosiasi'),
+                // Tambahkan string baru untuk kartu member
+                'cardSuccess' => __('Member card generated successfully!', 'asosiasi'),
+                'cardError' => __('Failed to generate member card.', 'asosiasi')
             ]
         ]);
+
     }
 }

@@ -164,12 +164,26 @@ class Asosiasi_Admin {
             array($this, 'display_member_certificate_page')
         );
 
-    }
+        // Di method add_plugin_admin_menu(), tambahkan:
+        add_submenu_page(
+            null,  // tidak tampil di menu
+            'Member Card',
+            'Member Card',
+            'manage_options',
+            'member-card',
+            array($this, 'display_member_card_page')
+        );
 
+    }
 
     public function display_member_certificate_page() {
         // wp-admin/admin.php?page=member-certificate&id=1
         require_once ASOSIASI_DIR . 'includes/docgen/modules/member-certificate/member-certificate.php';
+    }
+
+    public function display_member_card_page() {
+        // wp-admin/admin.php?page=member-card&id=1
+        require_once ASOSIASI_DIR . 'includes/docgen/modules/member-certificate/member-card.php';
     }
 
     public function display_admin_page() {

@@ -1,9 +1,9 @@
 <?php
 /**
- * Test Certificate View
+ * Member Card View
  * 
  * @package Asosiasi
- * Path: includes/modules/member-certificate/member-certificate.php
+ * Path: includes/modules/member-certificate/member-card.php
  */
 
 if (!defined('ABSPATH')) {
@@ -27,46 +27,42 @@ $member = $wpdb->get_row($wpdb->prepare(
 if (!$member) {
     wp_die(__('Member not found', 'asosiasi'));
 }
+// Get upload directory path
+$upload_dir = wp_upload_dir();
 
-// Get organization settings
+// Get organization settings and prepare data
 $data = array(
     'nomor_sertifikat' => $member['nomor_sertifikat'] ?? '',
     'company_name' => $member['company_name'] ?? '',
     'company_leader' => $member['company_leader'] ?? '',
     'leader_position' => $member['leader_position'] ?? '',
-    'business_field' => $member['business_field'] ?? '',
     'city' => $member['city'] ?? '',
     'company_address' => $member['company_address'] ?? '',
-    'npwp' => $member['npwp'] ?? '',
     'issue_date' => $member['tanggal_cetak'] ?? current_time('mysql'),
-    'ahu_number' => $member['ahu_number'] ?? '',
     'valid_until' => $member['valid_until'] ?? '',
     
     // Organization settings
     'organization_name' => get_option('asosiasi_organization_name'),
     'ketua_umum' => get_option('asosiasi_ketua_umum'),
-    'sekretaris_umum' => get_option('asosiasi_sekretaris_umum'),
     'contact_email' => get_option('asosiasi_contact_email'),
     'website' => get_option('asosiasi_website'),
     
-    // Image paths - adjust path as needed
-    'image:logo' => plugins_url('assets/images/logo-rui-02.png', dirname(__FILE__))
+    // Image paths
+    'image:logo' => $upload_dir['basedir'] . '/asosiasi/logo-rui-02.png',
+    'image:ttd_ketua' => $upload_dir['basedir'] . '/asosiasi/ttd-ketua-02.png',
+    'image:member_card_pattern' => $upload_dir['basedir'] . '/asosiasi/watermark-card-pattern.svg'
+
 );
 
-// Get member services
-$services = $wpdb->get_results($wpdb->prepare(
-    "SELECT s.short_name, s.full_name 
-     FROM {$wpdb->prefix}asosiasi_member_services ms
-     JOIN {$wpdb->prefix}asosiasi_services s ON ms.service_id = s.id
-     WHERE ms.member_id = %d",
-    $member_id
-), ARRAY_A);
+// Generate QR Code data
+$verification_code = base64_encode($member_id . '_' . time());
+$verification_url = add_query_arg([
+    'certificate_verify' => 1,
+    'member_id' => $member_id,
+    'verify_code' => $verification_code
+], home_url());
 
-$services_list = array();
-foreach ($services as $service) {
-    $services_list[] = $service['short_name'] . ' - ' . $service['full_name'];
-}
-$data['services'] = implode(', ', $services_list);
+$data['qr_data'] = $verification_url;
 
-// Include the certificate template
-include_once dirname(__FILE__) . '/templates/certificate-template.php';
+// Include the card template
+include_once dirname(__FILE__) . '/templates/member-card-template.php';

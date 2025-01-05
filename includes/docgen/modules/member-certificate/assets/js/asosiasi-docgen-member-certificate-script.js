@@ -147,5 +147,61 @@ jQuery(document).ready(function($) {
         });
     });    
 
+
+    // Add to existing jQuery ready function
+    $('#generate-member-card').on('click', function(e) {
+        e.preventDefault();
+        
+        const button = $(this);
+        const memberId = button.data('member');
+        const spinner = button.find('.spinner');
+        
+        // Disable button and show spinner
+        button.prop('disabled', true);
+        spinner.addClass('is-active');
+        
+        // Make AJAX request
+        $.ajax({
+            url: asosiasiDocGenCert.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'generate_member_card',
+                member_id: memberId,
+                _ajax_nonce: asosiasiDocGenCert.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data.url) {
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.href = response.data.url;
+                    link.download = response.data.file;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Clean up after download starts
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                    }, 1000);
+                } else {
+                    alert(asosiasiDocGenCert.strings.cardError || 'Failed to generate member card.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                alert(asosiasiDocGenCert.strings.cardError || 'Failed to generate member card.');
+            },
+            complete: function() {
+                // Re-enable button and hide spinner
+                button.prop('disabled', false);
+                spinner.removeClass('is-active');
+            }
+        });
+    });
+
+
+
+    
+
 });
 
