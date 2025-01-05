@@ -231,6 +231,8 @@ spl_autoload_register(function ($class) {
     error_log("Not found: " . $file_name);
 });
 
+require_once plugin_dir_path(__FILE__) . 'includes/docgen/modules/member-certificate/verification/class-asosiasi-certificate-verification.php';
+
 
 // Only load the plugin if requirements are met
 if (empty(asosiasi_check_requirements())) {
@@ -325,58 +327,15 @@ function run_asosiasi() {
     }
 }
     
-/*
-function run_asosiasi() {
-        try {
 
-            $plugin = new Asosiasi();
-
-            add_action('plugins_loaded', function() {
-                // Include admin functions
-                require_once ABSPATH . 'wp-admin/includes/plugin.php';
-                
-                if (file_exists(ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php')) {
-                    require_once ASOSIASI_DIR . 'includes/docgen/class-asosiasi-docgen-checker.php';
-                    
-                    if (Asosiasi_DocGen_Checker::check_dependencies('Asosiasi')) {
-                        // Inisialisasi module tanpa require
-                        new Asosiasi_DocGen_Member_Certificate_Module();
-                    } else {
-                        error_log('DocGen Implementation not properly initialized');
-                    }
-                }
-            }, 15);
-            
-            // Inisialisasi kelas-kelas inti
-            new Asosiasi_Settings();
-            new Asosiasi_Enqueue_Member(ASOSIASI_VERSION);
-            new Asosiasi_Enqueue_Settings(ASOSIASI_VERSION);
-
-            new Asosiasi_Enqueue_SKP_Perusahaan(ASOSIASI_VERSION);
-            new Asosiasi_Enqueue_SKP_Tenaga_Ahli(ASOSIASI_VERSION);
-
-            // Initialize SKP Perusahaan handlers    
-            new Asosiasi_Ajax_SKP_Perusahaan();
-            new Asosiasi_Ajax_Status_Skp_Perusahaan();
-
-            // Initialize SKP Tenaga Ahli handlers
-            new Asosiasi_Ajax_Skp_Tenaga_Ahli();
-            new Asosiasi_Ajax_Status_Skp_Tenaga_Ahli();
-            
-            $plugin->run();
-
-        } catch (Exception $e) {
-            error_log('Asosiasi plugin initialization error: ' . $e->getMessage());
-            add_action('admin_notices', function() use ($e) {
-                $message = sprintf(
-                    __('Error initializing Asosiasi plugin: %s', 'asosiasi'),
-                    esc_html($e->getMessage())
-                );
-                echo '<div class="notice notice-error"><p>' . $message . '</p></div>';
-            });
+    // Debug code - tambahkan sebelum kode plugin lainnya
+    add_action('template_redirect', function() {
+        if (get_query_var('certificate_verify')) {
+            error_log('Certificate verification requested');
+            error_log('Member ID: ' . get_query_var('member_id'));
+            error_log('Verify Code: ' . get_query_var('verify_code'));
         }
-    }
-*/
+    });
 
     /*
      * http://wppm.local/wp-admin/contribute.php
