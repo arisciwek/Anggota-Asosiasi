@@ -336,6 +336,11 @@ if (!defined('ABSPATH')) {
                             <td class="address-cell"><?php echo htmlspecialchars($data['company_address']); ?></td>
                         </tr>
                         <tr>
+                            <td>Kabupaten/Kota</td>
+                            <td style="text-align: center;">:</td>
+                            <td><?php echo htmlspecialchars($data['city']); ?></td>
+                        </tr>
+                        <tr>
                             <td>Nomor Anggota</td>
                             <td style="text-align: center;">:</td>
                             <td><?php echo htmlspecialchars($data['nomor_sertifikat']); ?></td>
