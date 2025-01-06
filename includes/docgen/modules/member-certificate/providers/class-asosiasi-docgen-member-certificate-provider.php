@@ -206,7 +206,9 @@ class Asosiasi_Docgen_Member_Certificate_Provider implements WP_DocGen_Provider 
             'postal_code' => $this->data['postal_code'],        // Tambahan
             'ahu_number' => $this->data['ahu_number'],
             'npwp' => $this->data['npwp'],
-            'valid_until' => date_i18n('j F Y', $this->data['valid_until']),
+            //'valid_until' => date_i18n('j F Y', $this->data['valid_until']),
+            'valid_until' => date_i18n('j F Y', strtotime($this->data['valid_until'])),
+
             'issue_date' => date_i18n('j F Y, H:i:s', strtotime($this->data['tanggal_cetak'])),
 
             //'qr_data' => urldecode($qrcode_verification_url)
