@@ -273,9 +273,15 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             // Get mPDF instance dengan config default
             $mpdf = $this->get_mpdf_instance();
 
+            $upload_dir = wp_upload_dir();
+
             // Get paths untuk watermark
             $paths = WP_MPDF_Activator::get_mpdf_paths();
-            $watermark_path = $paths['temp_path'] . '/watermark-pattern.svg';
+            $watermark_path = $upload_dir['basedir'] . '/asosiasi/watermark-pattern.svg';
+
+            // Get paths untuk watermark
+            //$paths = WP_MPDF_Activator::get_mpdf_paths();
+            //$watermark_path = $paths['temp_path'] . '/watermark-pattern.svg';
             
             // Set watermark jika diperlukan
             if (file_exists($watermark_path)) {
@@ -314,8 +320,6 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             // Gunakan 'D' untuk force download atau 'F' untuk save ke file system
             $mpdf->Output($output_path, 'F');
 
-            // Get URL for response
-            $upload_dir = wp_upload_dir();
             $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
 
             wp_send_json_success([
