@@ -165,6 +165,12 @@ class Asosiasi_DocGen_Member_Certificate_Module {
         check_ajax_referer('asosiasi-docgen-certificate');
 
         try {
+            // Initialize wp-mpdf first
+            if (!function_exists('wp_mpdf_init')) {
+                throw new Exception('WP mPDF plugin is required');
+            }
+            wp_mpdf_init();
+
             $member_id = absint($_POST['member_id'] ?? 0);
             if (!$member_id) {
                 throw new Exception(__('Invalid member ID', 'asosiasi'));
@@ -244,96 +250,161 @@ class Asosiasi_DocGen_Member_Certificate_Module {
             wp_send_json_error($e->getMessage());
         }
     }
+
     public function handle_member_certificate_generation() {
         check_ajax_referer('asosiasi-docgen-certificate');
 
         try {
-            // Pastikan WordPress sudah fully loaded
-            if (!did_action('init')) {
-                throw new Exception(__('WordPress initialization not complete. Please try again.', 'asosiasi'));
-            }
-
             $member_id = absint($_POST['member_id'] ?? 0);
-            if (!$member_id) {
-                throw new Exception(__('Invalid member ID', 'asosiasi'));
-            }
-
-            // Get member data
+            
+            // Get data
             require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
             $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
+            
             $data = $provider->get_data();
 
-            // Generate QR Code
-            $qrCode = new \Mpdf\QrCode\QrCode($data['qr_data'], 'L');
-            $qrOutput = new \Mpdf\QrCode\Output\Png();
-            $qrImage = $qrOutput->output($qrCode, 300);
-            $base64QRCode = base64_encode($qrImage);
-            $data['base64QRCode'] = $base64QRCode;
-
-            // Get mPDF instance dengan config default
-            $mpdf = $this->get_mpdf_instance();
-
-            $upload_dir = wp_upload_dir();
-
-            // Get paths untuk watermark
-            $paths = WP_MPDF_Activator::get_mpdf_paths();
-            $watermark_path = $upload_dir['basedir'] . '/asosiasi/watermark-pattern.svg';
-
-            // Get paths untuk watermark
-            //$paths = WP_MPDF_Activator::get_mpdf_paths();
-            //$watermark_path = $paths['temp_path'] . '/watermark-pattern.svg';
-            
-            // Set watermark jika diperlukan
-            if (file_exists($watermark_path)) {
-                $watermark_image = new \Mpdf\WatermarkImage(
-                    $watermark_path,
-                    \Mpdf\WatermarkImage::SIZE_FIT_PAGE,
-                    \Mpdf\WatermarkImage::POSITION_CENTER_PAGE,
-                    0.5,
-                    true
-                );
-                
-                $mpdf->SetWatermarkImage(
-                    $watermark_path,
-                    0.5,
-                    $watermark_image->getSize(),
-                    $watermark_image->getPosition()
-                );
-                $mpdf->showWatermarkImage = true;
+            // Validasi data
+            if (!$member_id) {
+                throw new Exception('Invalid member ID');
             }
 
-            // Generate PDF content
-            ob_start();
-            include dirname(__FILE__) . '/templates/certificate-template.php';
-            $html = ob_get_clean();
+            if (empty($data['valid_until'])) {
+                throw new Exception('Empty valid_until date');
+            }
 
-            // Load translations sebelum generate PDF
-            // load_plugin_textdomain('asosiasi', false, dirname(plugin_basename(__FILE__)) . '/languages');
-            
-            $mpdf->WriteHTML($html);
+            if (strpos($data['valid_until'], '-0001') !== false) {
+                error_log('Main Process Error: Invalid valid_until date: ' . $data['valid_until']);
+                wp_send_json_error([
+                    'success' => false,
+                    'data' => 'Data tidak valid. Silakan cek tanggal berlaku keanggotaan.'
+                ]);
+                exit();
+            }
 
-            // Save output
-            $output_dir = $provider->get_temp_dir();
-            $filename = 'sertifikat-' . sanitize_title($data['company_name']) . '-' . date('Ymd-His') . '.pdf';
-            $output_path = $output_dir . '/' . $filename;
+            // Jika validasi berhasil, lanjut ke generate PDF
+            try {
+                if (!function_exists('wp_mpdf_init')) {
+                    throw new Exception('WP mPDF plugin is required');
+                }
+                wp_mpdf_init();
 
-            // Gunakan 'D' untuk force download atau 'F' untuk save ke file system
-            $mpdf->Output($output_path, 'F');
+                    // Lanjutkan dengan kode existing untuk generate PDF
 
-            $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
 
-            wp_send_json_success([
-                'url' => $file_url,
-                'file' => $filename,
-                'direct_download' => true
+
+                    $member_id = absint($_POST['member_id'] ?? 0);
+                    if (!$member_id) {
+                        throw new Exception(__('Invalid member ID', 'asosiasi'));
+                    }
+
+                    // Get member data
+                    require_once dirname(__FILE__) . '/providers/class-asosiasi-docgen-member-certificate-provider.php';
+                    $provider = new Asosiasi_Docgen_Member_Certificate_Provider($member_id);
+                    $data = $provider->get_data();
+
+                    // Cek kelengkapan data
+                    foreach($data as $key => $value) {
+                        if(empty($value)) {
+                            throw new Exception("Data {$key} masih kosong");
+                        }
+                    }
+
+                    // Generate QR Code
+                    $qrCode = new \Mpdf\QrCode\QrCode($data['qr_data'], 'L');
+                    $qrOutput = new \Mpdf\QrCode\Output\Png();
+                    $qrImage = $qrOutput->output($qrCode, 300);
+                    $base64QRCode = base64_encode($qrImage);
+                    $data['base64QRCode'] = $base64QRCode;
+
+                    // Get mPDF instance dengan config default
+                    $mpdf = $this->get_mpdf_instance();
+
+                    $upload_dir = wp_upload_dir();
+
+                    // Get paths untuk watermark
+                    $paths = WP_MPDF_Activator::get_mpdf_paths();
+                    $watermark_path = $upload_dir['basedir'] . '/asosiasi/watermark-pattern.svg';
+
+                    // Get paths untuk watermark
+                    //$paths = WP_MPDF_Activator::get_mpdf_paths();
+                    //$watermark_path = $paths['temp_path'] . '/watermark-pattern.svg';
+                    
+                    // Set watermark jika diperlukan
+                    if (file_exists($watermark_path)) {
+                        $watermark_image = new \Mpdf\WatermarkImage(
+                            $watermark_path,
+                            \Mpdf\WatermarkImage::SIZE_FIT_PAGE,
+                            \Mpdf\WatermarkImage::POSITION_CENTER_PAGE,
+                            0.5,
+                            true
+                        );
+                        
+                        $mpdf->SetWatermarkImage(
+                            $watermark_path,
+                            0.5,
+                            $watermark_image->getSize(),
+                            $watermark_image->getPosition()
+                        );
+                        $mpdf->showWatermarkImage = true;
+                    }
+
+                    // Generate PDF content
+                    ob_start();
+                    include dirname(__FILE__) . '/templates/certificate-template.php';
+                    $html = ob_get_clean();
+
+                    // Load translations sebelum generate PDF
+                    // load_plugin_textdomain('asosiasi', false, dirname(plugin_basename(__FILE__)) . '/languages');
+                    
+                    $mpdf->WriteHTML($html);
+
+                    // Save output
+                    $output_dir = $provider->get_temp_dir();
+                    $filename = 'sertifikat-' . sanitize_title($data['company_name']) . '-' . date('Ymd-His') . '.pdf';
+                    $output_path = $output_dir . '/' . $filename;
+
+                    // Gunakan 'D' untuk force download atau 'F' untuk save ke file system
+                    $mpdf->Output($output_path, 'F');
+
+                    $file_url = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $output_path);
+
+                    wp_send_json_success([
+                        'url' => $file_url,
+                        'file' => $filename,
+                        'direct_download' => true
+                    ]);
+
+
+                    // ... rest of your existing code ...
+
+            } catch (Exception $pdfError) {
+                error_log('PDF Generation Error: ' . $pdfError->getMessage());
+                wp_send_json_error([
+                    'success' => false,
+                    'data' => 'Mohon maaf, terjadi kesalahan teknis dalam pembuatan PDF.'
+                ]);
+                wp_die();
+            }
+
+
+
+
+
+
+
+
+        } catch (Exception $mainError) {
+            error_log('Main Process Error: ' . $mainError->getMessage());
+            wp_send_json_error([
+                'success' => false,
+                'data' => 'Terjadi kesalahan sistem. Silakan hubungi administrator.'
             ]);
-
-        } catch (Exception $e) {
-            error_log('Direct PDF Generation Error: ' . $e->getMessage());
-            error_log('Error trace: ' . $e->getTraceAsString());
-            wp_send_json_error($e->getMessage());
+            wp_die();
         }
     }
+
+
+
 
     public function add_member_certificate_button($member_id) {
         if (!current_user_can('manage_options')) {
